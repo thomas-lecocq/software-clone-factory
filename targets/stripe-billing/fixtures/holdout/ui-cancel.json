@@ -1,0 +1,117 @@
+{
+  "id": "ui-cancel",
+  "rules": [
+    "UI-07",
+    "UI-08",
+    "UI-09"
+  ],
+  "input": {
+    "kind": "ui",
+    "start": 1791158400,
+    "current": "Basic",
+    "coupon_percent": null,
+    "cancel_enabled": true,
+    "steps": [
+      {
+        "do": "capture",
+        "as": "home",
+        "until": "Cancel subscription"
+      },
+      {
+        "do": "click",
+        "role": "link",
+        "name": "Cancel subscription"
+      },
+      {
+        "do": "capture",
+        "as": "review",
+        "until": "Review your changes"
+      },
+      {
+        "do": "click",
+        "role": "button",
+        "name": "Cancel subscription"
+      },
+      {
+        "do": "capture",
+        "as": "after",
+        "until": "Your service will end on"
+      }
+    ]
+  },
+  "observed": {
+    "home": {
+      "screen": [
+        "- text: environnement de test AcmeCo Sandbox environnement de test AcmeCo partners with Stripe for simplified billing.",
+        "- contentinfo:",
+        "  - link \"Powered by Stripe\":",
+        "    - text: Powered by",
+        "    - img \"Stripe\"",
+        "  - link \"Terms\":",
+        "  - link \"Privacy\":",
+        "- text: Current subscription Basic $10.00 per month Your next billing date is November 5, 2026.",
+        "- link \"Update subscription\":",
+        "- link \"Cancel subscription\":",
+        "- text: Payment method Visa •••• 4242 Expires 09/2027 Default",
+        "- button \"Delete\" [disabled]",
+        "- link \"Add payment method\":",
+        "- iframe"
+      ],
+      "requests": [
+        "GET /v1/billing_portal/sessions/bps_1UItNCDSnaJHjCbZl59wjAvR",
+        "GET /v1/billing_portal/sessions/bps_1UItNCDSnaJHjCbZl59wjAvR/customer",
+        "GET /v1/billing_portal/sessions/bps_1UItNCDSnaJHjCbZl59wjAvR/subscriptions",
+        "GET /v1/billing_portal/sessions/bps_1UItNCDSnaJHjCbZl59wjAvR/payment_methods"
+      ]
+    },
+    "review": {
+      "screen": [
+        "- text: environnement de test AcmeCo Sandbox environnement de test AcmeCo partners with Stripe for simplified billing.",
+        "- contentinfo:",
+        "  - link \"Powered by Stripe\":",
+        "    - text: Powered by",
+        "    - img \"Stripe\"",
+        "  - link \"Terms\":",
+        "  - link \"Privacy\":",
+        "- button \"Billing\"",
+        "- text: Cancel Review your changes Basic $10.00 per month If you cancel this subscription, it will still be available until the end of your billing period on November 5, 2026.",
+        "- button \"Cancel subscription\":",
+        "  - text: Cancel subscription",
+        "  - img",
+        "  - img",
+        "- button \"Go back\"",
+        "- iframe"
+      ],
+      "requests": [
+        "GET /v1/billing_portal/sessions/bps_1UItNCDSnaJHjCbZl59wjAvR/subscriptions/sub_1UItN9DSnaJHjCbZ8l6jYxdf",
+        "GET /v1/billing_portal/sessions/bps_1UItNCDSnaJHjCbZl59wjAvR/subscriptions/sub_1UItN9DSnaJHjCbZ8l6jYxdf/retention_coupon"
+      ]
+    },
+    "after": {
+      "screen": [
+        "- text: environnement de test AcmeCo Sandbox environnement de test AcmeCo partners with Stripe for simplified billing.",
+        "- contentinfo:",
+        "  - link \"Powered by Stripe\":",
+        "    - text: Powered by",
+        "    - img \"Stripe\"",
+        "  - link \"Terms\":",
+        "  - link \"Privacy\":",
+        "- text: Current subscription Cancels Nov 5 Basic $10.00 per month Your service will end on November 5, 2026.",
+        "- link \"Update subscription\":",
+        "- link \"Don't cancel subscription\":",
+        "- text: Payment method Visa •••• 4242 Expires 09/2027 Default",
+        "- button \"Delete\" [disabled]",
+        "- link \"Add payment method\":",
+        "- iframe"
+      ],
+      "requests": [
+        "POST /v1/billing_portal/sessions/bps_1UItNCDSnaJHjCbZl59wjAvR/subscriptions/sub_1UItN9DSnaJHjCbZ8l6jYxdf/cancel",
+        "GET /v1/billing_portal/sessions/bps_1UItNCDSnaJHjCbZl59wjAvR/customer",
+        "GET /v1/billing_portal/sessions/bps_1UItNCDSnaJHjCbZl59wjAvR/subscriptions",
+        "GET /v1/billing_portal/sessions/bps_1UItNCDSnaJHjCbZl59wjAvR/payment_methods"
+      ]
+    }
+  },
+  "noise": [],
+  "recorded_at": "2026-09-23T16:50:43.270Z"
+}

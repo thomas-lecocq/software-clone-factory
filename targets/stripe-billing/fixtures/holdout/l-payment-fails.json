@@ -1,0 +1,58 @@
+{
+  "id": "l-payment-fails",
+  "rules": [
+    "LIF-06"
+  ],
+  "input": {
+    "kind": "lifecycle",
+    "start": 1791158400,
+    "amount": 1000,
+    "trial_days": null,
+    "steps": [
+      {
+        "do": "failing_card"
+      },
+      {
+        "do": "advance",
+        "seconds": 2682000
+      },
+      {
+        "do": "snapshot",
+        "as": "failed"
+      }
+    ]
+  },
+  "observed": {
+    "failed": {
+      "status": "past_due",
+      "cancel_at_period_end": false,
+      "cancel_at": null,
+      "canceled_at": null,
+      "ended_at": null,
+      "trial_end": null,
+      "period_start": 1793836800,
+      "period_end": 1796428800,
+      "latest_invoice": {
+        "status": "open",
+        "billing_reason": "subscription_cycle",
+        "subtotal": 1000,
+        "total": 1000,
+        "amount_due": 1000,
+        "amount_paid": 0,
+        "amount_remaining": 1000,
+        "attempt_count": 1,
+        "period_start": 1791158400,
+        "period_end": 1793836800,
+        "lines": [
+          {
+            "amount": 1000,
+            "description": "1 × Basic (at $10.00 / month)"
+          }
+        ]
+      },
+      "invoice_count": 2
+    }
+  },
+  "noise": [],
+  "recorded_at": "2026-09-23T16:53:27.666Z"
+}

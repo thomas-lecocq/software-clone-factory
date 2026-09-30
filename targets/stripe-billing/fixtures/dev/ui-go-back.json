@@ -1,0 +1,124 @@
+{
+  "id": "ui-go-back",
+  "rules": [
+    "UI-02",
+    "UI-06"
+  ],
+  "input": {
+    "kind": "ui",
+    "start": 1791158400,
+    "current": "Basic",
+    "coupon_percent": null,
+    "steps": [
+      {
+        "do": "click",
+        "role": "link",
+        "name": "Update subscription"
+      },
+      {
+        "do": "capture",
+        "as": "plans",
+        "until": "Update your subscription"
+      },
+      {
+        "do": "click",
+        "role": "button",
+        "name": "Select"
+      },
+      {
+        "do": "click",
+        "role": "button",
+        "name": "Continue"
+      },
+      {
+        "do": "capture",
+        "as": "confirm",
+        "until": "Confirm your updates"
+      },
+      {
+        "do": "click",
+        "role": "button",
+        "name": "Go back"
+      },
+      {
+        "do": "capture",
+        "as": "back",
+        "until": "Update your subscription"
+      }
+    ]
+  },
+  "observed": {
+    "plans": {
+      "screen": [
+        "- text: environnement de test AcmeCo Sandbox environnement de test AcmeCo partners with Stripe for simplified billing.",
+        "- contentinfo:",
+        "  - link \"Powered by Stripe\":",
+        "    - text: Powered by",
+        "    - img \"Stripe\"",
+        "  - link \"Terms\":",
+        "  - link \"Privacy\":",
+        "- button \"Billing\"",
+        "- text: Subscriptions Update your subscription Current subscription Basic $10.00 per month Selected Pro $30.00 per month",
+        "- button \"Select\"",
+        "- text: Subtotal $10.00 per month",
+        "- button \"Continue\" [disabled]",
+        "- iframe"
+      ],
+      "requests": [
+        "GET /v1/billing_portal/sessions/bps_1UIsosDSnaJHjCbZhO4krq8s",
+        "GET /v1/billing_portal/sessions/bps_1UIsosDSnaJHjCbZhO4krq8s/customer",
+        "GET /v1/billing_portal/sessions/bps_1UIsosDSnaJHjCbZhO4krq8s/subscriptions",
+        "GET /v1/billing_portal/sessions/bps_1UIsosDSnaJHjCbZhO4krq8s/payment_methods",
+        "GET /v1/billing_portal/sessions/bps_1UIsosDSnaJHjCbZhO4krq8s/subscriptions/sub_1UIsoqDSnaJHjCbZ6ZxemIcQ"
+      ]
+    },
+    "confirm": {
+      "screen": [
+        "- text: environnement de test AcmeCo Sandbox environnement de test AcmeCo partners with Stripe for simplified billing.",
+        "- contentinfo:",
+        "  - link \"Powered by Stripe\":",
+        "    - text: Powered by",
+        "    - img \"Stripe\"",
+        "  - link \"Terms\":",
+        "  - link \"Privacy\":",
+        "- button \"Billing\"",
+        "- button \"Subscriptions\"",
+        "- text: Confirm Confirm your updates Pro What you'll pay monthly starting November 5, 2026 $30.00",
+        "- link \"Visa •••• 4242\":",
+        "- button \"Subscribe and pay\":",
+        "  - text: Subscribe and pay",
+        "  - img",
+        "  - img",
+        "- button \"Go back\"",
+        "- iframe"
+      ],
+      "requests": [
+        "GET /v1/billing_portal/sessions/bps_1UIsosDSnaJHjCbZhO4krq8s/subscriptions/sub_1UIsoqDSnaJHjCbZ6ZxemIcQ",
+        "GET /v1/billing_portal/sessions/bps_1UIsosDSnaJHjCbZhO4krq8s/customer",
+        "GET /v1/billing_portal/sessions/bps_1UIsosDSnaJHjCbZhO4krq8s/update_preview"
+      ]
+    },
+    "back": {
+      "screen": [
+        "- text: environnement de test AcmeCo Sandbox environnement de test AcmeCo partners with Stripe for simplified billing.",
+        "- contentinfo:",
+        "  - link \"Powered by Stripe\":",
+        "    - text: Powered by",
+        "    - img \"Stripe\"",
+        "  - link \"Terms\":",
+        "  - link \"Privacy\":",
+        "- button \"Billing\"",
+        "- text: Subscriptions Update your subscription Current subscription Basic $10.00 per month Selected Pro $30.00 per month",
+        "- button \"Select\"",
+        "- text: Subtotal $10.00 per month",
+        "- button \"Continue\" [disabled]",
+        "- iframe"
+      ],
+      "requests": [
+        "GET /v1/billing_portal/sessions/bps_1UIsosDSnaJHjCbZhO4krq8s/subscriptions/sub_1UIsoqDSnaJHjCbZ6ZxemIcQ"
+      ]
+    }
+  },
+  "noise": [],
+  "recorded_at": "2026-09-23T16:15:23.207Z"
+}

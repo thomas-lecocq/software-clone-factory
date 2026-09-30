@@ -1,0 +1,92 @@
+{
+  "id": "l-trial-cancel",
+  "rules": [
+    "LIF-07",
+    "LIF-03"
+  ],
+  "input": {
+    "kind": "lifecycle",
+    "start": 1791158400,
+    "amount": 1000,
+    "trial_days": 7,
+    "steps": [
+      {
+        "do": "cancel_at_period_end"
+      },
+      {
+        "do": "snapshot",
+        "as": "scheduled"
+      },
+      {
+        "do": "advance",
+        "seconds": 608400
+      },
+      {
+        "do": "snapshot",
+        "as": "ended"
+      }
+    ]
+  },
+  "observed": {
+    "scheduled": {
+      "status": "trialing",
+      "cancel_at_period_end": true,
+      "cancel_at": 1791763200,
+      "canceled_at": 1791158400,
+      "ended_at": null,
+      "trial_end": 1791763200,
+      "period_start": 1791158400,
+      "period_end": 1791763200,
+      "latest_invoice": {
+        "status": "paid",
+        "billing_reason": "subscription_create",
+        "subtotal": 0,
+        "total": 0,
+        "amount_due": 0,
+        "amount_paid": 0,
+        "amount_remaining": 0,
+        "attempt_count": 0,
+        "period_start": 1791158400,
+        "period_end": 1791158400,
+        "lines": [
+          {
+            "amount": 0,
+            "description": "Free trial for 1 × Basic"
+          }
+        ]
+      },
+      "invoice_count": 1
+    },
+    "ended": {
+      "status": "canceled",
+      "cancel_at_period_end": true,
+      "cancel_at": 1791763200,
+      "canceled_at": 1791158400,
+      "ended_at": 1791763200,
+      "trial_end": 1791763200,
+      "period_start": 1791158400,
+      "period_end": 1791763200,
+      "latest_invoice": {
+        "status": "paid",
+        "billing_reason": "subscription_create",
+        "subtotal": 0,
+        "total": 0,
+        "amount_due": 0,
+        "amount_paid": 0,
+        "amount_remaining": 0,
+        "attempt_count": 0,
+        "period_start": 1791158400,
+        "period_end": 1791158400,
+        "lines": [
+          {
+            "amount": 0,
+            "description": "Free trial for 1 × Basic"
+          }
+        ]
+      },
+      "invoice_count": 1
+    }
+  },
+  "noise": [],
+  "recorded_at": "2026-09-23T16:55:15.310Z"
+}

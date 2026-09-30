@@ -1,0 +1,108 @@
+{
+  "id": "ui-reselect-current",
+  "rules": [
+    "UI-02"
+  ],
+  "input": {
+    "kind": "ui",
+    "start": 1791158400,
+    "current": "Basic",
+    "coupon_percent": null,
+    "steps": [
+      {
+        "do": "click",
+        "role": "link",
+        "name": "Update subscription"
+      },
+      {
+        "do": "capture",
+        "as": "plans",
+        "until": "Update your subscription"
+      },
+      {
+        "do": "click",
+        "role": "button",
+        "name": "Select"
+      },
+      {
+        "do": "capture",
+        "as": "selected",
+        "until": "Subtotal"
+      },
+      {
+        "do": "click",
+        "role": "button",
+        "name": "Select"
+      },
+      {
+        "do": "capture",
+        "as": "reselected",
+        "until": "Subtotal"
+      }
+    ]
+  },
+  "observed": {
+    "plans": {
+      "screen": [
+        "- text: environnement de test AcmeCo Sandbox environnement de test AcmeCo partners with Stripe for simplified billing.",
+        "- contentinfo:",
+        "  - link \"Powered by Stripe\":",
+        "    - text: Powered by",
+        "    - img \"Stripe\"",
+        "  - link \"Terms\":",
+        "  - link \"Privacy\":",
+        "- button \"Billing\"",
+        "- text: Subscriptions Update your subscription Current subscription Basic $10.00 per month Selected Pro $30.00 per month",
+        "- button \"Select\"",
+        "- text: Subtotal $10.00 per month",
+        "- button \"Continue\" [disabled]",
+        "- iframe"
+      ],
+      "requests": [
+        "GET /v1/billing_portal/sessions/bps_1UIsoaDSnaJHjCbZRGbqrABe",
+        "GET /v1/billing_portal/sessions/bps_1UIsoaDSnaJHjCbZRGbqrABe/customer",
+        "GET /v1/billing_portal/sessions/bps_1UIsoaDSnaJHjCbZRGbqrABe/subscriptions",
+        "GET /v1/billing_portal/sessions/bps_1UIsoaDSnaJHjCbZRGbqrABe/payment_methods",
+        "GET /v1/billing_portal/sessions/bps_1UIsoaDSnaJHjCbZRGbqrABe/subscriptions/sub_1UIsoYDSnaJHjCbZI2vmkq0T"
+      ]
+    },
+    "selected": {
+      "screen": [
+        "- text: environnement de test AcmeCo Sandbox environnement de test AcmeCo partners with Stripe for simplified billing.",
+        "- contentinfo:",
+        "  - link \"Powered by Stripe\":",
+        "    - text: Powered by",
+        "    - img \"Stripe\"",
+        "  - link \"Terms\":",
+        "  - link \"Privacy\":",
+        "- button \"Billing\"",
+        "- text: Subscriptions Update your subscription Current subscription Basic $10.00 per month",
+        "- button \"Select\"",
+        "- text: Pro $30.00 per month Selected Subtotal $30.00 per month",
+        "- button \"Continue\"",
+        "- iframe"
+      ],
+      "requests": []
+    },
+    "reselected": {
+      "screen": [
+        "- text: environnement de test AcmeCo Sandbox environnement de test AcmeCo partners with Stripe for simplified billing.",
+        "- contentinfo:",
+        "  - link \"Powered by Stripe\":",
+        "    - text: Powered by",
+        "    - img \"Stripe\"",
+        "  - link \"Terms\":",
+        "  - link \"Privacy\":",
+        "- button \"Billing\"",
+        "- text: Subscriptions Update your subscription Current subscription Basic $10.00 per month Selected Pro $30.00 per month",
+        "- button \"Select\"",
+        "- text: Subtotal $10.00 per month",
+        "- button \"Continue\" [disabled]",
+        "- iframe"
+      ],
+      "requests": []
+    }
+  },
+  "noise": [],
+  "recorded_at": "2026-09-23T16:14:50.030Z"
+}

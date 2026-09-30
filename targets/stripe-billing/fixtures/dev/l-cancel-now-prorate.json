@@ -1,0 +1,60 @@
+{
+  "id": "l-cancel-now-prorate",
+  "rules": [
+    "LIF-05"
+  ],
+  "input": {
+    "kind": "lifecycle",
+    "start": 1791158400,
+    "amount": 3000,
+    "trial_days": null,
+    "steps": [
+      {
+        "do": "advance",
+        "seconds": 864000
+      },
+      {
+        "do": "cancel_now",
+        "prorate": true,
+        "invoice_now": true
+      },
+      {
+        "do": "snapshot",
+        "as": "canceled"
+      }
+    ]
+  },
+  "observed": {
+    "canceled": {
+      "status": "canceled",
+      "cancel_at_period_end": false,
+      "cancel_at": null,
+      "canceled_at": 1792022400,
+      "ended_at": 1792022400,
+      "trial_end": null,
+      "period_start": 1791158400,
+      "period_end": 1793836800,
+      "latest_invoice": {
+        "status": "draft",
+        "billing_reason": "subscription_cycle",
+        "subtotal": -2032,
+        "total": -2032,
+        "amount_due": 0,
+        "amount_paid": 0,
+        "amount_remaining": 0,
+        "attempt_count": 0,
+        "period_start": 1791158400,
+        "period_end": 1792022400,
+        "lines": [
+          {
+            "amount": -2032,
+            "description": "Unused time on Basic after 15 Oct 2026"
+          }
+        ]
+      },
+      "invoice_count": 2
+    }
+  },
+  "noise": [],
+  "recorded_at": "2026-09-23T16:52:23.546Z"
+}

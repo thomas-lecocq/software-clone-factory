@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# Before every commit: types, lint, format, tests, and the lock of every target. The full replay
+# (npm run verify) takes minutes because of the browser walkthroughs; it is run before every
+# measurement and logged in targets/<t>/verify/runs.jsonl instead.
+set -euo pipefail
+npm run --silent check
+npx tsx -e '
+import { readdirSync } from "node:fs";
+import { checkLock } from "./harness/src/fixtures.ts";
+let bad = 0;
+for (const t of readdirSync("targets", { withFileTypes: true }).filter((d) => d.isDirectory() && !d.name.startsWith("_")).map((d) => d.name)) {
+  const p = checkLock(t);
+  if (p.length > 0) { bad++; console.error(`${t}: ${p.join("; ")}`); }
+}
+if (bad > 0) { console.error("lock check failed: relock deliberately (npm run relock) or restore the evaluator"); process.exit(1); }
+'

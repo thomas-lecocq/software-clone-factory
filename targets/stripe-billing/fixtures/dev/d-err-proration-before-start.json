@@ -1,0 +1,44 @@
+{
+  "id": "d-err-proration-before-start",
+  "rules": [
+    "ERR-01"
+  ],
+  "input": {
+    "start": 1791158400,
+    "billing_mode": "flexible",
+    "plan": {
+      "amount": 1000,
+      "interval": "month"
+    },
+    "quantity": 1,
+    "coupon": null,
+    "change": {
+      "plan": {
+        "amount": 3000,
+        "interval": "month"
+      },
+      "quantity": null,
+      "offset": -86400,
+      "proration_behavior": null,
+      "discount": null
+    }
+  },
+  "observed": {
+    "preview": {
+      "error": {
+        "type": "StripeInvalidRequestError",
+        "code": null,
+        "param": "proration_date",
+        "message": "Cannot specify proration date outside of current subscription period or current phase. The value should be between 1791158400 and 1793836800."
+      }
+    },
+    "first_invoice": {
+      "subtotal": 1000,
+      "total": 1000,
+      "amount_due": 1000,
+      "status": "paid"
+    }
+  },
+  "noise": [],
+  "recorded_at": "2026-09-23T16:13:43.896Z"
+}

@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# Optional local pre-push check. Set it per clone with `git config hooks.prepush <script>`; the
+# script path stays in the local git config and is never committed.
+set -euo pipefail
+hook="$(git config --get hooks.prepush || true)"
+[ -n "$hook" ] && exec "$hook"
+exit 0

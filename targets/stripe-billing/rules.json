@@ -1,0 +1,328 @@
+{
+  "rules": [
+    {
+      "id": "PRO-01",
+      "area": "logic",
+      "statement": "Changing a subscription item credits the unused time of the old item as a negative line: minus the old unit amount times the old quantity times remaining time over period length. The credit carries the discount in force on the credited period, a used once coupon included.",
+      "provenance": {
+        "kind": "observed",
+        "ref": "dev fixtures with a subscription coupon (builder report); RECON.md's 'credit not discounted' holds only for a coupon passed to the preview"
+      }
+    },
+    {
+      "id": "PRO-02",
+      "area": "logic",
+      "statement": "It charges the remaining time on the new item as a positive line: new unit amount times new quantity times remaining time over period length.",
+      "provenance": {
+        "kind": "observed",
+        "ref": "RECON.md: +2000"
+      }
+    },
+    {
+      "id": "PRO-03",
+      "area": "logic",
+      "statement": "Proration is computed to the second from proration_date to the end of the current period.",
+      "provenance": {
+        "kind": "documented",
+        "ref": "https://docs.stripe.com/billing/subscriptions/prorations"
+      }
+    },
+    {
+      "id": "PRO-04",
+      "area": "logic",
+      "statement": "Proration lines are rounded to the cent: credits round half away from zero, the classic-mode charge rounds half up, and the flexible-mode charge behaves like rounding of a floating-point 1 - elapsed/period (7.5 and 22.5 down, 1501.5 up).",
+      "provenance": {
+        "kind": "mined",
+        "ref": "builder report, pass 2 (dev fixtures); t-round-half-*, b-round-half"
+      }
+    },
+    {
+      "id": "PRO-05",
+      "area": "logic",
+      "statement": "Without an immediate invoice, the preview is the next renewal invoice: prorations plus the next full period at the new price and quantity.",
+      "provenance": {
+        "kind": "observed",
+        "ref": "RECON.md: 3000 next-period line"
+      }
+    },
+    {
+      "id": "PRO-06",
+      "area": "logic",
+      "statement": "proration_behavior=none together with a proration_date is rejected: 'Cannot specify proration date if no proration is being done'.",
+      "provenance": {
+        "kind": "observed",
+        "ref": "d-behavior-none, d-pct20-none (builder report 2026-09-23); the documented behaviour without a date is not probed"
+      }
+    },
+    {
+      "id": "PRO-07",
+      "area": "logic",
+      "statement": "proration_behavior=always_invoice previews an immediate invoice holding only the proration lines.",
+      "provenance": {
+        "kind": "documented",
+        "ref": "https://docs.stripe.com/billing/subscriptions/prorations"
+      }
+    },
+    {
+      "id": "PRO-08",
+      "area": "logic",
+      "statement": "A quantity change prorates like a price change: credit at the old quantity, charge at the new quantity.",
+      "provenance": {
+        "kind": "documented",
+        "ref": "https://docs.stripe.com/billing/subscriptions/quantities"
+      }
+    },
+    {
+      "id": "PRO-09",
+      "area": "logic",
+      "statement": "A downgrade gives a negative proration total; a negative invoice total leaves amount_due at 0 and the remainder as customer credit.",
+      "provenance": {
+        "kind": "documented",
+        "ref": "https://docs.stripe.com/billing/customer/balance"
+      }
+    },
+    {
+      "id": "PRO-10",
+      "area": "logic",
+      "statement": "A price change sent without a quantity bills quantity 1 on the new item, not the old quantity.",
+      "provenance": {
+        "kind": "mined",
+        "ref": "builder, from rand-004 and rand-011 (dev)"
+      }
+    },
+    {
+      "id": "PER-01",
+      "area": "logic",
+      "statement": "A monthly period runs to the same day of the next calendar month, so the period length in seconds depends on the month.",
+      "provenance": {
+        "kind": "documented",
+        "ref": "https://docs.stripe.com/billing/subscriptions/billing-cycle"
+      }
+    },
+    {
+      "id": "INT-01",
+      "area": "logic",
+      "statement": "Interval changes. Flexible mode: monthly to yearly prorates the yearly price over the remaining time and keeps the anchor; yearly to monthly keeps the anchor while the proration date is inside the new monthly period and is rejected past it. Classic mode: an interval change resets the billing cycle to the clock time. Yearly to yearly keeps the period.",
+      "provenance": {
+        "kind": "observed",
+        "ref": "t-month-to-year-*, u-year-to-month-*, u-year-to-year (dev); builder pass 3 (dev fixtures), clone/NOTES.md pass 6; edited 2026-09-23 after the final measurement, statements only"
+      }
+    },
+    {
+      "id": "DSC-01",
+      "area": "logic",
+      "statement": "A percent-off coupon reduces the discountable lines by that percent, reported in total_discount_amounts.",
+      "provenance": {
+        "kind": "observed",
+        "ref": "RECON.md: 600 on the 3000 line"
+      }
+    },
+    {
+      "id": "DSC-02",
+      "area": "logic",
+      "statement": "In flexible billing mode, the discount is applied inside proration lines (proration_discounts=included) instead of at invoice level.",
+      "provenance": {
+        "kind": "observed",
+        "ref": "RECON.md: 1600 'with 20.0% off' line"
+      }
+    },
+    {
+      "id": "DSC-03",
+      "area": "logic",
+      "statement": "An amount-off coupon is allocated across discountable lines in proportion to their amounts, with rounding.",
+      "provenance": {
+        "kind": "documented",
+        "ref": "https://docs.stripe.com/billing/subscriptions/prorations (166/334 example)"
+      }
+    },
+    {
+      "id": "DSC-04",
+      "area": "logic",
+      "statement": "Classic mode: proration lines are not discountable; the credit is the prorated discounted amount, round((b - D) f), for percent and amount-off coupons; the charge prorates first and subtracts the prorated discount after.",
+      "provenance": {
+        "kind": "mined",
+        "ref": "fresh2-002/081/124/140, u-classic-off-* (dev); builder pass 3 (dev fixtures), clone/NOTES.md pass 6; edited 2026-09-23 after the final measurement, statements only"
+      }
+    },
+    {
+      "id": "DSC-05",
+      "area": "logic",
+      "statement": "A coupon with duration=once applies to the first invoice only, not to the previewed renewal.",
+      "provenance": {
+        "kind": "documented",
+        "ref": "https://docs.stripe.com/billing/subscriptions/coupons"
+      }
+    },
+    {
+      "id": "MOD-01",
+      "area": "logic",
+      "statement": "Classic and flexible modes differ by the order of prorating and discounting (DSC-02, DSC-04), which can move a line by one cent, by the credit line's discount list for a used once coupon, and by the cycle reset on an interval change in classic mode.",
+      "provenance": {
+        "kind": "mined",
+        "ref": "builder pass 3 (dev fixtures), clone/NOTES.md pass 6; edited 2026-09-23 after the final measurement, statements only"
+      }
+    },
+    {
+      "id": "ERR-01",
+      "area": "logic",
+      "statement": "A proration_date outside the allowed window is rejected with an invalid_request_error.",
+      "provenance": {
+        "kind": "inferred",
+        "ref": "API reference, proration_date parameter"
+      }
+    },
+    {
+      "id": "UI-01",
+      "area": "ui",
+      "statement": "The portal home shows the current plan, its price per interval, the next billing date, an 'Update subscription' link and the default card, whose Delete button is disabled.",
+      "provenance": {
+        "kind": "observed",
+        "ref": "RECON.md and recon/portal-walk.ts, walk of 2026-09-23"
+      }
+    },
+    {
+      "id": "UI-02",
+      "area": "ui",
+      "statement": "The plan list marks the current plan 'Selected', offers 'Select' on the others, shows a subtotal for the selection, and keeps 'Continue' disabled while the selection is the current plan.",
+      "provenance": {
+        "kind": "observed",
+        "ref": "RECON.md and recon/portal-walk.ts, walk of 2026-09-23"
+      }
+    },
+    {
+      "id": "UI-03",
+      "area": "ui",
+      "statement": "The confirmation screen shows only the new recurring amount from the next billing date; prorations are only mentioned in the info tooltip.",
+      "provenance": {
+        "kind": "observed",
+        "ref": "RECON.md and recon/portal-walk.ts, walk of 2026-09-23"
+      }
+    },
+    {
+      "id": "UI-04",
+      "area": "ui",
+      "statement": "Opening the confirmation fires GET update_preview; confirming fires POST on the session's subscription, then reloads customer, subscriptions and payment methods.",
+      "provenance": {
+        "kind": "observed",
+        "ref": "RECON.md and recon/portal-walk.ts, walk of 2026-09-23"
+      }
+    },
+    {
+      "id": "UI-05",
+      "area": "ui",
+      "statement": "After confirming, the home shows the new plan and 'Your next estimated payment', which includes the prorations, with a 'View details' button. The estimated payment details start open when the invoice has a discount and closed otherwise.",
+      "provenance": {
+        "kind": "observed",
+        "ref": "RECON.md and recon/portal-walk.ts, walk of 2026-09-23"
+      }
+    },
+    {
+      "id": "UI-06",
+      "area": "ui",
+      "statement": "'Go back' from the confirmation returns to the plan list.",
+      "provenance": {
+        "kind": "observed",
+        "ref": "RECON.md and recon/portal-walk.ts, walk of 2026-09-23"
+      }
+    },
+    {
+      "id": "LIF-01",
+      "area": "logic",
+      "statement": "Without changes, crossing the period end creates and pays a renewal invoice and moves the period forward by one calendar month.",
+      "provenance": {
+        "kind": "documented",
+        "ref": "https://docs.stripe.com/billing/subscriptions/overview"
+      }
+    },
+    {
+      "id": "LIF-02",
+      "area": "logic",
+      "statement": "cancel_at_period_end=true keeps the subscription active and sets cancel_at to the period end.",
+      "provenance": {
+        "kind": "documented",
+        "ref": "https://docs.stripe.com/billing/subscriptions/cancel"
+      }
+    },
+    {
+      "id": "LIF-03",
+      "area": "logic",
+      "statement": "When the period end is crossed with cancel_at_period_end=true, the subscription becomes canceled with ended_at at the period end, and no renewal invoice is created.",
+      "provenance": {
+        "kind": "documented",
+        "ref": "https://docs.stripe.com/billing/subscriptions/cancel"
+      }
+    },
+    {
+      "id": "LIF-04",
+      "area": "logic",
+      "statement": "Setting cancel_at_period_end back to false before the period end restores a normal renewal.",
+      "provenance": {
+        "kind": "documented",
+        "ref": "https://docs.stripe.com/billing/subscriptions/cancel"
+      }
+    },
+    {
+      "id": "LIF-05",
+      "area": "logic",
+      "statement": "Cancelling now ends the subscription immediately; with prorate and invoice_now a final invoice credits the unused time. The immediate final invoice is a draft with billing_reason subscription_cycle; cancelling now after cancel_at_period_end keeps the earlier canceled_at.",
+      "provenance": {
+        "kind": "observed",
+        "ref": "l-cancel-now-* (dev), builder report, pass 2 (dev fixtures)"
+      }
+    },
+    {
+      "id": "LIF-06",
+      "area": "logic",
+      "statement": "A failed renewal payment leaves the invoice open and the subscription past_due; retries follow the account's retry schedule. Observed: 3 attempts 5 days after the first failure; the spacing between retries is not pinned.",
+      "provenance": {
+        "kind": "documented",
+        "ref": "https://docs.stripe.com/billing/subscriptions/overview"
+      }
+    },
+    {
+      "id": "LIF-07",
+      "area": "logic",
+      "statement": "A trial starts the subscription as trialing with a zero invoice; at trial end the first paid invoice is created.",
+      "provenance": {
+        "kind": "documented",
+        "ref": "https://docs.stripe.com/billing/subscriptions/trials"
+      }
+    },
+    {
+      "id": "UI-07",
+      "area": "ui",
+      "statement": "With cancellation enabled, the portal home shows a 'Cancel subscription' link.",
+      "provenance": {
+        "kind": "observed",
+        "ref": "recon/portal-cancel-walk.ts, walk of 2026-09-23"
+      }
+    },
+    {
+      "id": "UI-08",
+      "area": "ui",
+      "statement": "The cancel review screen restates the plan and the end-of-period date, with 'Cancel subscription' and 'Go back'.",
+      "provenance": {
+        "kind": "observed",
+        "ref": "recon/portal-cancel-walk.ts, walk of 2026-09-23"
+      }
+    },
+    {
+      "id": "UI-09",
+      "area": "ui",
+      "statement": "After cancelling, the home shows a 'Cancels <Mon D>' badge, 'Your service will end on <date>' and a 'Don't cancel subscription' link; the action fires POST .../cancel.",
+      "provenance": {
+        "kind": "observed",
+        "ref": "recon/portal-cancel-walk.ts, walk of 2026-09-23"
+      }
+    },
+    {
+      "id": "UI-10",
+      "area": "ui",
+      "statement": "'Don't cancel subscription' opens a renew screen; 'Renew subscription' fires POST .../reactivate and restores the home.",
+      "provenance": {
+        "kind": "observed",
+        "ref": "recon/portal-cancel-walk.ts, walk of 2026-09-23"
+      }
+    }
+  ]
+}

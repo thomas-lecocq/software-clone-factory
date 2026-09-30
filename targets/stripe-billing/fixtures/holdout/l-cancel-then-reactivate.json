@@ -1,0 +1,99 @@
+{
+  "id": "l-cancel-then-reactivate",
+  "rules": [
+    "LIF-02",
+    "LIF-04"
+  ],
+  "input": {
+    "kind": "lifecycle",
+    "start": 1791158400,
+    "amount": 1000,
+    "trial_days": null,
+    "steps": [
+      {
+        "do": "cancel_at_period_end"
+      },
+      {
+        "do": "advance",
+        "seconds": 864000
+      },
+      {
+        "do": "reactivate"
+      },
+      {
+        "do": "snapshot",
+        "as": "reactivated"
+      },
+      {
+        "do": "advance",
+        "seconds": 1900800
+      },
+      {
+        "do": "snapshot",
+        "as": "renewed"
+      }
+    ]
+  },
+  "observed": {
+    "reactivated": {
+      "status": "active",
+      "cancel_at_period_end": false,
+      "cancel_at": null,
+      "canceled_at": null,
+      "ended_at": null,
+      "trial_end": null,
+      "period_start": 1791158400,
+      "period_end": 1793836800,
+      "latest_invoice": {
+        "status": "paid",
+        "billing_reason": "subscription_create",
+        "subtotal": 1000,
+        "total": 1000,
+        "amount_due": 1000,
+        "amount_paid": 1000,
+        "amount_remaining": 0,
+        "attempt_count": 1,
+        "period_start": 1791158400,
+        "period_end": 1791158400,
+        "lines": [
+          {
+            "amount": 1000,
+            "description": "1 × Basic (at $10.00 / month)"
+          }
+        ]
+      },
+      "invoice_count": 1
+    },
+    "renewed": {
+      "status": "active",
+      "cancel_at_period_end": false,
+      "cancel_at": null,
+      "canceled_at": null,
+      "ended_at": null,
+      "trial_end": null,
+      "period_start": 1793836800,
+      "period_end": 1796428800,
+      "latest_invoice": {
+        "status": "paid",
+        "billing_reason": "subscription_cycle",
+        "subtotal": 1000,
+        "total": 1000,
+        "amount_due": 1000,
+        "amount_paid": 1000,
+        "amount_remaining": 0,
+        "attempt_count": 1,
+        "period_start": 1791158400,
+        "period_end": 1793836800,
+        "lines": [
+          {
+            "amount": 1000,
+            "description": "1 × Basic (at $10.00 / month)"
+          }
+        ]
+      },
+      "invoice_count": 2
+    }
+  },
+  "noise": [],
+  "recorded_at": "2026-09-23T16:52:03.653Z"
+}

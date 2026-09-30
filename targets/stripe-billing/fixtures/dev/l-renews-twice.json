@@ -1,0 +1,59 @@
+{
+  "id": "l-renews-twice",
+  "rules": [
+    "LIF-01"
+  ],
+  "input": {
+    "kind": "lifecycle",
+    "start": 1791158400,
+    "amount": 999,
+    "trial_days": null,
+    "steps": [
+      {
+        "do": "advance",
+        "seconds": 2682000
+      },
+      {
+        "do": "advance",
+        "seconds": 2592000
+      },
+      {
+        "do": "snapshot",
+        "as": "twice"
+      }
+    ]
+  },
+  "observed": {
+    "twice": {
+      "status": "active",
+      "cancel_at_period_end": false,
+      "cancel_at": null,
+      "canceled_at": null,
+      "ended_at": null,
+      "trial_end": null,
+      "period_start": 1796428800,
+      "period_end": 1799107200,
+      "latest_invoice": {
+        "status": "paid",
+        "billing_reason": "subscription_cycle",
+        "subtotal": 999,
+        "total": 999,
+        "amount_due": 999,
+        "amount_paid": 999,
+        "amount_remaining": 0,
+        "attempt_count": 1,
+        "period_start": 1793836800,
+        "period_end": 1796428800,
+        "lines": [
+          {
+            "amount": 999,
+            "description": "1 × Basic (at $9.99 / month)"
+          }
+        ]
+      },
+      "invoice_count": 3
+    }
+  },
+  "noise": [],
+  "recorded_at": "2026-09-23T16:56:27.937Z"
+}

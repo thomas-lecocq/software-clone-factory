@@ -1,0 +1,89 @@
+{
+  "id": "ui-cancel-go-back",
+  "rules": [
+    "UI-08"
+  ],
+  "input": {
+    "kind": "ui",
+    "start": 1791158400,
+    "current": "Basic",
+    "coupon_percent": null,
+    "cancel_enabled": true,
+    "steps": [
+      {
+        "do": "click",
+        "role": "link",
+        "name": "Cancel subscription"
+      },
+      {
+        "do": "capture",
+        "as": "review",
+        "until": "Review your changes"
+      },
+      {
+        "do": "click",
+        "role": "button",
+        "name": "Go back"
+      },
+      {
+        "do": "capture",
+        "as": "back",
+        "until": "Cancel subscription"
+      }
+    ]
+  },
+  "observed": {
+    "review": {
+      "screen": [
+        "- text: environnement de test AcmeCo Sandbox environnement de test AcmeCo partners with Stripe for simplified billing.",
+        "- contentinfo:",
+        "  - link \"Powered by Stripe\":",
+        "    - text: Powered by",
+        "    - img \"Stripe\"",
+        "  - link \"Terms\":",
+        "  - link \"Privacy\":",
+        "- button \"Billing\"",
+        "- text: Cancel Review your changes Basic $10.00 per month If you cancel this subscription, it will still be available until the end of your billing period on November 5, 2026.",
+        "- button \"Cancel subscription\":",
+        "  - text: Cancel subscription",
+        "  - img",
+        "  - img",
+        "- button \"Go back\"",
+        "- iframe"
+      ],
+      "requests": [
+        "GET /v1/billing_portal/sessions/bps_1UItTmDSnaJHjCbZmpkoQAvA",
+        "GET /v1/billing_portal/sessions/bps_1UItTmDSnaJHjCbZmpkoQAvA/customer",
+        "GET /v1/billing_portal/sessions/bps_1UItTmDSnaJHjCbZmpkoQAvA/subscriptions",
+        "GET /v1/billing_portal/sessions/bps_1UItTmDSnaJHjCbZmpkoQAvA/payment_methods",
+        "GET /v1/billing_portal/sessions/bps_1UItTmDSnaJHjCbZmpkoQAvA/subscriptions/sub_1UItTjDSnaJHjCbZYnZOanOO",
+        "GET /v1/billing_portal/sessions/bps_1UItTmDSnaJHjCbZmpkoQAvA/subscriptions/sub_1UItTjDSnaJHjCbZYnZOanOO/retention_coupon"
+      ]
+    },
+    "back": {
+      "screen": [
+        "- text: environnement de test AcmeCo Sandbox environnement de test AcmeCo partners with Stripe for simplified billing.",
+        "- contentinfo:",
+        "  - link \"Powered by Stripe\":",
+        "    - text: Powered by",
+        "    - img \"Stripe\"",
+        "  - link \"Terms\":",
+        "  - link \"Privacy\":",
+        "- text: Current subscription Basic $10.00 per month Your next billing date is November 5, 2026.",
+        "- link \"Update subscription\":",
+        "- link \"Cancel subscription\":",
+        "- text: Payment method Visa •••• 4242 Expires 09/2027 Default",
+        "- button \"Delete\" [disabled]",
+        "- link \"Add payment method\":",
+        "- iframe"
+      ],
+      "requests": [
+        "GET /v1/billing_portal/sessions/bps_1UItTmDSnaJHjCbZmpkoQAvA/customer",
+        "GET /v1/billing_portal/sessions/bps_1UItTmDSnaJHjCbZmpkoQAvA/subscriptions",
+        "GET /v1/billing_portal/sessions/bps_1UItTmDSnaJHjCbZmpkoQAvA/payment_methods"
+      ]
+    }
+  },
+  "noise": [],
+  "recorded_at": "2026-09-23T16:57:24.306Z"
+}

@@ -1,0 +1,158 @@
+{
+  "id": "ui-coupon-upgrade",
+  "rules": [
+    "UI-03",
+    "UI-05",
+    "DSC-01"
+  ],
+  "input": {
+    "kind": "ui",
+    "start": 1791158400,
+    "current": "Basic",
+    "coupon_percent": 20,
+    "steps": [
+      {
+        "do": "capture",
+        "as": "home",
+        "until": "Current subscription"
+      },
+      {
+        "do": "click",
+        "role": "link",
+        "name": "Update subscription"
+      },
+      {
+        "do": "capture",
+        "as": "plans",
+        "until": "Update your subscription"
+      },
+      {
+        "do": "click",
+        "role": "button",
+        "name": "Select"
+      },
+      {
+        "do": "click",
+        "role": "button",
+        "name": "Continue"
+      },
+      {
+        "do": "capture",
+        "as": "confirm",
+        "until": "Confirm your updates"
+      },
+      {
+        "do": "click",
+        "role": "button",
+        "name": "Subscribe and pay"
+      },
+      {
+        "do": "capture",
+        "as": "after",
+        "until": "Your next estimated payment"
+      }
+    ]
+  },
+  "observed": {
+    "home": {
+      "screen": [
+        "- text: environnement de test AcmeCo Sandbox environnement de test AcmeCo partners with Stripe for simplified billing.",
+        "- contentinfo:",
+        "  - link \"Powered by Stripe\":",
+        "    - text: Powered by",
+        "    - img \"Stripe\"",
+        "  - link \"Terms\":",
+        "  - link \"Privacy\":",
+        "- text: Current subscription Basic $8.00 per month Your next billing date is November 5, 2026. Your next estimated payment will be $8.00",
+        "- button \"Hide details\"",
+        "- text: Nov 5-Dec 5, 2026 Basic $10.00 Subtotal $10.00 20% off -$2.00 Total $8.00",
+        "- link \"Update subscription\":",
+        "- text: Payment method Visa •••• 4242 Expires 09/2027 Default",
+        "- button \"Delete\" [disabled]",
+        "- link \"Add payment method\":",
+        "- iframe"
+      ],
+      "requests": [
+        "GET /v1/billing_portal/sessions/bps_1UIspQDSnaJHjCbZ6ZsFxPBF",
+        "GET /v1/billing_portal/sessions/bps_1UIspQDSnaJHjCbZ6ZsFxPBF/customer",
+        "GET /v1/billing_portal/sessions/bps_1UIspQDSnaJHjCbZ6ZsFxPBF/subscriptions",
+        "GET /v1/billing_portal/sessions/bps_1UIspQDSnaJHjCbZ6ZsFxPBF/payment_methods"
+      ]
+    },
+    "plans": {
+      "screen": [
+        "- text: environnement de test AcmeCo Sandbox environnement de test AcmeCo partners with Stripe for simplified billing.",
+        "- contentinfo:",
+        "  - link \"Powered by Stripe\":",
+        "    - text: Powered by",
+        "    - img \"Stripe\"",
+        "  - link \"Terms\":",
+        "  - link \"Privacy\":",
+        "- button \"Billing\"",
+        "- text: Subscriptions Update your subscription Current subscription Basic $10.00 per month Selected Pro $30.00 per month",
+        "- button \"Select\"",
+        "- text: Subtotal $10.00 per month",
+        "- button \"Continue\" [disabled]",
+        "- iframe"
+      ],
+      "requests": [
+        "GET /v1/billing_portal/sessions/bps_1UIspQDSnaJHjCbZ6ZsFxPBF/subscriptions/sub_1UIspNDSnaJHjCbZIBLyNuUo"
+      ]
+    },
+    "confirm": {
+      "screen": [
+        "- text: environnement de test AcmeCo Sandbox environnement de test AcmeCo partners with Stripe for simplified billing.",
+        "- contentinfo:",
+        "  - link \"Powered by Stripe\":",
+        "    - text: Powered by",
+        "    - img \"Stripe\"",
+        "  - link \"Terms\":",
+        "  - link \"Privacy\":",
+        "- button \"Billing\"",
+        "- button \"Subscriptions\"",
+        "- text: Confirm Confirm your updates Pro What you'll pay monthly starting November 5, 2026",
+        "- button \"View details\"",
+        "- text: $24.00",
+        "- link \"Visa •••• 4242\":",
+        "- button \"Subscribe and pay\":",
+        "  - text: Subscribe and pay",
+        "  - img",
+        "  - img",
+        "- button \"Go back\"",
+        "- iframe"
+      ],
+      "requests": [
+        "GET /v1/billing_portal/sessions/bps_1UIspQDSnaJHjCbZ6ZsFxPBF/subscriptions/sub_1UIspNDSnaJHjCbZIBLyNuUo",
+        "GET /v1/billing_portal/sessions/bps_1UIspQDSnaJHjCbZ6ZsFxPBF/customer",
+        "GET /v1/billing_portal/sessions/bps_1UIspQDSnaJHjCbZ6ZsFxPBF/update_preview"
+      ]
+    },
+    "after": {
+      "screen": [
+        "- text: environnement de test AcmeCo Sandbox environnement de test AcmeCo partners with Stripe for simplified billing.",
+        "- contentinfo:",
+        "  - link \"Powered by Stripe\":",
+        "    - text: Powered by",
+        "    - img \"Stripe\"",
+        "  - link \"Terms\":",
+        "  - link \"Privacy\":",
+        "- text: Current subscription Pro $24.00 per month Your next billing date is November 5, 2026. Your next estimated payment will be $40.00",
+        "- button \"Hide details\"",
+        "- text: Oct 5-Nov 5, 2026 Prorated credit from Basic -$8.00 Prorated charge for Pro $24.00 Nov 5-Dec 5, 2026 Pro $30.00 Subtotal $46.00 20% off -$6.00 Total $40.00",
+        "- link \"Update subscription\":",
+        "- text: Payment method Visa •••• 4242 Expires 09/2027 Default",
+        "- button \"Delete\" [disabled]",
+        "- link \"Add payment method\":",
+        "- iframe"
+      ],
+      "requests": [
+        "POST /v1/billing_portal/sessions/bps_1UIspQDSnaJHjCbZ6ZsFxPBF/subscriptions/sub_1UIspNDSnaJHjCbZIBLyNuUo",
+        "GET /v1/billing_portal/sessions/bps_1UIspQDSnaJHjCbZ6ZsFxPBF/customer",
+        "GET /v1/billing_portal/sessions/bps_1UIspQDSnaJHjCbZ6ZsFxPBF/subscriptions",
+        "GET /v1/billing_portal/sessions/bps_1UIspQDSnaJHjCbZ6ZsFxPBF/payment_methods"
+      ]
+    }
+  },
+  "noise": [],
+  "recorded_at": "2026-09-23T16:16:12.214Z"
+}

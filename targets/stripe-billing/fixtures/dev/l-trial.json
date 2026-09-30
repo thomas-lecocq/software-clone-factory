@@ -1,0 +1,88 @@
+{
+  "id": "l-trial",
+  "rules": [
+    "LIF-07"
+  ],
+  "input": {
+    "kind": "lifecycle",
+    "start": 1791158400,
+    "amount": 1000,
+    "trial_days": 7,
+    "steps": [
+      {
+        "do": "snapshot",
+        "as": "trialing"
+      },
+      {
+        "do": "advance",
+        "seconds": 608400
+      },
+      {
+        "do": "snapshot",
+        "as": "converted"
+      }
+    ]
+  },
+  "observed": {
+    "trialing": {
+      "status": "trialing",
+      "cancel_at_period_end": false,
+      "cancel_at": null,
+      "canceled_at": null,
+      "ended_at": null,
+      "trial_end": 1791763200,
+      "period_start": 1791158400,
+      "period_end": 1791763200,
+      "latest_invoice": {
+        "status": "paid",
+        "billing_reason": "subscription_create",
+        "subtotal": 0,
+        "total": 0,
+        "amount_due": 0,
+        "amount_paid": 0,
+        "amount_remaining": 0,
+        "attempt_count": 0,
+        "period_start": 1791158400,
+        "period_end": 1791158400,
+        "lines": [
+          {
+            "amount": 0,
+            "description": "Free trial for 1 × Basic"
+          }
+        ]
+      },
+      "invoice_count": 1
+    },
+    "converted": {
+      "status": "active",
+      "cancel_at_period_end": false,
+      "cancel_at": null,
+      "canceled_at": null,
+      "ended_at": null,
+      "trial_end": 1791763200,
+      "period_start": 1791763200,
+      "period_end": 1794441600,
+      "latest_invoice": {
+        "status": "paid",
+        "billing_reason": "subscription_cycle",
+        "subtotal": 1000,
+        "total": 1000,
+        "amount_due": 1000,
+        "amount_paid": 1000,
+        "amount_remaining": 0,
+        "attempt_count": 1,
+        "period_start": 1791158400,
+        "period_end": 1791763200,
+        "lines": [
+          {
+            "amount": 1000,
+            "description": "1 × Basic (at $10.00 / month)"
+          }
+        ]
+      },
+      "invoice_count": 2
+    }
+  },
+  "noise": [],
+  "recorded_at": "2026-09-23T16:54:54.800Z"
+}

@@ -1,0 +1,36 @@
+{
+  "name": "software-clone-factory",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "vitest run",
+    "check": "tsc --noEmit && eslint . && prettier --check . && vitest run",
+    "record": "tsx harness/src/cli.ts record",
+    "verify": "tsx harness/src/cli.ts verify",
+    "clone": "tsx harness/src/cli.ts serve",
+    "demo": "tsx targets/stripe-billing/demo.ts",
+    "relock": "tsx harness/src/cli.ts relock",
+    "new-slice": "tsx harness/src/cli.ts new-slice"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "private": "true",
+  "dependencies": {
+    "stripe": "^22.6.2",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^26.6.2",
+    "eslint": "^10.11.0",
+    "playwright": "^1.63.0",
+    "prettier": "^3.9.9",
+    "tsx": "^4.23.15",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.70.1",
+    "vitest": "^5.0.1"
+  }
+}
