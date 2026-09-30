@@ -14,10 +14,11 @@ Prettier, Vitest, zod at every boundary, Playwright. `npm run check` clean befor
    `verify` aborts on any mismatch, and when the lock differs from the committed one.
 2. Only `npm run verify` writes `verify/*` and `GAPS.generated.md`, and every run is appended to
    `verify/runs.jsonl`. Rule status is never stored in `rules.json`; it is computed.
-3. Implementer agents run in a sandbox copy with no holdout, no audit material, no secrets and no
-   git history (`harness/run-builder.sh`, `harness/run-agent.sh`); only `clone/` is copied back.
-   Inside it, `harness/hooks/guard-oracle.sh` blocks evaluator writes, holdout and audit reads as a
-   guardrail, and logs blocked attempts.
+3. Implementer agents run in the agent container (`harness/sandbox.sh`, image
+   `harness/docker/Dockerfile`), which mounts only a sandbox copy with no holdout, no audit
+   material, no env or scrub files and no git history; only the requested folder (the clone) is
+   copied back. Inside it, `harness/hooks/guard-oracle.sh` is a guardrail that blocks evaluator
+   writes and holdout or audit reads, and logs blocked attempts.
 4. Recording refuses any Stripe key that is not a test key.
 5. Clone state lives in memory only. `POST /__reset` restores the seed; the same probe run twice
    after reset gives identical output.
