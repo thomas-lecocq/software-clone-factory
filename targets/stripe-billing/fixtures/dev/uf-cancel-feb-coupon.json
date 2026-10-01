@@ -1,0 +1,394 @@
+{
+  "id": "uf-cancel-feb-coupon",
+  "rules": [
+    "UI-08",
+    "UI-09",
+    "UI-12",
+    "UI-13",
+    "UI-14"
+  ],
+  "input": {
+    "kind": "ui",
+    "capture": "full",
+    "start": 1801612800,
+    "current": "Pro",
+    "coupon_percent": 20,
+    "cancel_enabled": true,
+    "steps": [
+      {
+        "do": "click",
+        "role": "link",
+        "name": "Cancel subscription"
+      },
+      {
+        "do": "capture",
+        "as": "review",
+        "until": "Review your changes"
+      },
+      {
+        "do": "click",
+        "role": "button",
+        "name": "Cancel subscription"
+      },
+      {
+        "do": "capture",
+        "as": "canceled",
+        "until": "Your service will end on"
+      }
+    ]
+  },
+  "observed": {
+    "review": {
+      "screen": [
+        "- text: environnement de test AcmeCo Sandbox environnement de test AcmeCo partners with Stripe for simplified billing.",
+        "- contentinfo:",
+        "  - link \"Powered by Stripe\":",
+        "    - text: Powered by",
+        "    - img \"Stripe\"",
+        "  - link \"Terms\":",
+        "  - link \"Privacy\":",
+        "- button \"Billing\"",
+        "- text: Cancel Review your changes Pro $24.00 per month If you cancel this subscription, it will still be available until the end of your billing period on March 3, 2027.",
+        "- button \"Cancel subscription\":",
+        "  - text: Cancel subscription",
+        "  - img",
+        "  - img",
+        "- button \"Go back\"",
+        "- iframe"
+      ],
+      "requests": [
+        {
+          "call": "GET /v1/billing_portal/sessions/bps_1ULd0WDSnaJHjCbZeMrAIVw5",
+          "body": null,
+          "status": 200
+        },
+        {
+          "call": "GET /v1/billing_portal/sessions/bps_1ULd0WDSnaJHjCbZeMrAIVw5/customer",
+          "body": null,
+          "status": 200
+        },
+        {
+          "call": "GET /v1/billing_portal/sessions/bps_1ULd0WDSnaJHjCbZeMrAIVw5/subscriptions",
+          "body": null,
+          "status": 200
+        },
+        {
+          "call": "GET /v1/billing_portal/sessions/bps_1ULd0WDSnaJHjCbZeMrAIVw5/payment_methods",
+          "body": null,
+          "status": 200
+        },
+        {
+          "call": "GET /v1/billing_portal/sessions/bps_1ULd0WDSnaJHjCbZeMrAIVw5/subscriptions/sub_1ULd0UDSnaJHjCbZ9VLYc1uL",
+          "body": null,
+          "status": 200
+        },
+        {
+          "call": "GET /v1/billing_portal/sessions/bps_1ULd0WDSnaJHjCbZeMrAIVw5/subscriptions/sub_1ULd0UDSnaJHjCbZ9VLYc1uL/retention_coupon",
+          "body": null,
+          "status": 200
+        }
+      ],
+      "layout": {
+        "span environnement de test AcmeCo": [
+          100,
+          69,
+          259,
+          18
+        ],
+        "span Sandbox": [
+          367,
+          68,
+          79,
+          20
+        ],
+        "span environnement de test AcmeCo partners with Stripe for sim": [
+          64,
+          174,
+          279,
+          92
+        ],
+        "a Powered by": [
+          64,
+          720,
+          112,
+          17
+        ],
+        "a Terms": [
+          64,
+          745,
+          35,
+          15
+        ],
+        "a Privacy": [
+          107,
+          745,
+          41,
+          15
+        ],
+        "button Billing": [
+          592,
+          70,
+          40,
+          16
+        ],
+        "span Cancel": [
+          668,
+          69,
+          44,
+          17
+        ],
+        "span Review your changes": [
+          592,
+          121,
+          316,
+          38
+        ],
+        "span Pro": [
+          592,
+          200,
+          30,
+          23
+        ],
+        "span $24.00 per month": [
+          592,
+          234,
+          203,
+          28
+        ],
+        "span If you cancel this subscription, it will still be available ": [
+          592,
+          279,
+          442,
+          42
+        ],
+        "span March 3, 2027": [
+          798,
+          303,
+          105,
+          18
+        ],
+        "button Cancel subscription": [
+          592,
+          372,
+          464,
+          44
+        ],
+        "button Go back": [
+          592,
+          435,
+          464,
+          44
+        ]
+      },
+      "thumbnail": "64x40:9vb29vb29vb29vb29vb29vb29vb29vb29vf///////////////////////////////////////////////////b29vb29vb29vb29vb29vb29vb29vb29vb2///////////////////////////////////////////////////29vb29vb29vb29vb29vb29vb29vb29vb29v//////////////////////////////////////////////////9vb16ezg3d7a293h2d/b3N7kpn18gM729vb////05fL3+PL1//////////////////////////////////////b29evu6OXm5Obm6uXq5uPi5sClp6rd9vb2////+vPy+/r3+v/////////////////////////////////////29vb29vb29vb29vb29vb29vb29vb29vb29v//////////////////////////////////////////////////9vb29vb29vb29vb29vb29vb29vb29vb29vb////hw9rM1OLh2dvl3srZ29bZ7/////////////////////////b29vb29vb29vb29vb29vb29vb29vb29vb2////5r/Fwb3CtMKz3MO6tLSfyd/////////////////////////29vbx8fHy8fHx8fHx8fH19vb29vb29vb29v//////////////////////////////////////////////////9vb2xcnBy8LGwsbMxsbI8vb29vb29vb29vb////9/f////////////////////////////////////////////b29tDP1tXV3tLY0dfV2tja9vb29vb29vb2////8Nv8///////////////////////////////////////////29vbm0tjQz9XTz9fa1uDU2fX29vb29vb29v////z5/v7+///////+////////////////////////////////9vb2xMG/yMfOwsCxw8K4wsP19vb29vb29vb////jtLG0trvCwLuxxf////////////////////////////////b29uno4uvo7Obk5+jm5urY9Pb29vb29vb2////+/X59vXz+Pf29Pf8+fn3+vv5+Pr59/z////////////////29vb29vb29vb29vb29vb29vb29vb29vb29v////bj5N7m4OXf4N3i7ufk3+bl29vm4ePp////////////////9vb29vb29vb29vb29vb29vb29vb29vb29vb////v1tTZ1s/K29DV4cbW2tTT8Pv8/Pz8/f////////////////b29vb29vb29vb29vb29vb29vb29vb29vb2/////////v///P7////////////////////////////////////29vb29vb29vb29vb29vb29vb29vb29vb29v//////////////////////////////////////////////////9vb29vb29vb29vb29vb29vb29vb29vb29vb////ktLS0tLS0tLS0tLS0tLS0tLS0tLS0tL3+//////////////b29vb29vb29vb29vb29vb29vb29vb29vb2////xWFhYWFhYWFugYF5hH6BfmJhYWFhYWFx/f/////////////29vb29vb29vb29vb29vb29vb29vb29vb29v///8ptbGxsbGxsbGxsbGxubWxsbGxsbGxsfP3/////////////9vb29vb29vb29vb29vb29vb29vb29vb29vb////8+vr6+vr6+vr6+vr6+vr6+vr6+vr6+vv+//////////////b29vb29vb29vb29vb29vb29vb29vb29vb2/////P7+/v7+/v7+/vPj4+r9/v7+/v7+/v7+/f/////////////29vb29vb29vb29vb29vb29vb29vb29vb29v////v7/Pz8/Pz8/Pz69/f5+/z8/Pz8/Pz8+/3/////////////9vb29vb29vb29vb29vb29vb29vb29vb29vb////+/f39/f39/f39/f39/f39/f39/f39/f3///////////////b29vb29vb29vb29vb29vb29vb29vb29vb2///////////////////////////////////////////////////29vb29vb29vb29vb29vb29vb29vb29vb29v//////////////////////////////////////////////////9vb29vb29vb29vb29vb29vb29vb29vb29vb///////////////////////////////////////////////////b29vb29vb29vb29vb29vb29vb29vb29vb2///////////////////////////////////////////////////29vb29vb29vb29vb29vb29vb29vb29vb29v//////////////////////////////////////////////////9vb29vb29vb29vb29vb29vb29vb29vb29vb///////////////////////////////////////////////////b29vb29vb29vb29vb29vb29vb29vb29vb2///////////////////////////////////////////////////29vb29vb29vb29vb29vb29vb29vb29vb29v//////////////////////////////////////////////////9vb29vb29vb29vb29vb29vb29vb29vb29vb///////////////////////////////////////////////////b29vb29vb29vb29vb29vb29vb29vb29vb2///////////////////////////////////////////////////29vb29vb29vb29vb29vb29vb29vb29vb29v//////////////////////////////////////////////////9vb24t/h48jG9vb29vb29vb29vb29vb29vb///////////////////////////////////////////////////b29uvs7evy9vb29vb29vb29vb29vb29vb2///////////////////////////////////////////////////29vby8/Py9Pb29vb29vb29vb29vb29vb29v//////////////////////////////////////////////////9vb29vb29vb29vb29vb29vb29vb29vb29vb//////////////////////////////////////////////////w=="
+    },
+    "canceled": {
+      "screen": [
+        "- text: environnement de test AcmeCo Sandbox environnement de test AcmeCo partners with Stripe for simplified billing.",
+        "- contentinfo:",
+        "  - link \"Powered by Stripe\":",
+        "    - text: Powered by",
+        "    - img \"Stripe\"",
+        "  - link \"Terms\":",
+        "  - link \"Privacy\":",
+        "- text: Current subscription Cancels Mar 3, 2027 Pro $24.00 per month Your service will end on March 3, 2027.",
+        "- link \"Update subscription\":",
+        "- link \"Don't cancel subscription\":",
+        "- text: Payment method Visa •••• 4242 Expires 10/2027 Default",
+        "- button \"Delete\" [disabled]",
+        "- link \"Add payment method\":",
+        "- iframe"
+      ],
+      "requests": [
+        {
+          "call": "POST /v1/billing_portal/sessions/bps_1ULd0WDSnaJHjCbZeMrAIVw5/subscriptions/sub_1ULd0UDSnaJHjCbZ9VLYc1uL/cancel",
+          "body": {
+            "refund": "false"
+          },
+          "status": 200
+        },
+        {
+          "call": "GET /v1/billing_portal/sessions/bps_1ULd0WDSnaJHjCbZeMrAIVw5/customer",
+          "body": null,
+          "status": 200
+        },
+        {
+          "call": "GET /v1/billing_portal/sessions/bps_1ULd0WDSnaJHjCbZeMrAIVw5/subscriptions",
+          "body": null,
+          "status": 200
+        },
+        {
+          "call": "GET /v1/billing_portal/sessions/bps_1ULd0WDSnaJHjCbZeMrAIVw5/payment_methods",
+          "body": null,
+          "status": 200
+        }
+      ],
+      "layout": {
+        "span environnement de test AcmeCo": [
+          100,
+          69,
+          259,
+          18
+        ],
+        "span Sandbox": [
+          367,
+          68,
+          79,
+          20
+        ],
+        "span environnement de test AcmeCo partners with Stripe for sim": [
+          64,
+          174,
+          279,
+          92
+        ],
+        "a Powered by": [
+          64,
+          720,
+          112,
+          17
+        ],
+        "a Terms": [
+          64,
+          745,
+          35,
+          15
+        ],
+        "a Privacy": [
+          107,
+          745,
+          41,
+          15
+        ],
+        "span CURRENT SUBSCRIPTION": [
+          592,
+          69,
+          173,
+          17
+        ],
+        "span Cancels Mar 3, 2027": [
+          599,
+          122,
+          118,
+          16
+        ],
+        "span Mar 3, 2027": [
+          647,
+          122,
+          70,
+          15
+        ],
+        "span Pro": [
+          592,
+          152,
+          30,
+          23
+        ],
+        "span $24.00 per month": [
+          592,
+          186,
+          203,
+          28
+        ],
+        "span Your service will end on March 3, 2027.": [
+          614,
+          224,
+          253,
+          17
+        ],
+        "span March 3, 2027": [
+          770,
+          224,
+          93,
+          17
+        ],
+        "a Update subscription": [
+          967,
+          120,
+          233,
+          44
+        ],
+        "a Don't cancel subscription": [
+          967,
+          176,
+          233,
+          44
+        ],
+        "span PAYMENT METHOD": [
+          592,
+          332,
+          130,
+          17
+        ],
+        "span Visa •••• 4242": [
+          632,
+          367,
+          106,
+          18
+        ],
+        "span Expires 10/2027": [
+          632,
+          387,
+          90,
+          15
+        ],
+        "span Default": [
+          933,
+          374,
+          55,
+          20
+        ],
+        "button ": [
+          1032,
+          378,
+          12,
+          12
+        ],
+        "a Add payment method": [
+          592,
+          426,
+          183,
+          24
+        ]
+      },
+      "thumbnail": "64x40:9vb29vb29vb29vb29vb29vb29vb29vb29vf///////////////////////////////////////////////////b29vb29vb29vb29vb29vb29vb29vb29vb2///////////////////////////////////////////////////29vb29vb29vb29vb29vb29vb29vb29vb29v//////////////////////////////////////////////////9vb16ezg3d7a293h2d/b3N7kpn18gM729vb////34eDg5+Hk3uX1//////////////////////////////////b29evu6OXm5Obm6uXq5uPi5sClp6rd9vb2////+vHy9PPv8vbz+//////////////////////////////////29vb29vb29vb29vb29vb29vb29vb29vb29v////78/Pv8+/r6///////////////t4uLi4uLi4uLi4uP+////9vb29vb29vb29vb29vb29vb29vb29vb29vb////65uXn6+nr5v7/////////////nXN6f399fX5/fHVz+P////b29vb29vb29vb29vb29vb29vb29vb29vb2////+vj8/f39/f3//////////////45danBxa3BucWxeXff////29vbx8fHy8fHx8fHx8fH19vb29vb29vb29v////DX+//////////////////////j0tLS0tLS0tLS0tP9////9vb2xcnBy8LGwsbMxsbI8vb29vb29vb29vb////z4uHh4ufp6Obh6P//////////+/Tw8u/w7+vw7PH+/f////b29tDP1tXV3tLY0dfV2tja9vb29vb29vb2////89ve3Nzd5OLg3OX///////////ry7u/s7u3p7urv+/3////29vbm0tjQz9XTz9fa1uDU2fX29vb29vb29v///+7i3eTd39ve39zZ5+Tb+f/////+/v7+/v7+/v7+/v7/////9vb2xMG/yMfOwsCxw8K4wsP19vb29vb29vb////9/f////////////////////////////////////////////b29uno4uvo7Obk5+jm5urY9Pb29vb29vb2///////////////////////////////////////////////////29vb29vb29vb29vb29vb29vb29vb29vb29v//////////////////////////////////////////////////9vb29vb29vb29vb29vb29vb29vb29vb29vb///////////////////////////////////////////////////b29vb29vb29vb29vb29vb29vb29vb29vb2/////fr5+vr6+f7////////////////////////////////////29vb29vb29vb29vb29vb29vb29vb29vb29v////Tj4OPl5OD8////////////////////////////////////9vb29vb29vb29vb29vb29vb29vb29vb29vb////Xi+jk8fbe3/3///////////z09fv//P7///////////////b29vb29vb29vb29vb29vb29vb29vb29vb2////wFXe2+Hg2vf////////////56uf5//r9///////////////29vb29vb29vb29vb29vb29vb29vb29vb29v////////7//v//////////////////////////////////////9vb29vb29vb29vb29vb29vb29vb29vb29vb////88+bq6+zs7Onv/v////////////////////////////////b29vb29vb29vb29vb29vb29vb29vb29vb2/////PPp6+vt7e3r8P7////////////////////////////////29vb29vb29vb29vb29vb29vb29vb29vb29v//////////////////////////////////////////////////9vb29vb29vb29vb29vb29vb29vb29vb29vb///////////////////////////////////////////////////b29vb29vb29vb29vb29vb29vb29vb29vb2///////////////////////////////////////////////////29vb29vb29vb29vb29vb29vb29vb29vb29v//////////////////////////////////////////////////9vb29vb29vb29vb29vb29vb29vb29vb29vb///////////////////////////////////////////////////b29vb29vb29vb29vb29vb29vb29vb29vb2///////////////////////////////////////////////////29vb29vb29vb29vb29vb29vb29vb29vb29v//////////////////////////////////////////////////9vb29vb29vb29vb29vb29vb29vb29vb29vb///////////////////////////////////////////////////b29vb29vb29vb29vb29vb29vb29vb29vb2///////////////////////////////////////////////////29vb29vb29vb29vb29vb29vb29vb29vb29v//////////////////////////////////////////////////9vb29vb29vb29vb29vb29vb29vb29vb29vb///////////////////////////////////////////////////b29vb29vb29vb29vb29vb29vb29vb29vb2///////////////////////////////////////////////////29vb29vb29vb29vb29vb29vb29vb29vb29v//////////////////////////////////////////////////9vb24t/h48jG9vb29vb29vb29vb29vb29vb///////////////////////////////////////////////////b29uvs7evy9vb29vb29vb29vb29vb29vb2///////////////////////////////////////////////////29vby8/Py9Pb29vb29vb29vb29vb29vb29v//////////////////////////////////////////////////9vb29vb29vb29vb29vb29vb29vb29vb29vb//////////////////////////////////////////////////w=="
+    },
+    "account": {
+      "status": "active",
+      "cancel_at_period_end": false,
+      "cancel_at": 1804032000,
+      "discounts": 1,
+      "items": [
+        {
+          "amount": 3000,
+          "interval": "month",
+          "quantity": 1,
+          "period_end": 1804032000
+        }
+      ],
+      "invoices": [
+        {
+          "status": "paid",
+          "billing_reason": "subscription_create",
+          "subtotal": 3000,
+          "total": 2400,
+          "amount_due": 2400,
+          "amount_paid": 2400,
+          "amount_remaining": 0,
+          "attempt_count": 1,
+          "period_start": 1801612800,
+          "period_end": 1801612800,
+          "lines": [
+            {
+              "amount": 3000,
+              "description": "1 × Pro (at $30.00 / month)"
+            }
+          ]
+        }
+      ],
+      "pending_items": []
+    }
+  },
+  "noise": [],
+  "recorded_at": "2026-10-01T05:58:38.889Z"
+}

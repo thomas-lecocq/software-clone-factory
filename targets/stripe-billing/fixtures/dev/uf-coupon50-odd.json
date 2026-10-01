@@ -1,0 +1,930 @@
+{
+  "id": "uf-coupon50-odd",
+  "rules": [
+    "UI-03",
+    "UI-05",
+    "DSC-01",
+    "UI-12",
+    "UI-13",
+    "UI-14"
+  ],
+  "input": {
+    "kind": "ui",
+    "capture": "full",
+    "start": 1797510896,
+    "current": "Basic",
+    "coupon_percent": 50,
+    "steps": [
+      {
+        "do": "capture",
+        "as": "home",
+        "until": "Current subscription"
+      },
+      {
+        "do": "click",
+        "role": "link",
+        "name": "Update subscription"
+      },
+      {
+        "do": "capture",
+        "as": "plans",
+        "until": "Update your subscription"
+      },
+      {
+        "do": "click",
+        "role": "button",
+        "name": "Select"
+      },
+      {
+        "do": "click",
+        "role": "button",
+        "name": "Continue"
+      },
+      {
+        "do": "capture",
+        "as": "confirm",
+        "until": "Confirm your updates"
+      },
+      {
+        "do": "click",
+        "role": "button",
+        "name": "Subscribe and pay"
+      },
+      {
+        "do": "capture",
+        "as": "after",
+        "until": "Your next estimated payment"
+      }
+    ]
+  },
+  "observed": {
+    "home": {
+      "screen": [
+        "- text: environnement de test AcmeCo Sandbox environnement de test AcmeCo partners with Stripe for simplified billing.",
+        "- contentinfo:",
+        "  - link \"Powered by Stripe\":",
+        "    - text: Powered by",
+        "    - img \"Stripe\"",
+        "  - link \"Terms\":",
+        "  - link \"Privacy\":",
+        "- text: Current subscription Basic $5.00 per month Your next billing date is January 17, 2027. Your next estimated payment will be $5.00",
+        "- button \"Hide details\"",
+        "- text: Jan 17-Feb 17, 2027 Basic $10.00 Subtotal $10.00 50% off -$5.00 Total $5.00",
+        "- link \"Update subscription\":",
+        "- text: Payment method Visa •••• 4242 Expires 10/2027 Default",
+        "- button \"Delete\" [disabled]",
+        "- link \"Add payment method\":",
+        "- iframe"
+      ],
+      "requests": [
+        {
+          "call": "GET /v1/billing_portal/sessions/bps_1ULcveDSnaJHjCbZX6LZJh63",
+          "body": null,
+          "status": 200
+        },
+        {
+          "call": "GET /v1/billing_portal/sessions/bps_1ULcveDSnaJHjCbZX6LZJh63/customer",
+          "body": null,
+          "status": 200
+        },
+        {
+          "call": "GET /v1/billing_portal/sessions/bps_1ULcveDSnaJHjCbZX6LZJh63/subscriptions",
+          "body": null,
+          "status": 200
+        },
+        {
+          "call": "GET /v1/billing_portal/sessions/bps_1ULcveDSnaJHjCbZX6LZJh63/payment_methods",
+          "body": null,
+          "status": 200
+        }
+      ],
+      "layout": {
+        "span environnement de test AcmeCo": [
+          100,
+          69,
+          259,
+          18
+        ],
+        "span Sandbox": [
+          367,
+          68,
+          79,
+          20
+        ],
+        "span environnement de test AcmeCo partners with Stripe for sim": [
+          64,
+          174,
+          279,
+          92
+        ],
+        "a Powered by": [
+          64,
+          720,
+          112,
+          17
+        ],
+        "a Terms": [
+          64,
+          745,
+          35,
+          15
+        ],
+        "a Privacy": [
+          107,
+          745,
+          41,
+          15
+        ],
+        "span CURRENT SUBSCRIPTION": [
+          592,
+          69,
+          173,
+          17
+        ],
+        "span Basic": [
+          592,
+          132,
+          49,
+          23
+        ],
+        "span $5.00 per month": [
+          592,
+          166,
+          188,
+          28
+        ],
+        "span Your next billing date is January 17, 2027.": [
+          592,
+          205,
+          266,
+          17
+        ],
+        "span January 17, 2027": [
+          745,
+          205,
+          109,
+          17
+        ],
+        "span Your next estimated payment will be $5.00": [
+          592,
+          237,
+          277,
+          17
+        ],
+        "span $5.00": [
+          829,
+          237,
+          41,
+          17
+        ],
+        "button Hide details": [
+          592,
+          260,
+          96,
+          20
+        ],
+        "span JAN 17-FEB 17, 2027": [
+          612,
+          318,
+          119,
+          15
+        ],
+        "span JAN 17": [
+          612,
+          318,
+          40,
+          15
+        ],
+        "span FEB 17, 2027": [
+          658,
+          318,
+          74,
+          15
+        ],
+        "span Basic #2": [
+          612,
+          349,
+          36,
+          17
+        ],
+        "span $10.00": [
+          804,
+          349,
+          45,
+          17
+        ],
+        "span Subtotal": [
+          612,
+          386,
+          59,
+          17
+        ],
+        "span $10.00 #2": [
+          801,
+          386,
+          48,
+          17
+        ],
+        "span 50% off": [
+          612,
+          423,
+          53,
+          17
+        ],
+        "span -$5.00": [
+          804,
+          423,
+          45,
+          17
+        ],
+        "span Total": [
+          612,
+          460,
+          34,
+          17
+        ],
+        "span $5.00 #2": [
+          809,
+          460,
+          41,
+          17
+        ],
+        "a Update subscription": [
+          967,
+          120,
+          233,
+          44
+        ],
+        "span PAYMENT METHOD": [
+          592,
+          599,
+          130,
+          17
+        ],
+        "span Visa •••• 4242": [
+          632,
+          634,
+          106,
+          18
+        ],
+        "span Expires 10/2027": [
+          632,
+          654,
+          90,
+          15
+        ],
+        "span Default": [
+          933,
+          642,
+          55,
+          20
+        ],
+        "button ": [
+          1032,
+          646,
+          12,
+          12
+        ],
+        "a Add payment method": [
+          592,
+          693,
+          183,
+          24
+        ]
+      },
+      "thumbnail": "64x40:9vb29vb29vb29vb29vb29vb29vb29vb29vf///////////////////////////////////////////////////b29vb29vb29vb29vb29vb29vb29vb29vb2///////////////////////////////////////////////////29vb29vb29vb29vb29vb29vb29vb29vb29v//////////////////////////////////////////////////9vb16ezg3d7a293h2d/b3N7kpn18gM729vb////34eDg5+Hk3uX1//////////////////////////////////b29evu6OXm5Obm6uXq5uPi5sClp6rd9vb2////+vHy9PPv8vbz+//////////////////////////////////29vb29vb29vb29vb29vb29vb29vb29vb29v/////////////////////////////t4uLi4uLi4uLi4uP+////9vb29vb29vb29vb29vb29vb29vb29vb29vb////48fP/////////////////////nXN6f399fX5/fHVz+P////b29vb29vb29vb29vb29vb29vb29vb29vb2////8NLc/v///////////////////45danBxa3BucWxeXff////29vbx8fHy8fHx8fHx8fH19vb29vb29vb29v////Te5d/19/j39O39///////////k1NTU1NTU1NTU1NX+////9vb2xcnBy8LGwsbMxsbI8vb29vb29vb29vb////v1NnPytDU0c/S+/////////////////////////////////b29tDP1tXV3tLY0dfV2tja9vb29vb29vb2////9ufj6N7j3efo4+jn5ez+///////////////////////////29vbm0tjQz9XTz9fa1uDU2fX29vb29vb29v////37+/z6+/r7+/v8/Pv8////////////////////////////9vb2xMG/yMfOwsCxw8K4wsP19vb29vb29vb////04d/k3d3c4+Dj3+Hf0ur///////////////////////////b29uno4uvo7Obk5+jm5urY9Pb29vb29vb2////9d/l4ej6///////////////////////////////////////29vb29vb29vb29vb29vb29vb29vb29vb29v////34+Pf5/Pz8/Pz8/Pz8/v//////////////////////////9vb29vb29vb29vb29vb29vb29vb29vb29vb////89vb29vb29vb29vb29vv///////////////////////////b29vb29vb29vb29vb29vb29vb29vb29vb2/////O7n6OTp4+z29vb29vb7///////////////////////////29vb29vb29vb29vb29vb29vb29vb29vb29v////zs5PD29vb29vb26OXu+///////////////////////////9vb29vb29vb29vb29vb29vb29vb29vb29vb////87eXw9vb29vb29urm7/v///////////////////////////b29vb29vb29vb29vb29vb29vb29vb29vb2/////N3HxNf29vb29vbGyd/7///////////////////////////29vb29vb29vb29vb29vb29vb29vb29vb29v////z08/T09vb29vb29PP1+///////////////////////////9vb29vb29vb29vb29vb29vb29vb29vb29vb////86t/n7vb29vb29ufh7Pv///////////////////////////b29vb29vb29vb29vb29vb29vb29vb29vb2/////PPx8fT29vb29vbx7/P7///////////////////////////29vb29vb29vb29vb29vb29vb29vb29vb29v////zhv+P29vb29vb20sXd+///////////////////////////9vb29vb29vb29vb29vb29vb29vb29vb29vb////89/f39/f39/f39/f39/v///////////////////////////b29vb29vb29vb29vb29vb29vb29vb29vb2//////7+/v7+/v7+/v7+/v7+///////////////////////////29vb29vb29vb29vb29vb29vb29vb29vb29v//////////////////////////////////////////////////9vb29vb29vb29vb29vb29vb29vb29vb29vb///////////////////////////////////////////////////b29vb29vb29vb29vb29vb29vb29vb29vb2///////////////////////////////////////////////////29vb29vb29vb29vb29vb29vb29vb29vb29v////z39vb39/f+////////////////////////////////////9vb29vb29vb29vb29vb29vb29vb29vb29vb////049/j4uXg/P////////////////////////////////////b29vb29vb29vb29vb29vb29vb29vb29vb2////8Nb1+f398PP+///////////////////////////////////29vb29vb29vb29vb29vb29vb29vb29vb29v///8Zr4drn797f/f//////////997d9//3+///////////////9vb29vb29vb29vb29vb29vb29vb29vb29vb////gp+zn6+rp/f////////////78/P7///////////////////b29vb29vb29vb29vb29vb29vb29vb29vb2/////vn09/j39/b1+P7////////////////////////////////29vb29vb29vb29vb29vb29vb29vb29vb29v////jn0NPS1trX2d/9////////////////////////////////9vb24t/h48jG9vb29vb29vb29vb29vb29vb///////////////////////////////////////////////////b29uvs7evy9vb29vb29vb29vb29vb29vb2///////////////////////////////////////////////////29vby8/Py9Pb29vb29vb29vb29vb29vb29v//////////////////////////////////////////////////9vb29vb29vb29vb29vb29vb29vb29vb29vb//////////////////////////////////////////////////w=="
+    },
+    "plans": {
+      "screen": [
+        "- text: environnement de test AcmeCo Sandbox environnement de test AcmeCo partners with Stripe for simplified billing.",
+        "- contentinfo:",
+        "  - link \"Powered by Stripe\":",
+        "    - text: Powered by",
+        "    - img \"Stripe\"",
+        "  - link \"Terms\":",
+        "  - link \"Privacy\":",
+        "- button \"Billing\"",
+        "- text: Subscriptions Update your subscription Current subscription Basic $10.00 per month Selected Pro $30.00 per month",
+        "- button \"Select\"",
+        "- text: Subtotal $10.00 per month",
+        "- button \"Continue\" [disabled]",
+        "- iframe"
+      ],
+      "requests": [
+        {
+          "call": "GET /v1/billing_portal/sessions/bps_1ULcveDSnaJHjCbZX6LZJh63/subscriptions/sub_1ULcvbDSnaJHjCbZVSRqqrtD",
+          "body": null,
+          "status": 200
+        }
+      ],
+      "layout": {
+        "span environnement de test AcmeCo": [
+          100,
+          69,
+          259,
+          18
+        ],
+        "span Sandbox": [
+          367,
+          68,
+          79,
+          20
+        ],
+        "span environnement de test AcmeCo partners with Stripe for sim": [
+          64,
+          174,
+          279,
+          92
+        ],
+        "a Powered by": [
+          64,
+          720,
+          112,
+          17
+        ],
+        "a Terms": [
+          64,
+          745,
+          35,
+          15
+        ],
+        "a Privacy": [
+          107,
+          745,
+          41,
+          15
+        ],
+        "button Billing": [
+          592,
+          70,
+          40,
+          16
+        ],
+        "span Subscriptions": [
+          668,
+          69,
+          89,
+          17
+        ],
+        "span Update your subscription": [
+          592,
+          121,
+          377,
+          38
+        ],
+        "span Current subscription": [
+          603,
+          215,
+          122,
+          15
+        ],
+        "div Basic": [
+          594,
+          241,
+          167,
+          24
+        ],
+        "span $10.00 per month": [
+          594,
+          297,
+          167,
+          40
+        ],
+        "div $10.00": [
+          594,
+          297,
+          167,
+          23
+        ],
+        "span Selected": [
+          656,
+          380,
+          67,
+          18
+        ],
+        "div Pro": [
+          813,
+          240,
+          167,
+          24
+        ],
+        "span $30.00 per month": [
+          813,
+          297,
+          167,
+          40
+        ],
+        "div $30.00": [
+          813,
+          297,
+          167,
+          23
+        ],
+        "button Select": [
+          813,
+          369,
+          167,
+          40
+        ],
+        "span Subtotal": [
+          592,
+          499,
+          73,
+          23
+        ],
+        "span $10.00 per month #2": [
+          1044,
+          499,
+          156,
+          23
+        ],
+        "button Continue": [
+          1016,
+          555,
+          184,
+          40
+        ]
+      },
+      "thumbnail": "64x40:9vb29vb29vb29vb29vb29vb29vb29vb29vf///////////////////////////////////////////////////b29vb29vb29vb29vb29vb29vb29vb29vb2///////////////////////////////////////////////////29vb29vb29vb29vb29vb29vb29vb29vb29v//////////////////////////////////////////////////9vb16ezg3d7a293h2d/b3N7kpn18gM729vb////05fL39/Hy8fX+//////////////////////////////////b29evu6OXm5Obm6uXq5uPi5sClp6rd9vb2////+vPy+/r29vf5/v/////////////////////////////////29vb29vb29vb29vb29vb29vb29vb29vb29v//////////////////////////////////////////////////9vb29vb29vb29vb29vb29vb29vb29vb29vb////wx9bJ09Xm19vn3djR3NzQ0NHZ7f////////////////////b29vb29vb29vb29vb29vb29vb29vb29vb2////6LKzt7HBvcG03L6qubrAtrO7wuL////////////////////29vbx8fHy8fHx8fHx8fH19vb29vb29vb29v///v39/f39/f39/f3+////////////////////////////////9vb2xcnBy8LGwsbMxsbI8vb29vb29vb29vb//+vu7u7u7u7u7u7t8v////////////////////////////////b29tDP1tXV3tLY0dfV2tja9vb29vb29vb2///q7rq1tLS0ttP//+r////////////////////////////////29vbm0tjQz9XTz9fa1uDU2fX29vb29vb29v//6umlmpmenJ7D///q////////////////////////////////9vb2xMG/yMfOwsCxw8K4wsP19vb29vb29vb//+rw09v8////////6u3Y9v////////////////////////////b29uno4uvo7Obk5+jm5urY9Pb29vb29vb2///q+/Pz/f///////+r9+/z////////////////////////////29vb29vb29vb29vb29vb29vb29vb29vb29v//6v34+vv////////q/vf5+v//////////////////////////9vb29vb29vb29vb29vb29vb29vb29vb29vb//+rw09XV////////6vPN0tn///////////////////////////b29vb29vb29vb29vb29vb29vb29vb29vb2///q9OTh3vv//////+rx4ePe///////////////////////////29vb29vb29vb29vb29vb29vb29vb29vb29v//6v/////////////q////////////////////////////////9vb29vb29vb29vb29vb29vb29vb29vb29vb//+r+/fr6+/z9/P3+6v39/fv7/f39/f7///////////////////b29vb29vb29vb29vb29vb29vb29vb29vb2///q/v7t6dDV0vX+/ur8///nydT4//79///////////////////29vb29vb29vb29vb29vb29vb29vb29vb29v//6v78/Pz8/Pz8/P7r/fz8/Pz8/Pz8/v//////////////////9vb29vb29vb29vb29vb29vb29vb29vb29vb//+z29vb29vb29vb18v////////////////////////////////b29vb29vb29vb29vb29vb29vb29vb29vb2///9+Pj4+Pj4+Pj4+f7////////////////////////////////29vb29vb29vb29vb29vb29vb29vb29vb29v//////////////////////////////////////////////////9vb29vb29vb29vb29vb29vb29vb29vb29vb////+/Pz9/v////////////////////////z8/P39/f38//////b29vb29vb29vb29vb29vb29vb29vb29vb2////8+Lg4/X////////////////////////e4tzq4+jk2v/////29vb29vb29vb29vb29vb29vb29vb29vb29v////z39/b7////////////////////////+fn39/b6+Pf/////9vb29vb29vb29vb29vb29vb29vb29vb29vb////////////////////////////////45+Xl5eXl5eXm/v////b29vb29vb29vb29vb29vb29vb29vb29vb2////////////////////////////////5a+ssLe5ta2sq/r////29vb29vb29vb29vb29vb29vb29vb29vb29v///////////////////////////////+3DwcLGxcfCwcH8////9vb29vb29vb29vb29vb29vb29vb29vb29vb////////////////////////////////9+fj4+Pj4+Pj5//////b29vb29vb29vb29vb29vb29vb29vb29vb2///////////////////////////////////////////////////29vb29vb29vb29vb29vb29vb29vb29vb29v//////////////////////////////////////////////////9vb29vb29vb29vb29vb29vb29vb29vb29vb///////////////////////////////////////////////////b29vb29vb29vb29vb29vb29vb29vb29vb2///////////////////////////////////////////////////29vb29vb29vb29vb29vb29vb29vb29vb29v//////////////////////////////////////////////////9vb24t/h48jG9vb29vb29vb29vb29vb29vb///////////////////////////////////////////////////b29uvs7evy9vb29vb29vb29vb29vb29vb2///////////////////////////////////////////////////29vby8/Py9Pb29vb29vb29vb29vb29vb29v//////////////////////////////////////////////////9vb29vb29vb29vb29vb29vb29vb29vb29vb//////////////////////////////////////////////////w=="
+    },
+    "confirm": {
+      "screen": [
+        "- text: environnement de test AcmeCo Sandbox environnement de test AcmeCo partners with Stripe for simplified billing.",
+        "- contentinfo:",
+        "  - link \"Powered by Stripe\":",
+        "    - text: Powered by",
+        "    - img \"Stripe\"",
+        "  - link \"Terms\":",
+        "  - link \"Privacy\":",
+        "- button \"Billing\"",
+        "- button \"Subscriptions\"",
+        "- text: Confirm Confirm your updates Pro What you'll pay monthly starting January 17, 2027",
+        "- button \"View details\"",
+        "- text: $15.00",
+        "- link \"Visa •••• 4242\":",
+        "- button \"Subscribe and pay\":",
+        "  - text: Subscribe and pay",
+        "  - img",
+        "  - img",
+        "- button \"Go back\"",
+        "- iframe"
+      ],
+      "requests": [
+        {
+          "call": "GET /v1/billing_portal/sessions/bps_1ULcveDSnaJHjCbZX6LZJh63/subscriptions/sub_1ULcvbDSnaJHjCbZVSRqqrtD",
+          "body": null,
+          "status": 200
+        },
+        {
+          "call": "GET /v1/billing_portal/sessions/bps_1ULcveDSnaJHjCbZX6LZJh63/customer",
+          "body": null,
+          "status": 200
+        },
+        {
+          "call": "GET /v1/billing_portal/sessions/bps_1ULcveDSnaJHjCbZX6LZJh63/update_preview",
+          "body": null,
+          "status": 200
+        }
+      ],
+      "layout": {
+        "span environnement de test AcmeCo": [
+          100,
+          69,
+          259,
+          18
+        ],
+        "span Sandbox": [
+          367,
+          68,
+          79,
+          20
+        ],
+        "span environnement de test AcmeCo partners with Stripe for sim": [
+          64,
+          174,
+          279,
+          92
+        ],
+        "a Powered by": [
+          64,
+          720,
+          112,
+          17
+        ],
+        "a Terms": [
+          64,
+          745,
+          35,
+          15
+        ],
+        "a Privacy": [
+          107,
+          745,
+          41,
+          15
+        ],
+        "button Billing": [
+          592,
+          70,
+          40,
+          16
+        ],
+        "button Subscriptions": [
+          668,
+          70,
+          91,
+          16
+        ],
+        "span Confirm": [
+          795,
+          69,
+          52,
+          17
+        ],
+        "span Confirm your updates": [
+          592,
+          121,
+          323,
+          38
+        ],
+        "span Pro": [
+          592,
+          184,
+          32,
+          23
+        ],
+        "span What you'll pay monthly starting January 17, 2027": [
+          592,
+          223,
+          233,
+          42
+        ],
+        "span January 17, 2027": [
+          592,
+          247,
+          122,
+          18
+        ],
+        "button View details": [
+          592,
+          276,
+          70,
+          16
+        ],
+        "span $15.00": [
+          986,
+          220,
+          54,
+          24
+        ],
+        "a Visa •••• 4242": [
+          956,
+          252,
+          101,
+          16
+        ],
+        "button Subscribe and pay": [
+          592,
+          348,
+          464,
+          44
+        ],
+        "button Go back": [
+          592,
+          411,
+          464,
+          44
+        ]
+      },
+      "thumbnail": "64x40:9vb29vb29vb29vb29vb29vb29vb29vb29vf///////////////////////////////////////////////////b29vb29vb29vb29vb29vb29vb29vb29vb2///////////////////////////////////////////////////29vb29vb29vb29vb29vb29vb29vb29vb29v//////////////////////////////////////////////////9vb16ezg3d7a293h2d/b3N7kpn18gM729vb////05fL38urs6O73+vLw+/////////////////////////////b29evu6OXm5Obm6uXq5uPi5sClp6rd9vb2////+vPy+/fx8vL1+/32+f3////////////////////////////29vb29vb29vb29vb29vb29vb29vb29vb29v//////////////////////////////////////////////////9vb29vb29vb29vb29vb29vb29vb29vb29vb////rzdfYxNfm2dzb5t/U0NDS5v7///////////////////////b29vb29vb29vb29vb29vb29vb29vb29vb2////6L2zz7zL1ay5vNyrr7K8t8z8///////////////////////29vbx8fHy8fHx8fHx8fH19vb29vb29vb29v////7+////////////////////////////////////////////9vb2xcnBy8LGwsbMxsbI8vb29vb29vb29vb////x4/3///////////////////////////////////////////b29tDP1tXV3tLY0dfV2tja9vb29vb29vb2////+Ov9///////////////////////////////////////////29vbm0tjQz9XTz9fa1uDU2fX29vb29vb29v///+7M3dfW19zZ0dvU0+7////////80sG43f//////////////9vb2xMG/yMfOwsCxw8K4wsP19vb29vb29vb////47Onx5+Hs//7+///9///////++/77+fn///////////////b29uno4uvo7Obk5+jm5urY9Pb29vb29vb2////9enk7fLy+f///////////////PP59vP1///////////////29vb29vb29vb29vb29vb29vb29vb29vb29v////v28vT9////////////////////////////////////////9vb29vb29vb29vb29vb29vb29vb29vb29vb///////////////////////////////////////////////////b29vb29vb29vb29vb29vb29vb29vb29vb2/////fr6+vr6+vr6+vr6+vr6+vr6+vr6+vr7///////////////29vb29vb29vb29vb29vb29vb29vb29vb29v///96kpKSkpKSkpqemp6WmpaWkpKSkpKSkr/7/////////////9vb29vb29vb29vb29vb29vb29vb29vb29vb////CXV1dXV1dXWR4d3p1eHdxXV1dXV1dXW39//////////////b29vb29vb29vb29vb29vb29vb29vb29vb2////2pmYmJiYmJiZm5ubm5ubm5iYmJiYmJik/v/////////////29vb29vb29vb29vb29vb29vb29vb29vb29v////38/Pz8/Pz8/Pz7+/v7/Pz8/Pz8/Pz8/P7/////////////9vb29vb29vb29vb29vb29vb29vb29vb29vb////9////////////9ujn7f7////////////9//////////////b29vb29vb29vb29vb29vb29vb29vb29vb2////+/v7+/v7+/v7+/jx8fT6+/v7+/v7+/v6/v/////////////29vb29vb29vb29vb29vb29vb29vb29vb29v/////+/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v//////////////9vb29vb29vb29vb29vb29vb29vb29vb29vb///////////////////////////////////////////////////b29vb29vb29vb29vb29vb29vb29vb29vb2///////////////////////////////////////////////////29vb29vb29vb29vb29vb29vb29vb29vb29v//////////////////////////////////////////////////9vb29vb29vb29vb29vb29vb29vb29vb29vb///////////////////////////////////////////////////b29vb29vb29vb29vb29vb29vb29vb29vb2///////////////////////////////////////////////////29vb29vb29vb29vb29vb29vb29vb29vb29v//////////////////////////////////////////////////9vb29vb29vb29vb29vb29vb29vb29vb29vb///////////////////////////////////////////////////b29vb29vb29vb29vb29vb29vb29vb29vb2///////////////////////////////////////////////////29vb29vb29vb29vb29vb29vb29vb29vb29v//////////////////////////////////////////////////9vb29vb29vb29vb29vb29vb29vb29vb29vb///////////////////////////////////////////////////b29vb29vb29vb29vb29vb29vb29vb29vb2///////////////////////////////////////////////////29vb29vb29vb29vb29vb29vb29vb29vb29v//////////////////////////////////////////////////9vb24t/h48jG9vb29vb29vb29vb29vb29vb///////////////////////////////////////////////////b29uvs7evy9vb29vb29vb29vb29vb29vb2///////////////////////////////////////////////////29vby8/Py9Pb29vb29vb29vb29vb29vb29v//////////////////////////////////////////////////9vb29vb29vb29vb29vb29vb29vb29vb29vb//////////////////////////////////////////////////w=="
+    },
+    "after": {
+      "screen": [
+        "- text: environnement de test AcmeCo Sandbox environnement de test AcmeCo partners with Stripe for simplified billing.",
+        "- contentinfo:",
+        "  - link \"Powered by Stripe\":",
+        "    - text: Powered by",
+        "    - img \"Stripe\"",
+        "  - link \"Terms\":",
+        "  - link \"Privacy\":",
+        "- text: Current subscription Pro $15.00 per month Your next billing date is January 17, 2027. Your next estimated payment will be $25.00",
+        "- button \"Hide details\"",
+        "- text: Dec 17-Jan 17, 2027 Prorated credit from Basic -$5.00 Prorated charge for Pro $15.00 Jan 17-Feb 17, 2027 Pro $30.00 Subtotal $40.00 50% off -$15.00 Total $25.00",
+        "- link \"Update subscription\":",
+        "- text: Payment method Visa •••• 4242 Expires 10/2027 Default",
+        "- button \"Delete\" [disabled]",
+        "- link \"Add payment method\":",
+        "- iframe"
+      ],
+      "requests": [
+        {
+          "call": "POST /v1/billing_portal/sessions/bps_1ULcveDSnaJHjCbZX6LZJh63/subscriptions/sub_1ULcvbDSnaJHjCbZVSRqqrtD",
+          "body": {
+            "recurring_items[0][id]": "si_VMLcZRvUfiKOH0",
+            "recurring_items[0][price]": "price_1ULcvaDSnaJHjCbZ1wHAUeLy",
+            "recurring_items[0][quantity]": "1"
+          },
+          "status": 200
+        },
+        {
+          "call": "GET /v1/billing_portal/sessions/bps_1ULcveDSnaJHjCbZX6LZJh63/customer",
+          "body": null,
+          "status": 200
+        },
+        {
+          "call": "GET /v1/billing_portal/sessions/bps_1ULcveDSnaJHjCbZX6LZJh63/subscriptions",
+          "body": null,
+          "status": 200
+        },
+        {
+          "call": "GET /v1/billing_portal/sessions/bps_1ULcveDSnaJHjCbZX6LZJh63/payment_methods",
+          "body": null,
+          "status": 200
+        }
+      ],
+      "layout": {
+        "span environnement de test AcmeCo": [
+          100,
+          69,
+          259,
+          18
+        ],
+        "span Sandbox": [
+          367,
+          68,
+          79,
+          20
+        ],
+        "span environnement de test AcmeCo partners with Stripe for sim": [
+          64,
+          174,
+          279,
+          92
+        ],
+        "a Powered by": [
+          64,
+          720,
+          112,
+          17
+        ],
+        "a Terms": [
+          64,
+          745,
+          35,
+          15
+        ],
+        "a Privacy": [
+          107,
+          745,
+          41,
+          15
+        ],
+        "span CURRENT SUBSCRIPTION": [
+          592,
+          69,
+          173,
+          17
+        ],
+        "span Pro": [
+          592,
+          132,
+          30,
+          23
+        ],
+        "span $15.00 per month": [
+          592,
+          166,
+          200,
+          28
+        ],
+        "span Your next billing date is January 17, 2027.": [
+          592,
+          205,
+          266,
+          17
+        ],
+        "span January 17, 2027": [
+          745,
+          205,
+          109,
+          17
+        ],
+        "span Your next estimated payment will be $25.00": [
+          592,
+          237,
+          286,
+          17
+        ],
+        "span $25.00": [
+          829,
+          237,
+          50,
+          17
+        ],
+        "button Hide details": [
+          592,
+          260,
+          96,
+          20
+        ],
+        "span DEC 17-JAN 17, 2027": [
+          612,
+          318,
+          122,
+          15
+        ],
+        "span DEC 17": [
+          612,
+          318,
+          41,
+          15
+        ],
+        "span JAN 17, 2027": [
+          658,
+          318,
+          75,
+          15
+        ],
+        "span Prorated credit from Basic": [
+          612,
+          349,
+          173,
+          17
+        ],
+        "span -$5.00": [
+          817,
+          349,
+          45,
+          17
+        ],
+        "span Prorated charge for Pro": [
+          612,
+          382,
+          155,
+          17
+        ],
+        "span $15.00": [
+          817,
+          382,
+          45,
+          17
+        ],
+        "span JAN 17-FEB 17, 2027": [
+          612,
+          417,
+          119,
+          15
+        ],
+        "span JAN 17": [
+          612,
+          417,
+          40,
+          15
+        ],
+        "span FEB 17, 2027": [
+          658,
+          417,
+          74,
+          15
+        ],
+        "span Pro #2": [
+          612,
+          448,
+          22,
+          17
+        ],
+        "span $30.00": [
+          815,
+          448,
+          48,
+          17
+        ],
+        "span Subtotal": [
+          612,
+          485,
+          59,
+          17
+        ],
+        "span $40.00": [
+          812,
+          485,
+          50,
+          17
+        ],
+        "span 50% off": [
+          612,
+          522,
+          53,
+          17
+        ],
+        "span -$15.00": [
+          811,
+          522,
+          52,
+          17
+        ],
+        "span Total": [
+          612,
+          559,
+          34,
+          17
+        ],
+        "span $25.00 #2": [
+          813,
+          559,
+          50,
+          17
+        ],
+        "a Update subscription": [
+          967,
+          120,
+          233,
+          44
+        ],
+        "span PAYMENT METHOD": [
+          592,
+          698,
+          130,
+          17
+        ],
+        "span Visa •••• 4242": [
+          632,
+          733,
+          106,
+          18
+        ],
+        "span Expires 10/2027": [
+          632,
+          753,
+          90,
+          15
+        ],
+        "span Default": [
+          933,
+          741,
+          55,
+          20
+        ],
+        "button ": [
+          1032,
+          745,
+          12,
+          12
+        ],
+        "a Add payment method": [
+          592,
+          792,
+          183,
+          24
+        ]
+      },
+      "thumbnail": "64x40:9vb29vb29vb29vb29vb29vb29vb29vb29vf///////////////////////////////////////////////////b29vb29vb29vb29vb29vb29vb29vb29vb2///////////////////////////////////////////////////29vb29vb29vb29vb29vb29vb29vb29vb29v//////////////////////////////////////////////////9vb16ezg3d7a293h2d/b3N7kpn18gM729vb////34eDg5+Hk3uX1//////////////////////////////////b29evu6OXm5Obm6uXq5uPi5sClp6rd9vb2////+vHy9PPv8vbz+//////////////////////////////////29vb29vb29vb29vb29vb29vb29vb29vb29v/////////////////////////////t4uLi4uLi4uLi4uP+////9vb29vb29vb29vb29vb29vb29vb29vb29vb////48v7/////////////////////nXN6f399fX5/fHVz+P////b29vb29vb29vb29vb29vb29vb29vb29vb2////8+L9/////////////////////45danBxa3BucWxeXff////29vbx8fHy8fHx8fHx8fH19vb29vb29vb29v////Tf49/n9vr39uz5///////////k1NTU1NTU1NTU1NX+////9vb2xcnBy8LGwsbMxsbI8vb29vb29vb29vb////v2tjQ0cvhzsjN5P////////////////////////////////b29tDP1tXV3tLY0dfV2tja9vb29vb29vb2////9ufj6N7j3efo4+jn5ez+///////////////////////////29vbm0tjQz9XTz9fa1uDU2fX29vb29vb29v////37+/z6+/r7+/v8/Pv8////////////////////////////9vb2xMG/yMfOwsCxw8K4wsP19vb29vb29vb////04d/k3d3c4+Dj3+Hf0dP///////////////////////////b29uno4uvo7Obk5+jm5urY9Pb29vb29vb2////9d/l4ej6///////////////////////////////////////29vb29vb29vb29vb29vb29vb29vb29vb29v////34+Pf5/Pz8/Pz8/Pz8/P//////////////////////////9vb29vb29vb29vb29vb29vb29vb29vb29vb////89vb29vb29vb29vb29vb+//////////////////////////b29vb29vb29vb29vb29vb29vb29vb29vb2/////Ozn6Obo5On29vb29vb2/f/////////////////////////29vb29vb29vb29vb29vb29vb29vb29vb29v////zt6OTn5ebm5+Tz9ebm9P3/////////////////////////9vb29vb29vb29vb29vb29vb29vb29vb29vb////87unl6Obn5+jl8/Xo5/T9//////////////////////////b29vb29vb29vb29vb29vb29vb29vb29vb2/////ODTyM/NyNHQ6vbyzM7y/f/////////////////////////29vb29vb29vb29vb29vb29vb29vb29vb29v////z19PT09PT19vb29vb29v3/////////////////////////9vb29vb29vb29vb29vb29vb29vb29vb29vb////88Orr6Ozn7/b29vb29vb9//////////////////////////b29vb29vb29vb29vb29vb29vb29vb29vb2/////Ofl9vb29vb29vby1tvz/f/////////////////////////29vb29vb29vb29vb29vb29vb29vb29vb29v////z08/b29vb29vb29fHx9f3/////////////////////////9vb29vb29vb29vb29vb29vb29vb29vb29vb////849LL3Pb29vb29ujLzvL9//////////////////////////b29vb29vb29vb29vb29vb29vb29vb29vb2/////O/n6+329vb29vby6Or0/f/////////////////////////29vb29vb29vb29vb29vb29vb29vb29vb29v////zp3eDt9vb29vb28Nzc9P3/////////////////////////9vb29vb29vb29vb29vb29vb29vb29vb29vb////89PPz9fb29vb29vXz8/b9//////////////////////////b29vb29vb29vb29vb29vb29vb29vb29vb2/////OLC4/b29vb29vbowMPx/f/////////////////////////29vb29vb29vb29vb29vb29vb29vb29vb29v////34+Pj4+Pj4+Pj4+Pj4+P7/////////////////////////9vb29vb29vb29vb29vb29vb29vb29vb29vb//////v7+/v7+/v7+/v7+/v7///////////////////////////b29vb29vb29vb29vb29vb29vb29vb29vb2///////////////////////////////////////////////////29vb29vb29vb29vb29vb29vb29vb29vb29v//////////////////////////////////////////////////9vb29vb29vb29vb29vb29vb29vb29vb29vb///////////////////////////////////////////////////b29vb29vb29vb29vb29vb29vb29vb29vb2/////Pn5+Pn59//////////////////////////////////////29vb29vb29vb29vb29vb29vb29vb29vb29v////DX1NrY3Nn6////////////////////////////////////9vb24t/h48jG9vb29vb29vb29vb29vb29vb////04vr6/P35+f////////////79/f7//v////////////////b29uvs7evy9vb29vb29vb29vb29vb29vb2////wlvd1uXp0979///////////55+f5//n8///////////////29vby8/Py9Pb29vb29vb29vb29vb29vb29v///+rE8/Hz8vL+/////////////fr5/f/+/v//////////////9vb29vb29vb29vb29vb29vb29vb29vb29vb////+/Pv9///9/vv9/////////////////////////////////w=="
+    },
+    "account": {
+      "status": "active",
+      "cancel_at_period_end": false,
+      "cancel_at": null,
+      "discounts": 1,
+      "items": [
+        {
+          "amount": 3000,
+          "interval": "month",
+          "quantity": 1,
+          "period_end": 1800189296
+        }
+      ],
+      "invoices": [
+        {
+          "status": "paid",
+          "billing_reason": "subscription_create",
+          "subtotal": 1000,
+          "total": 500,
+          "amount_due": 500,
+          "amount_paid": 500,
+          "amount_remaining": 0,
+          "attempt_count": 1,
+          "period_start": 1797510896,
+          "period_end": 1797510896,
+          "lines": [
+            {
+              "amount": 1000,
+              "description": "1 × Basic (at $10.00 / month)"
+            }
+          ]
+        }
+      ],
+      "pending_items": [
+        {
+          "amount": -500,
+          "description": "Unused time on Basic (with 50.0% off) after 17 Dec 2026"
+        },
+        {
+          "amount": 1500,
+          "description": "Remaining time on Pro (with 50.0% off) after 17 Dec 2026"
+        }
+      ]
+    }
+  },
+  "noise": [],
+  "recorded_at": "2026-10-01T05:53:59.527Z"
+}

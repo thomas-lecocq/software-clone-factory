@@ -11,11 +11,18 @@ import {
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterAll, describe, expect, it } from "vitest";
-import { checkLock, loadFixtures, targetDir, writeFixture, writeLock } from "../src/fixtures.ts";
+import {
+  checkLock,
+  loadFixtures,
+  splitOf,
+  targetDir,
+  writeFixture,
+  writeLock,
+} from "../src/fixtures.ts";
 import { canonicalIds } from "../src/json.ts";
 import { ruleStatuses } from "../src/ledger.ts";
-import { diff } from "../src/policy.ts";
-import { findSecrets, scrub } from "../src/scrub.ts";
+import { blocking, diff, thumbnailShare } from "../src/policy.ts";
+import { findSecrets, loadLiterals, scrub } from "../src/scrub.ts";
 import { committedLockProblems } from "../src/verify.ts";
 
 const root = join(import.meta.dirname, "..", "..");
@@ -131,6 +138,42 @@ describe("diff policy", () => {
     expect(diff(policy, { x: { a: 1 }, y: [1] }, { x: { a: 2 }, y: [9] })).toEqual([]);
     expect(diff(policy, { y: [1] }, { y: ["1"] })).toHaveLength(1);
   });
+
+  it("applies a tolerance to a whole subtree, keys with dots included", () => {
+    const policy = {
+      canonicalIds: false,
+      fields: [{ path: "*.layout.**", mode: "tolerance" as const, by: 16, why: "test only" }],
+    };
+    const e = { home: { layout: { "span $10.00": [0, 100, 50, 20] }, screen: ["a"] } };
+    const near = { home: { layout: { "span $10.00": [12, 90, 50, 20] }, screen: ["a"] } };
+    const far = { home: { layout: { "span $10.00": [40, 100, 50, 20] }, screen: ["a"] } };
+    expect(diff(policy, e, near)).toEqual([]);
+    expect(diff(policy, e, far).map((d) => d.path)).toEqual(["home.layout.span $10.00[0]"]);
+    expect(diff(policy, e, { home: { layout: {}, screen: ["a"] } })).not.toEqual([]);
+    expect(diff(policy, e, { ...near, home: { ...near.home, screen: ["b"] } })).toHaveLength(1);
+  });
+
+  it("reports perceptual differences without blocking the case", () => {
+    const policy = {
+      canonicalIds: false,
+      fields: [{ path: "*.thumbnail", mode: "perceptual" as const, max_share: 0.02, why: "test" }],
+    };
+    const thumb = (bytes: number[]): string => `10x10:${Buffer.from(bytes).toString("base64")}`;
+    const base = Array.from({ length: 100 }, () => 200);
+    const oneOff = base.map((v, i) => (i === 0 ? 0 : v));
+    const tenOff = base.map((v, i) => (i < 10 ? 0 : v));
+    expect(
+      diff(policy, { s: { thumbnail: thumb(base) } }, { s: { thumbnail: thumb(oneOff) } }),
+    ).toEqual([]);
+    const far = diff(
+      policy,
+      { s: { thumbnail: thumb(base) } },
+      { s: { thumbnail: thumb(tenOff) } },
+    );
+    expect(far).toEqual([expect.objectContaining({ path: "s.thumbnail", report: { share: 0.1 } })]);
+    expect(blocking(far)).toEqual([]);
+    expect(thumbnailShare(thumb(base), "5x5:AAAA")).toBe(1);
+  });
 });
 
 describe("invariant 3: the guard hook keeps agents away from the evaluator", () => {
@@ -190,6 +233,33 @@ describe("invariant 3: the guard hook keeps agents away from the evaluator", () 
         tool_input: { file_path: "targets/t/clone/x.ts" },
       },
       2,
+    ],
+    [
+      "builder fetches the public repository",
+      {
+        agent_type: "builder",
+        tool_name: "WebFetch",
+        tool_input: { url: "https://github.com/someone/software-clone-factory", prompt: "x" },
+      },
+      2,
+    ],
+    [
+      "builder curls a raw file from a code host",
+      {
+        agent_type: "builder",
+        tool_name: "Bash",
+        tool_input: { command: "curl -s https://raw.githubusercontent.com/a/b/main/x.json" },
+      },
+      2,
+    ],
+    [
+      "builder reads public API documentation",
+      {
+        agent_type: "builder",
+        tool_name: "WebFetch",
+        tool_input: { url: "https://docs.stripe.com/api/invoices", prompt: "x" },
+      },
+      0,
     ],
     [
       "builder writes the clone",
@@ -516,6 +586,18 @@ describe("invariant 3: the guard fails closed", () => {
   });
 });
 
+describe("splits", () => {
+  it("sends a quarter of ordinary probes and every hold- probe to the holdout", () => {
+    const ids = Array.from({ length: 400 }, (_, i) => `p-${String(i)}`);
+    const held = ids.filter((id) => splitOf(id) === "holdout").length;
+    expect(held).toBeGreaterThan(70);
+    expect(held).toBeLessThan(130);
+    expect(Array.from({ length: 50 }, (_, i) => splitOf(`hold-${String(i)}`))).toEqual(
+      Array.from({ length: 50 }, () => "holdout"),
+    );
+  });
+});
+
 describe("invariant 3: implementers see only a stripped sandbox", () => {
   const make = join(root, "harness", "make-sandbox.sh");
   const work = mkdtempSync(join(tmpdir(), "scf-sandbox-test-"));
@@ -535,6 +617,7 @@ describe("invariant 3: implementers see only a stripped sandbox", () => {
   it("copies the clone and dev fixtures, and nothing that must stay out", () => {
     const kept = ["targets/t/clone/server.ts", "targets/t/fixtures/dev/a.json", "harness/x.ts"];
     const dropped = [
+      "targets/t/holdout-seed.json",
       ".git/config",
       ".env",
       ".agent.env",
@@ -595,6 +678,18 @@ describe("invariant 8: committed fixtures carry no secret", () => {
       { "Acme Inc": "Org" },
     );
     expect(out).toEqual({ a: "key_REDACTED user@example.com ?secret=REDACTED&x=1 Org" });
+    expect(scrub({ "span Acme Inc": [1] }, { "Acme Inc": "Org" })).toEqual({ "span Org": [1] });
+  });
+
+  // The literal map stays outside the repository; where it exists, no fixture may hold its keys.
+  const literals = loadLiterals(process.env.SCRUB_LITERALS ?? join(root, ".scrub.json"));
+  it.each(targets)("%s fixtures hold no scrubbed literal", (t) => {
+    const dir = join(root, "targets", t, "fixtures");
+    if (!existsSync(dir)) return;
+    for (const f of filesUnder(dir)) {
+      const text = readFileSync(f, "utf8");
+      for (const from of Object.keys(literals)) expect(text.includes(from), f).toBe(false);
+    }
   });
 
   it.each(targets)("%s fixtures are clean", (t) => {

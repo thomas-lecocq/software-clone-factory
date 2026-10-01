@@ -52,6 +52,11 @@ fi
 if [[ "$tool" =~ ^(Grep|Glob)$ ]] && [[ "$target" == *targets* || "$target" == *"**"* ]] && [[ "$target" != *fixtures/dev* && "$target" != */clone* ]]; then
   block "$role must scope searches to fixtures/dev/ or clone/"
 fi
+# Once the repository is public, its holdout fixtures are one request away: code hosts and package
+# registries' source views are out of bounds for implementers, by any tool.
+if [[ "$target" =~ (github\.com|githubusercontent\.com|gitlab\.com|bitbucket\.org|sourcegraph\.com|software-clone-factory) ]] && [[ "$tool" =~ ^(WebFetch|WebSearch|Bash)$ ]]; then
+  block "$role cannot fetch from code hosts"
+fi
 # Audit prompts and the planted-defect library would tell an implementer what is checked.
 if [[ "$target" == *audit/* || "$target" =~ (^|[[:space:]])audit($|[[:space:]]) ]]; then
   block "$role cannot read audit material"

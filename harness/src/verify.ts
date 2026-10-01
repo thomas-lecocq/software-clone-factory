@@ -9,11 +9,20 @@ import { execFileSync } from "node:child_process";
 import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { z } from "zod";
-import { loadAdapter } from "./adapter.ts";
+import { loadAdapter, type TargetAdapter } from "./adapter.ts";
 import { checkLock, loadFixtures, sha256, targetDir, type Split } from "./fixtures.ts";
 import type { Json } from "./json.ts";
+import { breakerLogs, fidelityReport, holdoutLooks, type Tally } from "./fidelity.ts";
 import { loadLedger, ruleStatuses, type RuleResult } from "./ledger.ts";
-import { diff, PolicySchema, type FieldDiff, type Policy } from "./policy.ts";
+import { logTiming, secondsSince } from "./timings.ts";
+import {
+  blocking,
+  diff,
+  PolicySchema,
+  type FieldDiff,
+  type Policy,
+  type PolicyField,
+} from "./policy.ts";
 
 export interface CaseResult {
   id: string;
@@ -22,6 +31,8 @@ export interface CaseResult {
   pass: boolean;
   crashed: boolean;
   diffs: FieldDiff[];
+  // Perceptual differences: reported, never counted against the case.
+  reported: FieldDiff[];
 }
 
 const PreviousVerdict = z.object({
@@ -39,6 +50,7 @@ const withNoise = (policy: Policy, noise: string[]): Policy => ({
 const show = (v: Json | undefined): string => (v === undefined ? "absent" : JSON.stringify(v));
 
 export async function verify(target: string, splits: Split[], port = 4599): Promise<number> {
+  const started = performance.now();
   const dir = targetDir(target);
   const problems = [...checkLock(target), ...committedLockProblems(target)];
   if (problems.length > 0) {
@@ -57,6 +69,7 @@ export async function verify(target: string, splits: Split[], port = 4599): Prom
   const clone = await adapter.startClone(port);
 
   const cases: CaseResult[] = [];
+  let determinism: { identical: number; total: number };
   try {
     for (const f of fixtures) {
       const reset = await fetch(`${clone.url}/__reset`, { method: "POST" });
@@ -73,10 +86,18 @@ export async function verify(target: string, splits: Split[], port = 4599): Prom
         crashed = true;
         actual = { error: String(e) };
       }
-      const diffs = diff(withNoise(policy, f.noise), f.observed, actual);
+      const all = diff(withNoise(policy, f.noise), f.observed, actual);
+      const diffs = blocking(all);
+      const reported = all.filter((d) => d.report);
       const rules = tags.get(f.id) ?? f.rules;
-      cases.push({ id: f.id, split: f.split, rules, pass: diffs.length === 0, crashed, diffs });
+      const pass = diffs.length === 0;
+      cases.push({ id: f.id, split: f.split, rules, pass, crashed, diffs, reported });
     }
+    determinism = await replayTwice(
+      adapter,
+      clone.url,
+      sample(fixtures.filter((f) => f.split === "dev")),
+    );
   } finally {
     await clone.close();
   }
@@ -153,10 +174,78 @@ export async function verify(target: string, splits: Split[], port = 4599): Prom
     sandbox: process.env.RH_SANDBOX === "1",
   };
   appendFileSync(join(out, "runs.jsonl"), `${JSON.stringify(run)}\n`);
+  const tally = (cs: CaseResult[]): Tally => ({
+    pass: cs.filter((c) => c.pass).length,
+    total: cs.length,
+  });
+  const gapsFile = join(dir, "GAPS.md");
+  writeFileSync(
+    join(out, "fidelity-report.md"),
+    fidelityReport({
+      target,
+      at: run.at,
+      dev: tally(dev),
+      batch: tally(held.filter((c) => c.id.startsWith("hold-"))),
+      hashHoldout: tally(held.filter((c) => !c.id.startsWith("hold-"))),
+      pixelsReported: cases
+        .filter((c) => c.split === "dev")
+        .reduce((n, c) => n + c.reported.length, 0),
+      statuses: ruleStatuses(rules, dev),
+      holdoutRules: new Set(held.flatMap((c) => c.rules)),
+      determinism,
+      integrity: {
+        lockIntact: true,
+        lockHash: run.lock,
+        commit: run.commit,
+        dirty: run.dirty,
+        sandbox: run.sandbox,
+        holdoutLooks: holdoutLooks(join(out, "runs.jsonl"), run.lock),
+      },
+      gaps: existsSync(gapsFile) ? readFileSync(gapsFile, "utf8") : null,
+      breakerLogs: breakerLogs(dir),
+    }),
+  );
 
+  logTiming(target, "verify", {
+    splits,
+    cases: cases.length,
+    seconds: secondsSince(started),
+    sandbox: run.sandbox,
+  });
   const failed = cases.filter((c) => !c.pass).length;
   console.log(`${cases.length - failed} of ${cases.length} fixtures pass (${splits.join(" + ")})`);
   return failed === 0 ? 0 : 1;
+}
+
+// Ten dev fixtures spread over the sorted list, so that every kind of probe tends to be sampled.
+function sample<T extends { id: string }>(xs: T[], n = 10): T[] {
+  const sorted = [...xs].sort((a, b) => a.id.localeCompare(b.id));
+  if (sorted.length <= n) return sorted;
+  return Array.from({ length: n }, (_, i) => sorted[Math.floor((i * sorted.length) / n)]).filter(
+    (x): x is T => x !== undefined,
+  );
+}
+
+// Determinism: the same probe, each time after a reset, must give the same output.
+async function replayTwice(
+  adapter: TargetAdapter,
+  url: string,
+  fixtures: { id: string; rules: string[]; input: Json }[],
+): Promise<{ identical: number; total: number }> {
+  const exact: Policy = { canonicalIds: true, fields: [] };
+  let identical = 0;
+  for (const f of fixtures) {
+    const runs: Record<string, Json>[] = [];
+    for (let i = 0; i < 2; i += 1) {
+      await fetch(`${url}/__reset`, { method: "POST" });
+      runs.push(
+        await adapter.run(f, { kind: "clone", url }).catch((e: unknown) => ({ error: String(e) })),
+      );
+    }
+    const [a, b] = runs;
+    if (a && b && !("error" in a) && diff(exact, a, b).length === 0) identical += 1;
+  }
+  return { identical, total: fixtures.length };
 }
 
 // A lock rewritten locally proves nothing: in a git checkout the lock must equal the committed
@@ -297,15 +386,39 @@ function report(
       return head + d.join("");
     }),
     "",
+    "## Pixels (reported, never scored)",
+    "",
+    ...pixelLines(cases.filter((c) => c.split === "dev")),
+    "",
     "## Declared blind spots",
     "",
-    ...policy.fields.map((f) => `- \`${f.path}\` (${f.mode}): ${f.why}`),
+    ...policy.fields.map(fieldLine),
     ...fixtures
       .filter((f) => f.noise.length > 0)
       .map((f) => `- \`${f.id}\`: recorded noise on ${f.noise.join(", ")}`),
     "",
   ];
   return lines.join("\n");
+}
+
+function fieldLine(f: PolicyField): string {
+  const how =
+    f.mode === "tolerance"
+      ? `tolerance ${f.by}`
+      : f.mode === "perceptual"
+        ? `perceptual, reported above ${f.max_share * 100} % of cells, never scored`
+        : f.mode;
+  return `- \`${f.path}\` (${how}): ${f.why}`;
+}
+
+function pixelLines(cases: CaseResult[]): string[] {
+  const rows = cases.flatMap((c) =>
+    c.reported.map(
+      (d) =>
+        `- \`${c.id}\` \`${d.path}\`: ${((d.report?.share ?? 1) * 100).toFixed(1)} % of cells differ`,
+    ),
+  );
+  return rows.length > 0 ? rows : ["No perceptual difference above threshold."];
 }
 
 function gaps(statuses: RuleResult[], policy: Policy): string {
@@ -323,9 +436,9 @@ function gaps(statuses: RuleResult[], policy: Policy): string {
         : `- ${s.rule.id}: failing, ${s.pass} of ${s.total} fixtures pass. ${s.rule.statement}`,
     ),
     "",
-    "Fields not compared:",
+    "Fields not compared exactly:",
     "",
-    ...policy.fields.map((f) => `- \`${f.path}\` (${f.mode}): ${f.why}`),
+    ...policy.fields.map(fieldLine),
     "",
   ].join("\n");
 }

@@ -1,0 +1,155 @@
+{
+  "id": "x-no-cancel",
+  "rules": [
+    "UI-11"
+  ],
+  "input": {
+    "kind": "explore",
+    "depth": 3,
+    "max_states": 30,
+    "start": 1797510896,
+    "current": "Basic",
+    "coupon_percent": null
+  },
+  "observed": {
+    "graph": {
+      "states": [
+        [
+          "- text: environnement de test AcmeCo Sandbox environnement de test AcmeCo partners with Stripe for simplified billing.",
+          "- contentinfo:",
+          "  - link \"Powered by Stripe\":",
+          "    - text: Powered by",
+          "    - img \"Stripe\"",
+          "  - link \"Terms\":",
+          "  - link \"Privacy\":",
+          "- text: Current subscription Basic $10.00 per month Your next billing date is January 17, 2027.",
+          "- link \"Update subscription\":",
+          "- text: Payment method Visa •••• 4242 Expires 10/2027 Default",
+          "- button \"Delete\" [disabled]",
+          "- link \"Add payment method\":",
+          "- iframe"
+        ],
+        [
+          "- text: environnement de test AcmeCo Sandbox environnement de test AcmeCo partners with Stripe for simplified billing.",
+          "- contentinfo:",
+          "  - link \"Powered by Stripe\":",
+          "    - text: Powered by",
+          "    - img \"Stripe\"",
+          "  - link \"Terms\":",
+          "  - link \"Privacy\":",
+          "- button \"Billing\"",
+          "- text: Subscriptions Update your subscription Current subscription Basic $10.00 per month Selected Pro $30.00 per month",
+          "- button \"Select\"",
+          "- text: Subtotal $10.00 per month",
+          "- button \"Continue\" [disabled]",
+          "- iframe"
+        ],
+        [
+          "- text: environnement de test AcmeCo Sandbox environnement de test AcmeCo partners with Stripe for simplified billing.",
+          "- contentinfo:",
+          "  - link \"Powered by Stripe\":",
+          "    - text: Powered by",
+          "    - img \"Stripe\"",
+          "  - link \"Terms\":",
+          "  - link \"Privacy\":",
+          "- button \"Billing\"",
+          "- text: Payment method Add payment method",
+          "- iframe",
+          "- checkbox \"Use as default payment method\" [checked]",
+          "- img",
+          "- text: Use as default payment method",
+          "- button \"Add\" [disabled]:",
+          "  - text: Add",
+          "  - img",
+          "  - img",
+          "- button \"Go back\"",
+          "- iframe"
+        ],
+        [
+          "- text: environnement de test AcmeCo Sandbox environnement de test AcmeCo partners with Stripe for simplified billing.",
+          "- contentinfo:",
+          "  - link \"Powered by Stripe\":",
+          "    - text: Powered by",
+          "    - img \"Stripe\"",
+          "  - link \"Terms\":",
+          "  - link \"Privacy\":",
+          "- button \"Billing\"",
+          "- text: Subscriptions Update your subscription Current subscription Basic $10.00 per month",
+          "- button \"Select\"",
+          "- text: Pro $30.00 per month Selected Subtotal $30.00 per month",
+          "- button \"Continue\"",
+          "- iframe"
+        ],
+        [
+          "- text: environnement de test AcmeCo Sandbox environnement de test AcmeCo partners with Stripe for simplified billing.",
+          "- contentinfo:",
+          "  - link \"Powered by Stripe\":",
+          "    - text: Powered by",
+          "    - img \"Stripe\"",
+          "  - link \"Terms\":",
+          "  - link \"Privacy\":",
+          "- button \"Billing\"",
+          "- button \"Subscriptions\"",
+          "- text: Confirm Confirm your updates Pro What you'll pay monthly starting January 17, 2027 $30.00",
+          "- link \"Visa •••• 4242\":",
+          "- button \"Subscribe and pay\":",
+          "  - text: Subscribe and pay",
+          "  - img",
+          "  - img",
+          "- button \"Go back\"",
+          "- iframe"
+        ]
+      ],
+      "edges": [
+        {
+          "from": 0,
+          "action": "link \"Update subscription\"",
+          "to": 1
+        },
+        {
+          "from": 0,
+          "action": "link \"Add payment method\"",
+          "to": 2
+        },
+        {
+          "from": 1,
+          "action": "button \"Billing\"",
+          "to": 0
+        },
+        {
+          "from": 1,
+          "action": "button \"Select\"",
+          "to": 3
+        },
+        {
+          "from": 2,
+          "action": "button \"Billing\"",
+          "to": 0
+        },
+        {
+          "from": 2,
+          "action": "button \"Go back\"",
+          "to": 2
+        },
+        {
+          "from": 3,
+          "action": "button \"Billing\"",
+          "to": 0
+        },
+        {
+          "from": 3,
+          "action": "button \"Select\"",
+          "to": 1
+        },
+        {
+          "from": 3,
+          "action": "button \"Continue\"",
+          "to": 4
+        }
+      ],
+      "truncated": false
+    }
+  },
+  "noise": [],
+  "recorded_at": "2026-10-01T06:25:57.876Z"
+}

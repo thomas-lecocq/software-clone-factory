@@ -1,0 +1,579 @@
+{
+  "id": "x-quantity",
+  "rules": [
+    "UI-11"
+  ],
+  "input": {
+    "kind": "explore",
+    "depth": 3,
+    "max_states": 30,
+    "start": 1791158400,
+    "current": "Basic",
+    "coupon_percent": null,
+    "cancel_enabled": true,
+    "quantity": 3
+  },
+  "observed": {
+    "graph": {
+      "states": [
+        [
+          "- text: environnement de test AcmeCo Sandbox environnement de test AcmeCo partners with Stripe for simplified billing.",
+          "- contentinfo:",
+          "  - link \"Powered by Stripe\":",
+          "    - text: Powered by",
+          "    - img \"Stripe\"",
+          "  - link \"Terms\":",
+          "  - link \"Privacy\":",
+          "- text: Current subscription Basic(×3) $30.00 per month",
+          "- button \"View details\"",
+          "- text: Your next billing date is November 5, 2026.",
+          "- link \"Update subscription\":",
+          "- link \"Cancel subscription\":",
+          "- text: Payment method Visa •••• 4242 Expires 10/2027 Default",
+          "- button \"Delete\" [disabled]",
+          "- link \"Add payment method\":",
+          "- iframe"
+        ],
+        [
+          "- text: environnement de test AcmeCo Sandbox environnement de test AcmeCo partners with Stripe for simplified billing.",
+          "- contentinfo:",
+          "  - link \"Powered by Stripe\":",
+          "    - text: Powered by",
+          "    - img \"Stripe\"",
+          "  - link \"Terms\":",
+          "  - link \"Privacy\":",
+          "- button \"Billing\"",
+          "- text: Subscriptions Update your subscription Current subscription Basic $10.00 each per month Quantity",
+          "- button \"Decrease\"",
+          "- textbox: \"3\"",
+          "- button \"Increase\"",
+          "- text: Pro $30.00 each per month",
+          "- button \"Select\"",
+          "- text: Subtotal $30.00 per month",
+          "- button \"Continue\" [disabled]",
+          "- iframe"
+        ],
+        [
+          "- text: environnement de test AcmeCo Sandbox environnement de test AcmeCo partners with Stripe for simplified billing.",
+          "- contentinfo:",
+          "  - link \"Powered by Stripe\":",
+          "    - text: Powered by",
+          "    - img \"Stripe\"",
+          "  - link \"Terms\":",
+          "  - link \"Privacy\":",
+          "- button \"Billing\"",
+          "- text: Cancel Review your changes Basic(×3) $30.00 per month",
+          "- button \"View details\"",
+          "- text: If you cancel this subscription, it will still be available until the end of your billing period on November 5, 2026.",
+          "- button \"Cancel subscription\":",
+          "  - text: Cancel subscription",
+          "  - img",
+          "  - img",
+          "- button \"Go back\"",
+          "- iframe"
+        ],
+        [
+          "- text: environnement de test AcmeCo Sandbox environnement de test AcmeCo partners with Stripe for simplified billing.",
+          "- contentinfo:",
+          "  - link \"Powered by Stripe\":",
+          "    - text: Powered by",
+          "    - img \"Stripe\"",
+          "  - link \"Terms\":",
+          "  - link \"Privacy\":",
+          "- button \"Billing\"",
+          "- text: Payment method Add payment method",
+          "- iframe",
+          "- checkbox \"Use as default payment method\" [checked]",
+          "- img",
+          "- text: Use as default payment method",
+          "- button \"Add\" [disabled]:",
+          "  - text: Add",
+          "  - img",
+          "  - img",
+          "- button \"Go back\"",
+          "- iframe"
+        ],
+        [
+          "- text: environnement de test AcmeCo Sandbox environnement de test AcmeCo partners with Stripe for simplified billing.",
+          "- contentinfo:",
+          "  - link \"Powered by Stripe\":",
+          "    - text: Powered by",
+          "    - img \"Stripe\"",
+          "  - link \"Terms\":",
+          "  - link \"Privacy\":",
+          "- text: Current subscription Basic(×3) $30.00 per month",
+          "- button \"Hide details\"",
+          "- text: Basic Qty 3 $30.00 $10.00 each Total $30.00 Your next billing date is November 5, 2026.",
+          "- link \"Update subscription\":",
+          "- link \"Cancel subscription\":",
+          "- text: Payment method Visa •••• 4242 Expires 10/2027 Default",
+          "- button \"Delete\" [disabled]",
+          "- link \"Add payment method\":",
+          "- iframe"
+        ],
+        [
+          "- text: environnement de test AcmeCo Sandbox environnement de test AcmeCo partners with Stripe for simplified billing.",
+          "- contentinfo:",
+          "  - link \"Powered by Stripe\":",
+          "    - text: Powered by",
+          "    - img \"Stripe\"",
+          "  - link \"Terms\":",
+          "  - link \"Privacy\":",
+          "- button \"Billing\"",
+          "- text: Subscriptions Update your subscription Current subscription Basic $10.00 each per month Quantity",
+          "- button \"Decrease\"",
+          "- textbox: \"2\"",
+          "- button \"Increase\"",
+          "- text: Pro $30.00 each per month",
+          "- button \"Select\"",
+          "- text: Subtotal $20.00 per month",
+          "- button \"Continue\"",
+          "- iframe"
+        ],
+        [
+          "- text: environnement de test AcmeCo Sandbox environnement de test AcmeCo partners with Stripe for simplified billing.",
+          "- contentinfo:",
+          "  - link \"Powered by Stripe\":",
+          "    - text: Powered by",
+          "    - img \"Stripe\"",
+          "  - link \"Terms\":",
+          "  - link \"Privacy\":",
+          "- button \"Billing\"",
+          "- text: Subscriptions Update your subscription Current subscription Basic $10.00 each per month Quantity",
+          "- button \"Decrease\"",
+          "- textbox: \"4\"",
+          "- button \"Increase\"",
+          "- text: Pro $30.00 each per month",
+          "- button \"Select\"",
+          "- text: Subtotal $40.00 per month",
+          "- button \"Continue\"",
+          "- iframe"
+        ],
+        [
+          "- text: environnement de test AcmeCo Sandbox environnement de test AcmeCo partners with Stripe for simplified billing.",
+          "- contentinfo:",
+          "  - link \"Powered by Stripe\":",
+          "    - text: Powered by",
+          "    - img \"Stripe\"",
+          "  - link \"Terms\":",
+          "  - link \"Privacy\":",
+          "- button \"Billing\"",
+          "- text: Subscriptions Update your subscription Current subscription Basic $10.00 each per month",
+          "- button \"Select\"",
+          "- text: Pro $30.00 each per month Quantity",
+          "- button \"Decrease\"",
+          "- textbox: \"3\"",
+          "- button \"Increase\"",
+          "- text: Subtotal $90.00 per month",
+          "- button \"Continue\"",
+          "- iframe"
+        ],
+        [
+          "- text: environnement de test AcmeCo Sandbox environnement de test AcmeCo partners with Stripe for simplified billing.",
+          "- contentinfo:",
+          "  - link \"Powered by Stripe\":",
+          "    - text: Powered by",
+          "    - img \"Stripe\"",
+          "  - link \"Terms\":",
+          "  - link \"Privacy\":",
+          "- button \"Billing\"",
+          "- text: Cancel Review your changes Basic(×3) $30.00 per month",
+          "- button \"Hide details\"",
+          "- text: Basic Qty 3 $30.00 $10.00 each Total $30.00 If you cancel this subscription, it will still be available until the end of your billing period on November 5, 2026.",
+          "- button \"Cancel subscription\":",
+          "  - text: Cancel subscription",
+          "  - img",
+          "  - img",
+          "- button \"Go back\"",
+          "- iframe"
+        ],
+        [
+          "- text: environnement de test AcmeCo Sandbox environnement de test AcmeCo partners with Stripe for simplified billing.",
+          "- contentinfo:",
+          "  - link \"Powered by Stripe\":",
+          "    - text: Powered by",
+          "    - img \"Stripe\"",
+          "  - link \"Terms\":",
+          "  - link \"Privacy\":",
+          "- text: Current subscription Cancels Nov 5 Basic(×3) $30.00 per month",
+          "- button \"View details\"",
+          "- text: Your service will end on November 5, 2026.",
+          "- link \"Update subscription\":",
+          "- link \"Don't cancel subscription\":",
+          "- text: Payment method Visa •••• 4242 Expires 10/2027 Default",
+          "- button \"Delete\" [disabled]",
+          "- link \"Add payment method\":",
+          "- iframe"
+        ],
+        [
+          "- text: environnement de test AcmeCo Sandbox environnement de test AcmeCo partners with Stripe for simplified billing.",
+          "- contentinfo:",
+          "  - link \"Powered by Stripe\":",
+          "    - text: Powered by",
+          "    - img \"Stripe\"",
+          "  - link \"Terms\":",
+          "  - link \"Privacy\":",
+          "- button \"Billing\"",
+          "- text: Subscriptions Update your subscription Current subscription Basic $10.00 each per month Quantity",
+          "- button \"Decrease\" [disabled]",
+          "- textbox: \"1\"",
+          "- button \"Increase\"",
+          "- text: Pro $30.00 each per month",
+          "- button \"Select\"",
+          "- text: Subtotal $10.00 per month",
+          "- button \"Continue\"",
+          "- iframe"
+        ],
+        [
+          "- text: environnement de test AcmeCo Sandbox environnement de test AcmeCo partners with Stripe for simplified billing.",
+          "- contentinfo:",
+          "  - link \"Powered by Stripe\":",
+          "    - text: Powered by",
+          "    - img \"Stripe\"",
+          "  - link \"Terms\":",
+          "  - link \"Privacy\":",
+          "- button \"Billing\"",
+          "- text: Subscriptions Update your subscription Current subscription Basic $10.00 each per month",
+          "- button \"Select\"",
+          "- text: Pro $30.00 each per month Quantity",
+          "- button \"Decrease\"",
+          "- textbox: \"2\"",
+          "- button \"Increase\"",
+          "- text: Subtotal $60.00 per month",
+          "- button \"Continue\"",
+          "- iframe"
+        ],
+        [
+          "- text: environnement de test AcmeCo Sandbox environnement de test AcmeCo partners with Stripe for simplified billing.",
+          "- contentinfo:",
+          "  - link \"Powered by Stripe\":",
+          "    - text: Powered by",
+          "    - img \"Stripe\"",
+          "  - link \"Terms\":",
+          "  - link \"Privacy\":",
+          "- button \"Billing\"",
+          "- button \"Subscriptions\"",
+          "- text: Confirm Confirm your updates Basic(×2) $10.00 each per month $20.00 What you'll pay monthly starting November 5, 2026",
+          "- button \"View details\"",
+          "- text: $20.00",
+          "- link \"Visa •••• 4242\":",
+          "- button \"Subscribe and pay\":",
+          "  - text: Subscribe and pay",
+          "  - img",
+          "  - img",
+          "- button \"Go back\"",
+          "- iframe"
+        ],
+        [
+          "- text: environnement de test AcmeCo Sandbox environnement de test AcmeCo partners with Stripe for simplified billing.",
+          "- contentinfo:",
+          "  - link \"Powered by Stripe\":",
+          "    - text: Powered by",
+          "    - img \"Stripe\"",
+          "  - link \"Terms\":",
+          "  - link \"Privacy\":",
+          "- button \"Billing\"",
+          "- text: Subscriptions Update your subscription Current subscription Basic $10.00 each per month Quantity",
+          "- button \"Decrease\"",
+          "- textbox: \"5\"",
+          "- button \"Increase\"",
+          "- text: Pro $30.00 each per month",
+          "- button \"Select\"",
+          "- text: Subtotal $50.00 per month",
+          "- button \"Continue\"",
+          "- iframe"
+        ],
+        [
+          "- text: environnement de test AcmeCo Sandbox environnement de test AcmeCo partners with Stripe for simplified billing.",
+          "- contentinfo:",
+          "  - link \"Powered by Stripe\":",
+          "    - text: Powered by",
+          "    - img \"Stripe\"",
+          "  - link \"Terms\":",
+          "  - link \"Privacy\":",
+          "- button \"Billing\"",
+          "- text: Subscriptions Update your subscription Current subscription Basic $10.00 each per month",
+          "- button \"Select\"",
+          "- text: Pro $30.00 each per month Quantity",
+          "- button \"Decrease\"",
+          "- textbox: \"4\"",
+          "- button \"Increase\"",
+          "- text: Subtotal $120.00 per month",
+          "- button \"Continue\"",
+          "- iframe"
+        ],
+        [
+          "- text: environnement de test AcmeCo Sandbox environnement de test AcmeCo partners with Stripe for simplified billing.",
+          "- contentinfo:",
+          "  - link \"Powered by Stripe\":",
+          "    - text: Powered by",
+          "    - img \"Stripe\"",
+          "  - link \"Terms\":",
+          "  - link \"Privacy\":",
+          "- button \"Billing\"",
+          "- button \"Subscriptions\"",
+          "- text: Confirm Confirm your updates Basic(×4) $10.00 each per month $40.00 What you'll pay monthly starting November 5, 2026",
+          "- button \"View details\"",
+          "- text: $40.00",
+          "- link \"Visa •••• 4242\":",
+          "- button \"Subscribe and pay\":",
+          "  - text: Subscribe and pay",
+          "  - img",
+          "  - img",
+          "- button \"Go back\"",
+          "- iframe"
+        ],
+        [
+          "- text: environnement de test AcmeCo Sandbox environnement de test AcmeCo partners with Stripe for simplified billing.",
+          "- contentinfo:",
+          "  - link \"Powered by Stripe\":",
+          "    - text: Powered by",
+          "    - img \"Stripe\"",
+          "  - link \"Terms\":",
+          "  - link \"Privacy\":",
+          "- button \"Billing\"",
+          "- button \"Subscriptions\"",
+          "- text: Confirm Confirm your updates Pro(×3) $30.00 each per month $90.00 What you'll pay monthly starting November 5, 2026",
+          "- button \"View details\"",
+          "- text: $90.00",
+          "- link \"Visa •••• 4242\":",
+          "- button \"Subscribe and pay\":",
+          "  - text: Subscribe and pay",
+          "  - img",
+          "  - img",
+          "- button \"Go back\"",
+          "- iframe"
+        ],
+        [
+          "- text: environnement de test AcmeCo Sandbox environnement de test AcmeCo partners with Stripe for simplified billing.",
+          "- contentinfo:",
+          "  - link \"Powered by Stripe\":",
+          "    - text: Powered by",
+          "    - img \"Stripe\"",
+          "  - link \"Terms\":",
+          "  - link \"Privacy\":",
+          "- button \"Billing\"",
+          "- text: Renew Renew your subscription Current subscription Basic(×3) $30.00 per month",
+          "- button \"View details\"",
+          "- text: This subscription will no longer be canceled. It will renew on November 5, 2026.",
+          "- button \"Renew subscription\":",
+          "  - text: Renew subscription",
+          "  - img",
+          "  - img",
+          "- button \"Go back\"",
+          "- iframe"
+        ]
+      ],
+      "edges": [
+        {
+          "from": 0,
+          "action": "link \"Update subscription\"",
+          "to": 1
+        },
+        {
+          "from": 0,
+          "action": "link \"Cancel subscription\"",
+          "to": 2
+        },
+        {
+          "from": 0,
+          "action": "link \"Add payment method\"",
+          "to": 3
+        },
+        {
+          "from": 0,
+          "action": "button \"View details\"",
+          "to": 4
+        },
+        {
+          "from": 1,
+          "action": "button \"Billing\"",
+          "to": 0
+        },
+        {
+          "from": 1,
+          "action": "button \"Decrease\"",
+          "to": 5
+        },
+        {
+          "from": 1,
+          "action": "button \"Increase\"",
+          "to": 6
+        },
+        {
+          "from": 1,
+          "action": "button \"Select\"",
+          "to": 7
+        },
+        {
+          "from": 2,
+          "action": "button \"Billing\"",
+          "to": 0
+        },
+        {
+          "from": 2,
+          "action": "button \"View details\"",
+          "to": 8
+        },
+        {
+          "from": 2,
+          "action": "button \"Cancel subscription\"",
+          "to": 9
+        },
+        {
+          "from": 2,
+          "action": "button \"Go back\"",
+          "to": 0
+        },
+        {
+          "from": 3,
+          "action": "button \"Billing\"",
+          "to": 0
+        },
+        {
+          "from": 3,
+          "action": "button \"Go back\"",
+          "to": 3
+        },
+        {
+          "from": 4,
+          "action": "link \"Update subscription\"",
+          "to": 1
+        },
+        {
+          "from": 4,
+          "action": "link \"Cancel subscription\"",
+          "to": 2
+        },
+        {
+          "from": 4,
+          "action": "link \"Add payment method\"",
+          "to": 3
+        },
+        {
+          "from": 4,
+          "action": "button \"Hide details\"",
+          "to": 0
+        },
+        {
+          "from": 5,
+          "action": "button \"Billing\"",
+          "to": 0
+        },
+        {
+          "from": 5,
+          "action": "button \"Decrease\"",
+          "to": 10
+        },
+        {
+          "from": 5,
+          "action": "button \"Increase\"",
+          "to": 1
+        },
+        {
+          "from": 5,
+          "action": "button \"Select\"",
+          "to": 11
+        },
+        {
+          "from": 5,
+          "action": "button \"Continue\"",
+          "to": 12
+        },
+        {
+          "from": 6,
+          "action": "button \"Billing\"",
+          "to": 0
+        },
+        {
+          "from": 6,
+          "action": "button \"Decrease\"",
+          "to": 1
+        },
+        {
+          "from": 6,
+          "action": "button \"Increase\"",
+          "to": 13
+        },
+        {
+          "from": 6,
+          "action": "button \"Select\"",
+          "to": 14
+        },
+        {
+          "from": 6,
+          "action": "button \"Continue\"",
+          "to": 15
+        },
+        {
+          "from": 7,
+          "action": "button \"Billing\"",
+          "to": 0
+        },
+        {
+          "from": 7,
+          "action": "button \"Select\"",
+          "to": 1
+        },
+        {
+          "from": 7,
+          "action": "button \"Decrease\"",
+          "to": 11
+        },
+        {
+          "from": 7,
+          "action": "button \"Increase\"",
+          "to": 14
+        },
+        {
+          "from": 7,
+          "action": "button \"Continue\"",
+          "to": 16
+        },
+        {
+          "from": 8,
+          "action": "button \"Billing\"",
+          "to": 0
+        },
+        {
+          "from": 8,
+          "action": "button \"Hide details\"",
+          "to": 2
+        },
+        {
+          "from": 8,
+          "action": "button \"Cancel subscription\"",
+          "to": 9
+        },
+        {
+          "from": 8,
+          "action": "button \"Go back\"",
+          "to": 0
+        },
+        {
+          "from": 9,
+          "action": "link \"Update subscription\"",
+          "to": 1
+        },
+        {
+          "from": 9,
+          "action": "link \"Don't cancel subscription\"",
+          "to": 17
+        },
+        {
+          "from": 9,
+          "action": "link \"Add payment method\"",
+          "to": 3
+        },
+        {
+          "from": 9,
+          "action": "button \"View details\"",
+          "to": 9
+        }
+      ],
+      "truncated": false
+    }
+  },
+  "noise": [],
+  "recorded_at": "2026-10-01T06:48:07.182Z"
+}

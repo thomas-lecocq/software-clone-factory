@@ -29,7 +29,10 @@ const LockSchema = z.object({
 
 export const sha256 = (s: string): string => createHash("sha256").update(s).digest("hex");
 
+// A quarter of ordinary probes go to the holdout by hash of their ID. A probe whose ID starts with
+// `hold-` belongs to a dedicated, pre-registered holdout batch and never goes to dev.
 export function splitOf(id: string): Split {
+  if (id.startsWith("hold-")) return "holdout";
   return Number.parseInt(sha256(id).slice(0, 2), 16) % 4 === 0 ? "holdout" : "dev";
 }
 

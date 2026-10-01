@@ -27,7 +27,7 @@ export const LifeInput = z.object({
 });
 export type LifeInput = z.infer<typeof LifeInput>;
 
-function invoiceView(inv: Stripe.Invoice | null): Json {
+export function invoiceView(inv: Stripe.Invoice | null): Json {
   if (!inv) return null;
   return {
     status: inv.status ?? null,

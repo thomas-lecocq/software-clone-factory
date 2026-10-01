@@ -12,7 +12,9 @@ import { JsonSchema, type Json } from "../../harness/src/json.ts";
 import { startClone } from "./clone/server.ts";
 import { probes } from "./probes.ts";
 import { LifeInput, runLifecycle } from "./lifecycle.ts";
+import { ExploreInput, runExplore } from "./explore.ts";
 import { runWalkthrough, UiInput } from "./ui.ts";
+import { runWide, WideInput } from "./wide.ts";
 
 const Coupon = z.object({
   percent_off: z.number().optional(),
@@ -83,6 +85,10 @@ async function couponId(stripe: Stripe, c: z.infer<typeof Coupon>): Promise<stri
 async function run(probe: Probe, side: Side): Promise<Record<string, Json>> {
   const ui = UiInput.safeParse(probe.input);
   if (ui.success) return runWalkthrough(client(side), ui.data);
+  const explore = ExploreInput.safeParse(probe.input);
+  if (explore.success) return runExplore(client(side), explore.data);
+  const wide = WideInput.safeParse(probe.input);
+  if (wide.success) return runWide(client(side), wide.data, toJson, errorJson);
   const life = LifeInput.safeParse(probe.input);
   if (life.success) return runLifecycle(client(side), life.data);
   const p = Input.parse(probe.input);

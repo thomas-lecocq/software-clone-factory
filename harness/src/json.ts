@@ -37,9 +37,11 @@ export function flatten(
   return out;
 }
 
-// A path pattern uses `[*]` for any index and `*` for any single key segment.
+// A path pattern uses `[*]` for any index, `*` for any single key segment, and a trailing `.**`
+// for the whole subtree under a path.
 export function pathMatches(pattern: string, path: string): boolean {
-  const re = pattern
+  const subtree = pattern.endsWith(".**");
+  const re = (subtree ? pattern.slice(0, -3) : pattern)
     .split(/(\[\*\]|\*)/)
     .map((part) => {
       if (part === "[*]") return String.raw`\[\d+\]`;
@@ -47,7 +49,7 @@ export function pathMatches(pattern: string, path: string): boolean {
       return part.replace(/[.[\]()^$+?{}|\\]/g, (c) => `\\${c}`);
     })
     .join("");
-  return new RegExp(`^${re}$`).test(path);
+  return new RegExp(`^${re}${subtree ? String.raw`(?:[.[].*)?` : ""}$`).test(path);
 }
 
 const GENERATED_ID = /^([a-z]+(?:_[a-z]+)*)_([A-Za-z0-9]{8,})$/;

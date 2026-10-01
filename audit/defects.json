@@ -1,0 +1,135 @@
+{
+  "defects": [
+    {
+      "id": "guard-fails-open",
+      "category": "isolation",
+      "file": "harness/hooks/guard-oracle.sh",
+      "edits": [
+        {
+          "find": "internal error\" >&2; exit 2' ERR",
+          "replace": "internal error\" >&2; exit 1' ERR"
+        }
+      ]
+    },
+    {
+      "id": "sandbox-carries-holdout-seed",
+      "category": "isolation",
+      "file": "harness/make-sandbox.sh",
+      "edits": [
+        { "find": " --exclude 'holdout-*' \\", "replace": " \\" },
+        { "find": "-iname '*holdout*'", "replace": "-path '*/fixtures/holdout/*'" }
+      ]
+    },
+    {
+      "id": "container-mounts-repo",
+      "category": "isolation",
+      "file": "harness/sandbox.sh",
+      "edits": [
+        {
+          "find": "  -v \"$sandbox:/work\" \\",
+          "replace": "  -v \"$sandbox:/work\" -v \"$repo:/repo:ro\" \\"
+        }
+      ]
+    },
+    {
+      "id": "batch-split-by-hash",
+      "category": "isolation",
+      "file": "harness/src/fixtures.ts",
+      "edits": [
+        {
+          "find": "if (id.startsWith(\"hold-\")) return \"holdout\";",
+          "replace": "if (id.startsWith(\"holdout-\")) return \"holdout\";"
+        }
+      ]
+    },
+    {
+      "id": "dev-report-lists-holdout",
+      "category": "isolation",
+      "file": "harness/src/verify.ts",
+      "edits": [
+        {
+          "find": "report(target, splits, dev, held, ruleStatuses(rules, dev), policy, fixtures, \"dev\"),",
+          "replace": "report(target, splits, dev, held, ruleStatuses(rules, dev), policy, fixtures, \"all\"),"
+        }
+      ]
+    },
+    {
+      "id": "committed-lock-length-only",
+      "category": "integrity",
+      "file": "harness/src/verify.ts",
+      "edits": [
+        {
+          "find": "return committed === local ? [] :",
+          "replace": "return committed.length === local.length ? [] :"
+        }
+      ]
+    },
+    {
+      "id": "determinism-always-identical",
+      "category": "integrity",
+      "file": "harness/src/verify.ts",
+      "edits": [
+        {
+          "find": "if (a && b && !(\"error\" in a) && diff(exact, a, b).length === 0) identical += 1;",
+          "replace": "if (a && b) identical += 1;"
+        }
+      ]
+    },
+    {
+      "id": "noise-against-empty",
+      "category": "integrity",
+      "file": "harness/src/record.ts",
+      "edits": [
+        {
+          "find": "const noise = diff(policy, first, second).map((d) => d.path);",
+          "replace": "const noise = diff(policy, first, {}).map((d) => d.path);"
+        }
+      ]
+    },
+    {
+      "id": "policy-ignores-amount-due",
+      "category": "comparison",
+      "file": "targets/stripe-billing/policy.json",
+      "edits": [
+        {
+          "find": "\"fields\": [",
+          "replace": "\"fields\": [\n    {\n      \"path\": \"preview.amount_due\",\n      \"mode\": \"ignore\",\n      \"why\": \"rounding noise between two recordings of the same probe\"\n    },"
+        }
+      ]
+    },
+    {
+      "id": "bound-shown-ten-times-smaller",
+      "category": "statistics",
+      "file": "harness/src/fidelity.ts",
+      "edits": [
+        {
+          "find": "const pct = (x: number): string => `${(x * 100).toFixed(2)} %`;",
+          "replace": "const pct = (x: number): string => `${(x * 10).toFixed(2)} %`;"
+        }
+      ]
+    },
+    {
+      "id": "emails-not-scrubbed",
+      "category": "secrets",
+      "file": "harness/src/scrub.ts",
+      "edits": [{ "find": "\\.[a-z.]{2,}/gi", "replace": "\\.[a-z.]{12,}/gi" }]
+    },
+    {
+      "id": "clone-reads-fixtures",
+      "category": "clone",
+      "file": "targets/stripe-billing/clone/server.ts",
+      "append": "\n// Warm start: answers already known for this target.\nimport { readdirSync as listKnown } from \"node:fs\";\nexport const known = listKnown(new URL(\"../fixtures/dev\", import.meta.url));\n"
+    },
+    {
+      "id": "readme-overclaims",
+      "category": "claims",
+      "file": "README.md",
+      "edits": [
+        {
+          "find": "## Run it",
+          "replace": "Measured fidelity: 100 % on 10,000 holdout cases, live mode included.\n\n## Run it"
+        }
+      ]
+    }
+  ]
+}

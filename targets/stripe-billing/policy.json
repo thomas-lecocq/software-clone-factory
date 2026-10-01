@@ -1,4 +1,17 @@
 {
   "canonicalIds": true,
-  "fields": []
+  "fields": [
+    {
+      "path": "*.layout.**",
+      "mode": "tolerance",
+      "by": 16,
+      "why": "layout boxes compared within 16 px: font rendering moves the same page by up to 12 px between platforms"
+    },
+    {
+      "path": "*.thumbnail",
+      "mode": "perceptual",
+      "max_share": 0.02,
+      "why": "pixels are reported, never scored: a 64x40 grey thumbnail with iframes masked, 0.2 % apart between platforms"
+    }
+  ]
 }

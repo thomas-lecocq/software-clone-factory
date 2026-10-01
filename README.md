@@ -16,6 +16,27 @@ Agents build, code judges:
 The factory knows nothing about any product: a target plugs in through one adapter (its probes, a
 way to run a probe on either side, a way to start its clone).
 
+## How a clone is checked
+
+| Layer       | What is compared                                                                     | Decides the verdict |
+| ----------- | ------------------------------------------------------------------------------------ | ------------------- |
+| API         | every field of every response, generated IDs compared by the references between them | yes                 |
+| Screens     | the accessibility tree of each screen a scripted walkthrough reaches                 | yes                 |
+| Calls       | the body and status of each call a screen fires                                      | yes                 |
+| Effect      | the account state a UI flow leaves behind, read through the public API               | yes                 |
+| State graph | every screen reachable by clicking, breadth first, and every transition between them | yes                 |
+| Layout      | the box of each visible element, within a tolerance the diff policy states           | yes                 |
+| Pixels      | a masked grey thumbnail                                                              | reported only       |
+
+Each run writes a **fidelity report** (`verify/fidelity-report.md`): scope, clean measurement,
+confidence bound, coverage, determinism, divergences, saturation, task validation, integrity. The
+headline number comes from a holdout batch whose size, distribution and decision rule were
+committed before it was recorded (`analysis-plan.md`), and which is scored once.
+
+The auditors are measured too: `audit/meta.ts` plants known defects in a copy of the repository,
+runs the committed auditor prompt on it, and reports the share it found. The defect library stays
+out of every copy an auditor or a builder sees.
+
 ## First target: Stripe Billing
 
 - **Slice 1:** a mid-cycle plan change (proration, rounding, coupons, billing modes), through the
@@ -57,8 +78,10 @@ Stripe **test-mode** key; recording refuses any other kind of key.
 | Where                                                | What                                                                                               |
 | ---------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
 | [`docs/verification.md`](docs/verification.md)       | what "verified" means: the five rules, measurement, process                                        |
+| [`docs/design.md`](docs/design.md)                   | why the factory is built this way, and what was rejected                                           |
 | [`docs/target-triage.md`](docs/target-triage.md)     | how a target is classified by recording mode before any work                                       |
 | [`docs/lessons.md`](docs/lessons.md)                 | what went wrong so far, and the rule it gave                                                       |
+| [`audit/`](audit/)                                   | the auditor prompt, the planted-defect library and the script that measures auditors               |
 | [`.claude/`](.claude/)                               | the method as a skill (`replicate-slice`), the agents (recorder, builder, breaker), the guard hook |
 | [`harness/`](harness/)                               | recorder, verifier, evaluator lock, diff policy, clone kit, sandbox runners                        |
 | [`targets/stripe-billing/`](targets/stripe-billing/) | recon, rule ledger, probes, recorded fixtures, the clone, gaps                                     |

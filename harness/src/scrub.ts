@@ -20,17 +20,20 @@ export function loadLiterals(file: string | undefined): Record<string, string> {
   return LiteralMap.parse(JSON.parse(readFileSync(file, "utf8")));
 }
 
+function scrubText(text: string, literals: Record<string, string>): string {
+  let s = text;
+  for (const [re, rep] of SECRET_PATTERNS) s = s.replace(re, rep);
+  for (const [from, to] of Object.entries(literals)) s = s.split(from).join(to);
+  return s;
+}
+
+// Keys are scrubbed too: some observations are keyed by on-screen text.
 export function scrub(value: Json, literals: Record<string, string>): Json {
-  if (typeof value === "string") {
-    let s = value;
-    for (const [re, rep] of SECRET_PATTERNS) s = s.replace(re, rep);
-    for (const [from, to] of Object.entries(literals)) s = s.split(from).join(to);
-    return s;
-  }
+  if (typeof value === "string") return scrubText(value, literals);
   if (Array.isArray(value)) return value.map((v) => scrub(v, literals));
   if (value !== null && typeof value === "object") {
     const o: Record<string, Json> = {};
-    for (const [k, v] of Object.entries(value)) o[k] = scrub(v, literals);
+    for (const [k, v] of Object.entries(value)) o[scrubText(k, literals)] = scrub(v, literals);
     return o;
   }
   return value;

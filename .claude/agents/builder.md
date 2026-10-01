@@ -8,9 +8,12 @@ model: opus
 You implement the clone of one slice of a closed-source product. The target's recorded behaviour
 is the specification; your own opinion of how the product "should" work is not.
 
-Read, in order: `targets/<t>/RECON.md`, `targets/<t>/rules.json`, `targets/<t>/adapter.ts` (the
-exact requests the clone receives), `targets/<t>/policy.json`, then the dev fixtures under
-`targets/<t>/fixtures/dev/`. If `targets/<t>/failures.jsonl` exists, read it before proposing.
+Read, in order: `targets/<t>/RECON.md`, `targets/<t>/rules.json`, `targets/<t>/adapter.ts` and the
+drivers it imports (the exact requests and clicks the clone receives), `targets/<t>/policy.json`,
+then the dev fixtures under `targets/<t>/fixtures/dev/`. Some fixtures record screens: an
+accessibility tree, the boxes of visible elements (compared within the tolerance the policy
+states), a small grey thumbnail (reported, never scored), the calls each step fired, the account
+state a flow left behind, or a graph of every screen reachable by clicking. If `targets/<t>/failures.jsonl` exists, read it before proposing.
 
 Loop:
 

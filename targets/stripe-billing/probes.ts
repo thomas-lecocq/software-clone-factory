@@ -4,8 +4,12 @@
  * random batch samples the same input space for a statistical bound. Inputs only: outputs come
  * from the target.
  */
+import { existsSync, readFileSync } from "node:fs";
+import { join } from "node:path";
+import { z } from "zod";
 import type { Probe } from "../../harness/src/adapter.ts";
 import { JsonSchema } from "../../harness/src/json.ts";
+import type { Coupon, WideInput } from "./wide.ts";
 
 export interface CouponSpec {
   percent_off?: number;
@@ -494,6 +498,121 @@ function randomProbes(n: number, seed = 20260923, prefix = "rand"): [string, Pro
   return out;
 }
 
+// The widened distribution (same slice): one to three items on a monthly or yearly interval,
+// quantities 1 to 10, zero to two coupons, a start anywhere in a year (month ends included) and a
+// change anywhere in the first period, its two ends included. Stated for the bound in the report.
+export const WIDE_DISTRIBUTION =
+  "start uniform over 2026-10-15..2027-10-15, 15 % on a 28th-31st; mode flexible 70 % / classic " +
+  "30 %; interval month 75 % / year 25 %; 1-3 items (50/30/20 %), unit amount uniform in " +
+  "[100, 9999] cents per month or [1000, 99999] per year, quantity uniform 1-10; 0-2 coupons " +
+  "(50/35/15 %), each percent-off uniform 1-60 or amount-off uniform [50, 2000] cents, forever or " +
+  "once; one item changed: new amount 70 %, new interval 15 % (single item only), new quantity " +
+  "40 %; offset uniform over [0, period length] with 10 % on {0, 1, end - 1, end}; behaviour " +
+  "default 55 % / create, none, always 15 % each; a preview coupon 15 %.";
+
+const WIDE_FROM = utc(2026, 10, 15);
+const WIDE_TO = utc(2027, 10, 15);
+
+export function wideProbes(n: number, seed: number, prefix: string): [string, WideInput][] {
+  const r = rng(seed);
+  const int = (lo: number, hi: number): number => lo + Math.floor(r() * (hi - lo + 1));
+  const coupon = (): Coupon =>
+    r() < 0.5 ? pct(int(1, 60)) : off(int(50, 2000), r() < 0.5 ? "forever" : "once");
+  const out: [string, WideInput][] = [];
+  for (let i = 1; i <= n; i += 1) {
+    let start = int(WIDE_FROM, WIDE_TO - 1);
+    if (r() < 0.15) {
+      const d = new Date(start * 1000);
+      const last = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 1, 0)).getUTCDate();
+      d.setUTCDate(int(28, last));
+      start = Math.floor(d.getTime() / 1000);
+    }
+    const interval = r() < 0.75 ? "month" : "year";
+    const amount = (): number => (interval === "month" ? int(100, 9999) : int(1000, 99999));
+    const u = r();
+    const count = u < 0.5 ? 1 : u < 0.8 ? 2 : 3;
+    const items = Array.from({ length: count }, () => ({ amount: amount(), quantity: int(1, 10) }));
+    const c = r();
+    const coupons = c < 0.5 ? [] : c < 0.85 ? [coupon()] : [coupon(), coupon()];
+    const newInterval =
+      count === 1 && r() < 0.15 ? (interval === "month" ? "year" : "month") : null;
+    const newAmount =
+      r() < 0.7 || newInterval !== null
+        ? (newInterval ?? interval) === "month"
+          ? int(100, 9999)
+          : int(1000, 99999)
+        : null;
+    const len = periodLength(start, interval);
+    const offset = r() < 0.1 ? ([0, 1, len - 1, len][int(0, 3)] ?? 0) : int(0, len);
+    const b = r();
+    out.push([
+      `${prefix}-${String(i).padStart(3, "0")}`,
+      {
+        kind: "wide",
+        start,
+        billing_mode: r() < 0.7 ? "flexible" : "classic",
+        interval,
+        items,
+        coupons,
+        change: {
+          item: int(0, count - 1),
+          amount: newAmount,
+          interval: newInterval,
+          quantity: r() < 0.4 ? int(1, 10) : null,
+          offset,
+          proration_behavior:
+            b < 0.55 ? null : b < 0.7 ? "create_prorations" : b < 0.85 ? "none" : "always_invoice",
+          discount: r() < 0.15 ? coupon() : null,
+        },
+      },
+    ]);
+  }
+  return out;
+}
+
+// The wide probe seen through the single-item rules, plus the two rules only it can trigger.
+export function rulesForWide(p: WideInput): string[] {
+  const item = p.items[p.change.item] ?? { amount: 0, quantity: 1 };
+  const single: ProbeInput = {
+    start: p.start,
+    billing_mode: p.billing_mode,
+    plan: { amount: item.amount, interval: p.interval },
+    quantity: item.quantity,
+    coupon: p.coupons[0] ?? null,
+    change: {
+      plan:
+        p.change.amount !== null || p.change.interval !== null
+          ? { amount: p.change.amount ?? item.amount, interval: p.change.interval ?? p.interval }
+          : null,
+      quantity: p.change.quantity,
+      offset: p.change.offset,
+      proration_behavior: p.change.proration_behavior,
+      discount: p.change.discount,
+    },
+  };
+  const r = new Set(rulesFor(single));
+  if (r.has("ERR-01")) return ["ERR-01"];
+  if (p.items.length > 1) r.add("ITM-01");
+  if (p.coupons.length > 1) {
+    r.add("DSC-06");
+    if (p.coupons.some((c) => c.percent_off !== undefined)) r.add("DSC-01");
+    if (p.coupons.some((c) => c.amount_off !== undefined)) r.add("DSC-03");
+    if (p.coupons.some((c) => c.duration === "once")) r.add("DSC-05");
+  }
+  return [...r].sort();
+}
+
+// The dedicated holdout batch (docs: targets/stripe-billing/analysis-plan.md). Its seed lives in
+// a holdout-* file, which never enters a builder sandbox: there the batch simply does not exist.
+const HOLDOUT_SEED_FILE = join(import.meta.dirname, "holdout-seed.json");
+function holdoutBatch(): [string, WideInput][] {
+  if (!existsSync(HOLDOUT_SEED_FILE)) return [];
+  const { seed, size } = z
+    .object({ seed: z.number().int(), size: z.number().int() })
+    .parse(JSON.parse(readFileSync(HOLDOUT_SEED_FILE, "utf8")));
+  return wideProbes(size, seed, "hold");
+}
+
 // UI walkthroughs of the portal plan-change flow. Text in `until` is what the screen must show
 // before it is captured, identical on both sides.
 const home = (as: string, until = "Current subscription") =>
@@ -799,6 +918,166 @@ const cancelUi: [string, string[], Record<string, unknown>][] = [
   ],
 ];
 
+// Full-capture walkthroughs (layout, thumbnail, call bodies, final account state) and state-graph
+// explorations. Rules UI-12 to UI-14 apply to every full capture.
+const FULL = ["UI-12", "UI-13", "UI-14"];
+const subscribe = [
+  { do: "click", role: "button", name: "Subscribe and pay" },
+  home("after", "Your next estimated payment"),
+] as const;
+const changePlan = [
+  ...toPlans,
+  { do: "click", role: "button", name: "Select" },
+  ...toConfirm,
+] as const;
+const cancelFlow = [
+  { do: "click", role: "link", name: "Cancel subscription" },
+  { do: "capture", as: "review", until: "Review your changes" },
+  { do: "click", role: "button", name: "Cancel subscription" },
+  { do: "capture", as: "canceled", until: "Your service will end on" },
+] as const;
+const full: [string, string[], Record<string, unknown>][] = [
+  [
+    "uf-upgrade",
+    ["UI-01", "UI-03", "UI-04", "UI-05"],
+    {
+      start: STARTS.oct,
+      current: "Basic",
+      coupon_percent: null,
+      steps: [home("home"), ...changePlan, ...subscribe],
+    },
+  ],
+  [
+    "uf-downgrade-feb",
+    ["UI-01", "UI-03", "UI-04", "UI-05"],
+    {
+      start: STARTS.feb,
+      current: "Pro",
+      coupon_percent: null,
+      steps: [home("home"), ...changePlan, ...subscribe.slice(0, 1), home("after")],
+    },
+  ],
+  [
+    "uf-coupon50-odd",
+    ["UI-03", "UI-05", "DSC-01"],
+    {
+      start: STARTS.odd,
+      current: "Basic",
+      coupon_percent: 50,
+      steps: [home("home"), ...changePlan, ...subscribe],
+    },
+  ],
+  [
+    "uf-coupon-downgrade",
+    ["UI-03", "UI-05", "DSC-01"],
+    {
+      start: STARTS.oct,
+      current: "Pro",
+      coupon_percent: 20,
+      steps: [...changePlan, ...subscribe.slice(0, 1), home("after")],
+    },
+  ],
+  [
+    "uf-back-and-forth",
+    ["UI-02", "UI-06"],
+    {
+      start: STARTS.feb,
+      current: "Basic",
+      coupon_percent: null,
+      steps: [
+        ...changePlan,
+        { do: "click", role: "button", name: "Go back" },
+        { do: "capture", as: "back", until: "Update your subscription" },
+        // "Go back" clears the selection, so the plan is selected again.
+        { do: "click", role: "button", name: "Select" },
+        ...toConfirm,
+        ...subscribe,
+      ],
+    },
+  ],
+  [
+    "uf-upgrade-cancel-on",
+    ["UI-01", "UI-05", "UI-07"],
+    {
+      start: STARTS.odd,
+      current: "Basic",
+      coupon_percent: null,
+      cancel_enabled: true,
+      steps: [home("home", "Cancel subscription"), ...changePlan, ...subscribe],
+    },
+  ],
+  [
+    "uf-cancel",
+    ["UI-07", "UI-08", "UI-09"],
+    {
+      start: STARTS.oct,
+      current: "Basic",
+      coupon_percent: null,
+      cancel_enabled: true,
+      steps: [home("home", "Cancel subscription"), ...cancelFlow],
+    },
+  ],
+  [
+    "uf-cancel-feb-coupon",
+    ["UI-08", "UI-09"],
+    {
+      start: STARTS.feb,
+      current: "Pro",
+      coupon_percent: 20,
+      cancel_enabled: true,
+      steps: [...cancelFlow],
+    },
+  ],
+  [
+    "uf-cancel-renew",
+    ["UI-09", "UI-10"],
+    {
+      start: STARTS.odd,
+      current: "Pro",
+      coupon_percent: null,
+      cancel_enabled: true,
+      steps: [
+        ...cancelFlow,
+        { do: "click", role: "link", name: "Don't cancel subscription" },
+        { do: "capture", as: "renew", until: "Renew your subscription" },
+        { do: "click", role: "button", name: "Renew subscription" },
+        { do: "capture", as: "after", until: "Cancel subscription" },
+      ],
+    },
+  ],
+  [
+    "uf-cancel-go-back",
+    ["UI-08"],
+    {
+      start: STARTS.feb,
+      current: "Basic",
+      coupon_percent: 50,
+      cancel_enabled: true,
+      steps: [
+        { do: "click", role: "link", name: "Cancel subscription" },
+        { do: "capture", as: "review", until: "Review your changes" },
+        { do: "click", role: "button", name: "Go back" },
+        { do: "capture", as: "back", until: "Cancel subscription" },
+      ],
+    },
+  ],
+];
+const explorations: [string, Record<string, unknown>][] = [
+  ["x-basic", { start: STARTS.oct, current: "Basic", coupon_percent: null, cancel_enabled: true }],
+  ["x-pro-coupon", { start: STARTS.feb, current: "Pro", coupon_percent: 20, cancel_enabled: true }],
+  ["x-no-cancel", { start: STARTS.odd, current: "Basic", coupon_percent: null }],
+  [
+    "x-quantity",
+    {
+      start: STARTS.oct,
+      current: "Basic",
+      coupon_percent: null,
+      cancel_enabled: true,
+      quantity: 3,
+    },
+  ],
+];
+
 export function probes(): Probe[] {
   const logic = [
     ...designed.map(([id, p]) => [`d-${id}`, p] as const),
@@ -830,5 +1109,22 @@ export function probes(): Probe[] {
       input: JsonSchema.parse({ kind: "ui", start: STARTS.oct, ...rest }),
     })),
   ];
-  return [...logic, ...walkthroughs, ...slice2];
+  const uiFull = [
+    ...full.map(([id, rules, rest]) => ({
+      id,
+      rules: [...rules, ...FULL],
+      input: JsonSchema.parse({ kind: "ui", capture: "full", ...rest }),
+    })),
+    ...explorations.map(([id, rest]) => ({
+      id,
+      rules: ["UI-11"],
+      input: JsonSchema.parse({ kind: "explore", depth: 3, max_states: 30, ...rest }),
+    })),
+  ];
+  const wide = [...wideProbes(150, 20261001, "wide"), ...holdoutBatch()].map(([id, p]) => ({
+    id,
+    rules: rulesForWide(p),
+    input: JsonSchema.parse(p),
+  }));
+  return [...logic, ...walkthroughs, ...slice2, ...uiFull, ...wide];
 }

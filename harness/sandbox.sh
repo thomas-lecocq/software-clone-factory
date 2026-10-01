@@ -14,7 +14,7 @@ repo="$(cd "$(dirname "$0")/.." && pwd)"
 image="software-clone-factory-agent"
 credential="$repo/.agent.env"
 stamp="$(date -u +%Y%m%dT%H%M%SZ)"
-log="$repo/targets/$target/logs/$agent-$stamp.log"
+log="$repo/targets/$target/logs/$agent-$stamp.jsonl"
 
 command -v docker >/dev/null || { echo "refusing: docker is required (OrbStack or Docker Desktop)" >&2; exit 2; }
 [ -f "$credential" ] || { echo "refusing: $credential is missing (CLAUDE_CODE_OAUTH_TOKEN=...)" >&2; exit 2; }
@@ -33,7 +33,14 @@ docker run --rm \
   --model claude-opus-5-5 \
   --permission-mode acceptEdits \
   --allowedTools "Bash Read Write Edit Grep Glob Agent WebFetch" \
-  --output-format text | tee "$log"
+  --output-format stream-json --verbose | tee "$log" | jq -rj 'select(.type == "assistant") | .message.content[]? | select(.type == "text") | .text + "\n"'
+
+# The last line of the stream carries the run's totals: duration, turns, cost and tokens per model.
+jq -c --arg agent "$agent" --arg stamp "$stamp" 'select(.type == "result")
+  | {at: (now | todate), step: "agent", agent: $agent, log: ($agent + "-" + $stamp + ".jsonl"),
+     seconds: (.duration_ms / 1000), turns: .num_turns, cost_usd: .total_cost_usd,
+     usage: .usage, models: .modelUsage, ok: (.subtype == "success")}' "$log" \
+  >>"$repo/targets/$target/timings.jsonl" || echo "warning: no result line in $log" >&2
 
 if [ -n "$copy_back" ]; then
   rsync -a --delete "$sandbox/$copy_back/" "$repo/$copy_back/"

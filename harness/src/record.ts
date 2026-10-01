@@ -9,6 +9,7 @@ import { loadAdapter } from "./adapter.ts";
 import { fixturePath, sha256, targetDir, writeFixture, writeLock } from "./fixtures.ts";
 import { diff, PolicySchema } from "./policy.ts";
 import { loadLiterals, scrub } from "./scrub.ts";
+import { logTiming, secondsSince } from "./timings.ts";
 
 export interface RecordOptions {
   only?: string[];
@@ -31,6 +32,7 @@ export async function record(target: string, opts: RecordOptions): Promise<void>
     const path = fixturePath(target, probe.id);
     const before = existsSync(path) ? sha256(readFileSync(path, "utf8")) : null;
     if (before !== null && opts.rerecord?.id !== probe.id) continue;
+    const started = performance.now();
     const first = await adapter.run(probe, { kind: "target" });
     const second = await adapter.run(probe, { kind: "target" });
     const noise = diff(policy, first, second).map((d) => d.path);
@@ -43,6 +45,7 @@ export async function record(target: string, opts: RecordOptions): Promise<void>
       recorded_at: new Date().toISOString(),
     });
     written += 1;
+    logTiming(target, "record", { id: probe.id, runs: 2, seconds: secondsSince(started) });
     const after = sha256(readFileSync(path, "utf8"));
     const tag = noise.length > 0 ? ` (noise: ${noise.length} paths)` : "";
     console.log(`recorded ${probe.id}${tag}`);
