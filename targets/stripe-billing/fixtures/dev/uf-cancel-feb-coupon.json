@@ -58,32 +58,32 @@
       ],
       "requests": [
         {
-          "call": "GET /v1/billing_portal/sessions/bps_1ULd0WDSnaJHjCbZeMrAIVw5",
+          "call": "GET /v1/billing_portal/sessions/bps_1ULiTCDSnaJHjCbZ0qlrpbQ4",
           "body": null,
           "status": 200
         },
         {
-          "call": "GET /v1/billing_portal/sessions/bps_1ULd0WDSnaJHjCbZeMrAIVw5/customer",
+          "call": "GET /v1/billing_portal/sessions/bps_1ULiTCDSnaJHjCbZ0qlrpbQ4/customer",
           "body": null,
           "status": 200
         },
         {
-          "call": "GET /v1/billing_portal/sessions/bps_1ULd0WDSnaJHjCbZeMrAIVw5/subscriptions",
+          "call": "GET /v1/billing_portal/sessions/bps_1ULiTCDSnaJHjCbZ0qlrpbQ4/subscriptions",
           "body": null,
           "status": 200
         },
         {
-          "call": "GET /v1/billing_portal/sessions/bps_1ULd0WDSnaJHjCbZeMrAIVw5/payment_methods",
+          "call": "GET /v1/billing_portal/sessions/bps_1ULiTCDSnaJHjCbZ0qlrpbQ4/payment_methods",
           "body": null,
           "status": 200
         },
         {
-          "call": "GET /v1/billing_portal/sessions/bps_1ULd0WDSnaJHjCbZeMrAIVw5/subscriptions/sub_1ULd0UDSnaJHjCbZ9VLYc1uL",
+          "call": "GET /v1/billing_portal/sessions/bps_1ULiTCDSnaJHjCbZ0qlrpbQ4/subscriptions/sub_1ULiT9DSnaJHjCbZVJQmOeoP",
           "body": null,
           "status": 200
         },
         {
-          "call": "GET /v1/billing_portal/sessions/bps_1ULd0WDSnaJHjCbZeMrAIVw5/subscriptions/sub_1ULd0UDSnaJHjCbZ9VLYc1uL/retention_coupon",
+          "call": "GET /v1/billing_portal/sessions/bps_1ULiTCDSnaJHjCbZ0qlrpbQ4/subscriptions/sub_1ULiT9DSnaJHjCbZVJQmOeoP/retention_coupon",
           "body": null,
           "status": 200
         }
@@ -101,7 +101,7 @@
           79,
           20
         ],
-        "span environnement de test AcmeCo partners with Stripe for sim": [
+        "span environnement de test AcmeCo partners with Stripe for simplified billing.": [
           64,
           174,
           279,
@@ -155,7 +155,7 @@
           203,
           28
         ],
-        "span If you cancel this subscription, it will still be available ": [
+        "span If you cancel this subscription, it will still be available until the end of your billing period on March 3, 2027.": [
           592,
           279,
           442,
@@ -201,24 +201,24 @@
       ],
       "requests": [
         {
-          "call": "POST /v1/billing_portal/sessions/bps_1ULd0WDSnaJHjCbZeMrAIVw5/subscriptions/sub_1ULd0UDSnaJHjCbZ9VLYc1uL/cancel",
+          "call": "POST /v1/billing_portal/sessions/bps_1ULiTCDSnaJHjCbZ0qlrpbQ4/subscriptions/sub_1ULiT9DSnaJHjCbZVJQmOeoP/cancel",
           "body": {
             "refund": "false"
           },
           "status": 200
         },
         {
-          "call": "GET /v1/billing_portal/sessions/bps_1ULd0WDSnaJHjCbZeMrAIVw5/customer",
+          "call": "GET /v1/billing_portal/sessions/bps_1ULiTCDSnaJHjCbZ0qlrpbQ4/customer",
           "body": null,
           "status": 200
         },
         {
-          "call": "GET /v1/billing_portal/sessions/bps_1ULd0WDSnaJHjCbZeMrAIVw5/subscriptions",
+          "call": "GET /v1/billing_portal/sessions/bps_1ULiTCDSnaJHjCbZ0qlrpbQ4/subscriptions",
           "body": null,
           "status": 200
         },
         {
-          "call": "GET /v1/billing_portal/sessions/bps_1ULd0WDSnaJHjCbZeMrAIVw5/payment_methods",
+          "call": "GET /v1/billing_portal/sessions/bps_1ULiTCDSnaJHjCbZ0qlrpbQ4/payment_methods",
           "body": null,
           "status": 200
         }
@@ -236,7 +236,7 @@
           79,
           20
         ],
-        "span environnement de test AcmeCo partners with Stripe for sim": [
+        "span environnement de test AcmeCo partners with Stripe for simplified billing.": [
           64,
           174,
           279,
@@ -390,5 +390,5 @@
     }
   },
   "noise": [],
-  "recorded_at": "2026-10-01T05:58:38.889Z"
+  "recorded_at": "2026-10-01T11:48:36.800Z"
 }

@@ -12,7 +12,7 @@ import { z } from "zod";
 import { loadAdapter, type TargetAdapter } from "./adapter.ts";
 import { checkLock, loadFixtures, sha256, targetDir, type Split } from "./fixtures.ts";
 import type { Json } from "./json.ts";
-import { breakerLogs, fidelityReport, holdoutLooks, type Tally } from "./fidelity.ts";
+import { batchOf, breakerLogs, fidelityReport, holdoutLooks, type Tally } from "./fidelity.ts";
 import { loadLedger, ruleStatuses, type RuleResult } from "./ledger.ts";
 import { logTiming, secondsSince } from "./timings.ts";
 import {
@@ -185,7 +185,11 @@ export async function verify(target: string, splits: Split[], port = 4599): Prom
       target,
       at: run.at,
       dev: tally(dev),
-      batch: tally(held.filter((c) => c.id.startsWith("hold-"))),
+      batches: Object.fromEntries(
+        [...new Set(held.filter((c) => c.id.startsWith("hold-")).map((c) => batchOf(c.id)))].map(
+          (b) => [b, tally(held.filter((c) => c.id.startsWith("hold-") && batchOf(c.id) === b))],
+        ),
+      ),
       hashHoldout: tally(held.filter((c) => !c.id.startsWith("hold-"))),
       pixelsReported: cases
         .filter((c) => c.split === "dev")

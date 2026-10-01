@@ -201,8 +201,7 @@ async function layout(page: Page): Promise<Json> {
       if (r.width === 0 || r.height === 0) continue;
       const text = (el instanceof HTMLElement ? el.innerText : el.textContent)
         .replace(/\s+/g, " ")
-        .trim()
-        .slice(0, 60);
+        .trim();
       const tag = el.getAttribute("role") ?? el.tagName.toLowerCase();
       out.push({ tag, text, box: [r.x, r.y, r.width, r.height].map(Math.round) });
     }

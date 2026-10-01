@@ -111,10 +111,10 @@
     {
       "id": "DSC-01",
       "area": "logic",
-      "statement": "A percent-off coupon reduces the discountable lines by that percent, reported in total_discount_amounts.",
+      "statement": "A percent-off coupon takes round(percent × sum) from the discountable lines it applies to and allocates that amount across them like an amount-off: floor of the proportional share, with the remainder one cent per line from the last line. This includes the first invoice, whose allocation sets the discount a flexible credit carries.",
       "provenance": {
         "kind": "observed",
-        "ref": "RECON.md: 600 on the 3000 line"
+        "ref": "dev fixtures and spent holdout batch 1, analysed in analysis/batch1-failures.md (2026-10-01)"
       }
     },
     {
@@ -147,10 +147,10 @@
     {
       "id": "DSC-05",
       "area": "logic",
-      "statement": "A coupon with duration=once applies to the first invoice only, not to the previewed renewal.",
+      "statement": "A once coupon on the subscription discounts its first invoice only. A once coupon passed to the preview: (a) with prorations and no immediate invoice, discounts only the remaining-time charge and is not listed in the invoice's discounts; (b) when the change prorates nothing, discounts the renewal invoice and is listed; (c) in an immediate invoice, is listed in discounts and total_discount_amounts at 0 and on the proration lines at 0.",
       "provenance": {
-        "kind": "documented",
-        "ref": "https://docs.stripe.com/billing/subscriptions/coupons"
+        "kind": "observed",
+        "ref": "dev fixtures and spent holdout batch 1, analysed in analysis/batch1-failures.md (2026-10-01)"
       }
     },
     {
@@ -376,6 +376,42 @@
       "provenance": {
         "kind": "inferred",
         "ref": "widened distribution, 2026-10-01; to be checked against the wide fixtures"
+      }
+    },
+    {
+      "id": "DSC-07",
+      "area": "logic",
+      "statement": "In an immediate flexible invoice with no discount, proration lines list no discount. Otherwise the credit line lists the invoice's discounts at 0, unless everything it carries is a used once coupon, in which case it lists those coupons.",
+      "provenance": {
+        "kind": "observed",
+        "ref": "dev fixtures and spent holdout batch 1, analysed in analysis/batch1-failures.md (2026-10-01)"
+      }
+    },
+    {
+      "id": "DSC-08",
+      "area": "logic",
+      "statement": "Flexible mode: a discount carried by a credit line whose prorated amount rounds to 0 is not applied: it is absent from the line's description and, in an immediate invoice, from its discount list. Classic mode keeps the label.",
+      "provenance": {
+        "kind": "observed",
+        "ref": "dev fixtures and spent holdout batch 1, analysed in analysis/batch1-failures.md (2026-10-01)"
+      }
+    },
+    {
+      "id": "INT-02",
+      "area": "logic",
+      "statement": "An interval change with proration_date at the current period end still changes the subscription. Flexible: a remaining-time charge from proration_date to the new, start-anchored period end, then the renewal. Classic: the cycle resets and the invoice bills a full new period from the clock time. A credit with zero remaining time is omitted.",
+      "provenance": {
+        "kind": "observed",
+        "ref": "dev fixtures and spent holdout batch 1, analysed in analysis/batch1-failures.md (2026-10-01)"
+      }
+    },
+    {
+      "id": "INV-01",
+      "area": "logic",
+      "statement": "An invoice whose amount due is above 0 and below 50 cents is not charged: amount_due 0, status paid, and the amount is added to the customer balance. The next invoice shows it as starting_balance and adds it to amount_due.",
+      "provenance": {
+        "kind": "observed",
+        "ref": "dev fixtures and spent holdout batch 1, analysed in analysis/batch1-failures.md (2026-10-01)"
       }
     }
   ]

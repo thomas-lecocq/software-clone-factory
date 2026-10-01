@@ -77,22 +77,22 @@
       ],
       "requests": [
         {
-          "call": "GET /v1/billing_portal/sessions/bps_1ULcuADSnaJHjCbZDEihVdC3",
+          "call": "GET /v1/billing_portal/sessions/bps_1ULiOGDSnaJHjCbZcuLi2RNJ",
           "body": null,
           "status": 200
         },
         {
-          "call": "GET /v1/billing_portal/sessions/bps_1ULcuADSnaJHjCbZDEihVdC3/customer",
+          "call": "GET /v1/billing_portal/sessions/bps_1ULiOGDSnaJHjCbZcuLi2RNJ/customer",
           "body": null,
           "status": 200
         },
         {
-          "call": "GET /v1/billing_portal/sessions/bps_1ULcuADSnaJHjCbZDEihVdC3/subscriptions",
+          "call": "GET /v1/billing_portal/sessions/bps_1ULiOGDSnaJHjCbZcuLi2RNJ/subscriptions",
           "body": null,
           "status": 200
         },
         {
-          "call": "GET /v1/billing_portal/sessions/bps_1ULcuADSnaJHjCbZDEihVdC3/payment_methods",
+          "call": "GET /v1/billing_portal/sessions/bps_1ULiOGDSnaJHjCbZcuLi2RNJ/payment_methods",
           "body": null,
           "status": 200
         }
@@ -110,7 +110,7 @@
           79,
           20
         ],
-        "span environnement de test AcmeCo partners with Stripe for sim": [
+        "span environnement de test AcmeCo partners with Stripe for simplified billing.": [
           64,
           174,
           279,
@@ -227,7 +227,7 @@
       ],
       "requests": [
         {
-          "call": "GET /v1/billing_portal/sessions/bps_1ULcuADSnaJHjCbZDEihVdC3/subscriptions/sub_1ULcu7DSnaJHjCbZSYJUtjcS",
+          "call": "GET /v1/billing_portal/sessions/bps_1ULiOGDSnaJHjCbZcuLi2RNJ/subscriptions/sub_1ULiODDSnaJHjCbZD7pDxIMx",
           "body": null,
           "status": 200
         }
@@ -245,7 +245,7 @@
           79,
           20
         ],
-        "span environnement de test AcmeCo partners with Stripe for sim": [
+        "span environnement de test AcmeCo partners with Stripe for simplified billing.": [
           64,
           174,
           279,
@@ -384,17 +384,17 @@
       ],
       "requests": [
         {
-          "call": "GET /v1/billing_portal/sessions/bps_1ULcuADSnaJHjCbZDEihVdC3/subscriptions/sub_1ULcu7DSnaJHjCbZSYJUtjcS",
+          "call": "GET /v1/billing_portal/sessions/bps_1ULiOGDSnaJHjCbZcuLi2RNJ/subscriptions/sub_1ULiODDSnaJHjCbZD7pDxIMx",
           "body": null,
           "status": 200
         },
         {
-          "call": "GET /v1/billing_portal/sessions/bps_1ULcuADSnaJHjCbZDEihVdC3/customer",
+          "call": "GET /v1/billing_portal/sessions/bps_1ULiOGDSnaJHjCbZcuLi2RNJ/customer",
           "body": null,
           "status": 200
         },
         {
-          "call": "GET /v1/billing_portal/sessions/bps_1ULcuADSnaJHjCbZDEihVdC3/update_preview",
+          "call": "GET /v1/billing_portal/sessions/bps_1ULiOGDSnaJHjCbZcuLi2RNJ/update_preview",
           "body": null,
           "status": 200
         }
@@ -412,7 +412,7 @@
           79,
           20
         ],
-        "span environnement de test AcmeCo partners with Stripe for sim": [
+        "span environnement de test AcmeCo partners with Stripe for simplified billing.": [
           64,
           174,
           279,
@@ -524,26 +524,26 @@
       ],
       "requests": [
         {
-          "call": "POST /v1/billing_portal/sessions/bps_1ULcuADSnaJHjCbZDEihVdC3/subscriptions/sub_1ULcu7DSnaJHjCbZSYJUtjcS",
+          "call": "POST /v1/billing_portal/sessions/bps_1ULiOGDSnaJHjCbZcuLi2RNJ/subscriptions/sub_1ULiODDSnaJHjCbZD7pDxIMx",
           "body": {
-            "recurring_items[0][id]": "si_VMLbvID8pAvwSS",
-            "recurring_items[0][price]": "price_1ULcu6DSnaJHjCbZLV56OoZH",
+            "recurring_items[0][id]": "si_VMRGwEL63ulvb4",
+            "recurring_items[0][price]": "price_1ULiOCDSnaJHjCbZmCPOlxos",
             "recurring_items[0][quantity]": "1"
           },
           "status": 200
         },
         {
-          "call": "GET /v1/billing_portal/sessions/bps_1ULcuADSnaJHjCbZDEihVdC3/customer",
+          "call": "GET /v1/billing_portal/sessions/bps_1ULiOGDSnaJHjCbZcuLi2RNJ/customer",
           "body": null,
           "status": 200
         },
         {
-          "call": "GET /v1/billing_portal/sessions/bps_1ULcuADSnaJHjCbZDEihVdC3/subscriptions",
+          "call": "GET /v1/billing_portal/sessions/bps_1ULiOGDSnaJHjCbZcuLi2RNJ/subscriptions",
           "body": null,
           "status": 200
         },
         {
-          "call": "GET /v1/billing_portal/sessions/bps_1ULcuADSnaJHjCbZDEihVdC3/payment_methods",
+          "call": "GET /v1/billing_portal/sessions/bps_1ULiOGDSnaJHjCbZcuLi2RNJ/payment_methods",
           "body": null,
           "status": 200
         }
@@ -561,7 +561,7 @@
           79,
           20
         ],
-        "span environnement de test AcmeCo partners with Stripe for sim": [
+        "span environnement de test AcmeCo partners with Stripe for simplified billing.": [
           64,
           174,
           279,
@@ -724,5 +724,5 @@
     }
   },
   "noise": [],
-  "recorded_at": "2026-10-01T05:52:22.392Z"
+  "recorded_at": "2026-10-01T11:43:51.564Z"
 }

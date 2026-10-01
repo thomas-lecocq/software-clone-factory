@@ -20,8 +20,8 @@ export interface FidelityInput {
   target: string;
   at: string;
   dev: Tally;
-  // Pre-registered batches (IDs starting with `hold-`) and the hash-split holdout, apart.
-  batch: Tally;
+  // Pre-registered batches (IDs `hold-…-NNN`, keyed by prefix) and the hash-split holdout, apart.
+  batches: Record<string, Tally>;
   hashHoldout: Tally;
   pixelsReported: number;
   statuses: RuleResult[];
@@ -85,6 +85,9 @@ export function section(markdown: string | null, title: string): string | null {
   return (end < 0 ? rest : rest.slice(0, end)).join("\n").trim();
 }
 
+// `hold-042` belongs to batch `hold`, `hold-b2-042` to batch `hold-b2`.
+export const batchOf = (id: string): string => id.replace(/-\d+$/, "");
+
 export function fidelityReport(f: FidelityInput): string {
   const verified = f.statuses.filter((s) => s.status === "verified");
   const withHoldout = verified.filter((s) => f.holdoutRules.has(s.rule.id));
@@ -108,7 +111,9 @@ export function fidelityReport(f: FidelityInput): string {
     "",
     "| Set | Passing | Failures | Upper bound on the failure rate, 95 % | Same, 99 % |",
     "| --- | --- | --- | --- | --- |",
-    measured("Pre-registered holdout batch", f.batch),
+    ...Object.entries(f.batches)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([prefix, t]) => measured(`Pre-registered batch \`${prefix}-\``, t)),
     measured("Hash-split holdout", f.hashHoldout),
     measured("Dev (training, not a claim)", f.dev),
     "",
@@ -117,8 +122,8 @@ export function fidelityReport(f: FidelityInput): string {
     "## 3. Bound",
     "",
     "One-sided exact (Clopper-Pearson) bounds at 95 % and 99 %, valid for the distribution each set was",
-    "drawn from and for nothing outside it. A pre-registered batch has its plan in",
-    "`analysis-plan.md`; with no failure in n cases the 95 % bound is 1 − 0.05^(1/n).",
+    "drawn from and for nothing outside it. Each pre-registered batch has its plan in an",
+    "`analysis-plan*.md` and is scored once; spent batches are listed in `measurements.md`; with no failure in n cases the 95 % bound is 1 − 0.05^(1/n).",
     "",
     f.policySincePlan === null
       ? "No analysis plan committed."
@@ -162,7 +167,7 @@ export function fidelityReport(f: FidelityInput): string {
     `- Commit: ${i.commit ?? "none (outside git)"}${i.dirty === true ? ", with uncommitted changes to the harness or targets" : ""}.`,
     `- Run inside a builder sandbox: ${i.sandbox ? "yes (the holdout is absent there)" : "no"}.`,
     `- Scored runs that looked at the holdout under this lock, this one included: ${String(i.holdoutLooks)}. A`,
-    "  holdout that drove a decision is spent; see `analysis-plan.md` for the batch's single look.",
+    "  holdout that drove a decision is spent; see `measurements.md` for each batch's single look.",
     "",
   ].join("\n");
 }

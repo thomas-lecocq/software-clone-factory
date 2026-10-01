@@ -1,0 +1,53 @@
+{
+  "id": "wide2-228",
+  "rules": [
+    "ITM-01",
+    "PRO-05",
+    "PRO-06",
+    "PRO-08"
+  ],
+  "input": {
+    "kind": "wide",
+    "start": 1801770373,
+    "billing_mode": "flexible",
+    "interval": "month",
+    "items": [
+      {
+        "amount": 6183,
+        "quantity": 2
+      },
+      {
+        "amount": 9567,
+        "quantity": 3
+      }
+    ],
+    "coupons": [],
+    "change": {
+      "item": 0,
+      "amount": 5212,
+      "interval": null,
+      "quantity": 7,
+      "offset": 486180,
+      "proration_behavior": "none",
+      "discount": null
+    }
+  },
+  "observed": {
+    "preview": {
+      "error": {
+        "type": "StripeInvalidRequestError",
+        "code": null,
+        "param": "proration_date",
+        "message": "Cannot specify proration date if no proration is being done"
+      }
+    },
+    "first_invoice": {
+      "subtotal": 41067,
+      "total": 41067,
+      "amount_due": 41067,
+      "status": "paid"
+    }
+  },
+  "noise": [],
+  "recorded_at": "2026-10-01T12:25:41.972Z"
+}

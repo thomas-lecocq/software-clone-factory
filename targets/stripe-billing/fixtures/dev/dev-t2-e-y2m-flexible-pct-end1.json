@@ -1,0 +1,60 @@
+{
+  "id": "dev-t2-e-y2m-flexible-pct-end1",
+  "rules": [
+    "DSC-01",
+    "DSC-02",
+    "DSC-08",
+    "INT-01",
+    "PRO-01",
+    "PRO-02",
+    "PRO-03",
+    "PRO-04",
+    "PRO-05",
+    "PRO-09"
+  ],
+  "input": {
+    "kind": "wide",
+    "start": 1791158400,
+    "billing_mode": "flexible",
+    "interval": "year",
+    "items": [
+      {
+        "amount": 10000,
+        "quantity": 1
+      }
+    ],
+    "coupons": [
+      {
+        "percent_off": 20,
+        "duration": "forever"
+      }
+    ],
+    "change": {
+      "item": 0,
+      "amount": 1000,
+      "interval": "month",
+      "quantity": null,
+      "offset": 31535999,
+      "proration_behavior": null,
+      "discount": null
+    }
+  },
+  "observed": {
+    "preview": {
+      "error": {
+        "type": "StripeInvalidRequestError",
+        "code": null,
+        "param": null,
+        "message": "You cannot specify `proration_date` past the updated subscription period end when using flexible billing mode. The value should be less than 1793836800."
+      }
+    },
+    "first_invoice": {
+      "subtotal": 10000,
+      "total": 8000,
+      "amount_due": 8000,
+      "status": "paid"
+    }
+  },
+  "noise": [],
+  "recorded_at": "2026-10-01T12:06:45.212Z"
+}

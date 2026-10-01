@@ -620,6 +620,9 @@ describe("splits", () => {
     expect(Array.from({ length: 50 }, (_, i) => splitOf(`hold-${String(i)}`))).toEqual(
       Array.from({ length: 50 }, () => "holdout"),
     );
+    expect(Array.from({ length: 50 }, (_, i) => splitOf(`dev-${String(i)}`))).toEqual(
+      Array.from({ length: 50 }, () => "dev"),
+    );
   });
 });
 

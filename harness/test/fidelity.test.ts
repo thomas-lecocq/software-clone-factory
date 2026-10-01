@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { fidelityReport, section, upperBound } from "../src/fidelity.ts";
+import { batchOf, fidelityReport, section, upperBound } from "../src/fidelity.ts";
 
 describe("fidelity report", () => {
   it("computes the one-sided exact upper bound", () => {
@@ -10,6 +10,11 @@ describe("fidelity report", () => {
     expect(upperBound(1, 472)).toBeGreaterThan(0.01);
     expect(upperBound(0, 473, 0.01)).toBeCloseTo(1 - 0.01 ** (1 / 473), 6);
     expect(upperBound(0, 0)).toBe(1);
+  });
+
+  it("groups batch IDs by prefix", () => {
+    expect(batchOf("hold-042")).toBe("hold");
+    expect(batchOf("hold-b2-042")).toBe("hold-b2");
   });
 
   it("reads declared sections from GAPS.md", () => {
@@ -23,7 +28,7 @@ describe("fidelity report", () => {
       target: "t",
       at: "now",
       dev: { pass: 10, total: 10 },
-      batch: { pass: 473, total: 473 },
+      batches: { hold: { pass: 448, total: 473 }, "hold-b2": { pass: 473, total: 473 } },
       hashHoldout: { pass: 3, total: 4 },
       pixelsReported: 2,
       statuses: [],
@@ -43,7 +48,8 @@ describe("fidelity report", () => {
     });
     const headings = md.split("\n").filter((l) => /^## \d\. /.test(l));
     expect(headings).toHaveLength(9);
-    expect(md).toContain("| Pre-registered holdout batch | 473 of 473 | 0 | 0.63 % | 0.97 % |");
+    expect(md).toContain("| Pre-registered batch `hold-b2-` | 473 of 473 | 0 | 0.63 % | 0.97 % |");
+    expect(md).toContain("| Pre-registered batch `hold-` | 448 of 473 | 25 | 7.30 % | 8.18 % |");
     expect(md).toContain("| Hash-split holdout | 3 of 4 | 1 |");
     expect(md).not.toMatch(/hold-\d/);
     expect(md).toContain("Diff policy changed since the analysis plan was committed: abc123");

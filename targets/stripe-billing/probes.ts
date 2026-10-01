@@ -82,8 +82,10 @@ export function rulesFor(p: ProbeInput): string[] {
   const prorates = behavior !== "none";
   if (p.change.offset < 0 || p.change.offset > periodLength(p.start, p.plan.interval))
     return ["ERR-01"];
-  if (prorates) ["PRO-01", "PRO-02", "PRO-03", "PRO-04"].forEach((x) => r.add(x));
-  else r.add("PRO-06");
+  // A change that changes nothing prorates nothing: tagging it PRO-01..04 hid where bugs were.
+  const changes = p.change.plan !== null || p.change.quantity !== null;
+  if (!prorates) r.add("PRO-06");
+  else if (changes) ["PRO-01", "PRO-02", "PRO-03", "PRO-04"].forEach((x) => r.add(x));
   if (behavior === "always_invoice") r.add("PRO-07");
   else r.add("PRO-05");
   if (p.change.quantity !== null) r.add("PRO-08");
@@ -593,6 +595,19 @@ export function rulesForWide(p: WideInput): string[] {
   const r = new Set(rulesFor(single));
   if (r.has("ERR-01")) return ["ERR-01"];
   if (p.items.length > 1) r.add("ITM-01");
+  const real = p.change.amount !== null || p.change.interval !== null || p.change.quantity !== null;
+  const len = periodLength(p.start, p.interval);
+  const discounted = p.coupons.length > 0 || p.change.discount !== null;
+  const flexible = p.billing_mode === "flexible";
+  if (flexible && p.change.proration_behavior === "always_invoice" && real) r.add("DSC-07");
+  if (flexible && discounted && real && p.change.offset >= len - 1) r.add("DSC-08");
+  if (p.change.interval !== null && p.change.offset === len) r.add("INT-02");
+  let first = p.items.reduce((n, i) => n + i.amount * i.quantity, 0);
+  for (const c of p.coupons)
+    first =
+      c.percent_off !== undefined ? first * (1 - c.percent_off / 100) : first - (c.amount_off ?? 0);
+  if (Math.round(first) > 0 && Math.round(first) < 50) r.add("INV-01");
+  if (p.items.length > 1 && p.coupons.some((c) => c.percent_off !== undefined)) r.add("DSC-01");
   if (p.coupons.length > 1) {
     r.add("DSC-06");
     if (p.coupons.some((c) => c.percent_off !== undefined)) r.add("DSC-01");
@@ -602,15 +617,183 @@ export function rulesForWide(p: WideInput): string[] {
   return [...r].sort();
 }
 
-// The dedicated holdout batch (docs: targets/stripe-billing/analysis-plan.md). Its seed lives in
-// a holdout-* file, which never enters a builder sandbox: there the batch simply does not exist.
+// Targeted dev probes after holdout batch 1 was spent, one family per root cause found in it
+// (analysis/batch1-failures.md): A percent coupons over several lines, B once coupons passed to
+// the preview, C credit-line discounts in immediate flexible invoices, D credits that prorate a
+// discount to 0, E interval changes at the period end, F first invoices under 50 cents.
+type WideChange = WideInput["change"];
+const w = (
+  over: Partial<Omit<WideInput, "change">> & { change?: Partial<WideChange> },
+): WideInput => ({
+  kind: "wide",
+  start: STARTS.oct,
+  billing_mode: "flexible",
+  interval: "month",
+  items: [{ amount: 1000, quantity: 1 }],
+  coupons: [],
+  ...over,
+  change: {
+    item: 0,
+    amount: 3000,
+    interval: null,
+    quantity: null,
+    offset: 10 * DAY,
+    proration_behavior: null,
+    discount: null,
+    ...over.change,
+  },
+});
+const once = (n: number): Coupon => ({ amount_off: n, duration: "once" });
+const pctOnce = (n: number): Coupon => ({ percent_off: n, duration: "once" });
+const MONTH_LEN = periodLength(STARTS.oct, "month");
+const YEAR_LEN = periodLength(STARTS.oct, "year");
+
+function targetedWide(): [string, WideInput][] {
+  const out: [string, WideInput][] = [];
+  const add = (id: string, p: WideInput): void => {
+    out.push([`dev-t2-${id}`, p]);
+  };
+  const noop = { amount: null, quantity: null };
+  const sets: [string, WideInput["items"], number][] = [
+    [
+      "a1",
+      [
+        { amount: 7009, quantity: 1 },
+        { amount: 1371, quantity: 9 },
+        { amount: 9488, quantity: 6 },
+      ],
+      22,
+    ],
+    [
+      "a2",
+      [
+        { amount: 1065, quantity: 4 },
+        { amount: 4809, quantity: 3 },
+        { amount: 4156, quantity: 7 },
+      ],
+      26,
+    ],
+    [
+      "a3",
+      [
+        { amount: 3880, quantity: 3 },
+        { amount: 1459, quantity: 3 },
+        { amount: 2578, quantity: 4 },
+      ],
+      43,
+    ],
+  ];
+  for (const [id, items, percent] of sets) {
+    add(`${id}-noop`, w({ items, coupons: [pct(percent)], change: noop }));
+    for (const item of [0, 1, 2])
+      add(
+        `${id}-change-${String(item)}`,
+        w({ items, coupons: [pct(percent)], change: { item, amount: 2222 } }),
+      );
+  }
+  for (const mode of ["flexible", "classic"] as const) {
+    for (const behavior of [null, "create_prorations"] as const)
+      add(
+        `b-noop-${mode}-${behavior ?? "default"}`,
+        w({
+          billing_mode: mode,
+          change: { ...noop, proration_behavior: behavior, discount: once(300) },
+        }),
+      );
+    for (const [name, coupons] of [
+      ["none", []],
+      ["forever", [pct(20)]],
+      ["once", [once(200)]],
+    ] as const)
+      add(
+        `b-always-${mode}-${name}`,
+        w({
+          billing_mode: mode,
+          coupons: [...coupons],
+          change: { proration_behavior: "always_invoice", discount: once(300) },
+        }),
+      );
+  }
+  const subSets: [string, Coupon[]][] = [
+    ["once", [once(200)]],
+    ["once-forever", [once(200), pct(10)]],
+    ["forever", [pct(10)]],
+    ["forever-forever", [pct(10), off(150)]],
+  ];
+  for (const [name, coupons] of subSets)
+    for (const [dname, discount] of [
+      ["none", null],
+      ["once", pctOnce(15)],
+      ["forever", pct(15)],
+    ] as const)
+      add(
+        `c-${name}-${dname}`,
+        w({ coupons, change: { proration_behavior: "always_invoice", discount } }),
+      );
+  for (const mode of ["flexible", "classic"] as const)
+    for (const [name, coupons] of [
+      ["pct", [pct(20)]],
+      ["off", [off(300)]],
+      ["both", [pct(20), off(300)]],
+    ] as const)
+      for (const back of [1, 2])
+        for (const behavior of [null, "always_invoice"] as const)
+          add(
+            `d-${mode}-${name}-end${String(back)}-${behavior ?? "default"}`,
+            w({
+              billing_mode: mode,
+              coupons: [...coupons],
+              change: { offset: MONTH_LEN - back, proration_behavior: behavior },
+            }),
+          );
+  for (const mode of ["flexible", "classic"] as const)
+    for (const coupons of [[], [pct(20)]])
+      for (const back of [0, 1]) {
+        const tag = `${mode}-${coupons.length > 0 ? "pct" : "none"}-end${String(back)}`;
+        add(
+          `e-m2y-${tag}`,
+          w({
+            billing_mode: mode,
+            coupons,
+            change: { amount: 10000, interval: "year", offset: MONTH_LEN - back },
+          }),
+        );
+        add(
+          `e-y2m-${tag}`,
+          w({
+            billing_mode: mode,
+            interval: "year",
+            items: [{ amount: 10000, quantity: 1 }],
+            coupons,
+            change: { amount: 1000, interval: "month", offset: YEAR_LEN - back },
+          }),
+        );
+      }
+  for (const left of [1, 25, 49, 50, 51])
+    add(
+      `f-left${String(left)}`,
+      w({ items: [{ amount: 1621, quantity: 1 }], coupons: [once(1621 - left)] }),
+    );
+  return out;
+}
+
+// Dedicated holdout batches, one per pre-registered plan (analysis-plan*.md). Their seeds live in a
+// holdout-* file, which never enters a builder sandbox: there the batches simply do not exist.
+// Batch IDs start with `hold-`, which `splitOf` sends to the holdout whatever their hash.
 const HOLDOUT_SEED_FILE = join(import.meta.dirname, "holdout-seed.json");
-function holdoutBatch(): [string, WideInput][] {
+const Batches = z.object({
+  batches: z.array(
+    z.object({
+      prefix: z.string().startsWith("hold"),
+      seed: z.number().int(),
+      size: z.number().int(),
+    }),
+  ),
+});
+function holdoutBatches(): [string, WideInput][] {
   if (!existsSync(HOLDOUT_SEED_FILE)) return [];
-  const { seed, size } = z
-    .object({ seed: z.number().int(), size: z.number().int() })
-    .parse(JSON.parse(readFileSync(HOLDOUT_SEED_FILE, "utf8")));
-  return wideProbes(size, seed, "hold");
+  const { batches } = Batches.parse(JSON.parse(readFileSync(HOLDOUT_SEED_FILE, "utf8")));
+  return batches.flatMap((b) => wideProbes(b.size, b.seed, b.prefix));
 }
 
 // UI walkthroughs of the portal plan-change flow. Text in `until` is what the screen must show
@@ -1121,7 +1304,13 @@ export function probes(): Probe[] {
       input: JsonSchema.parse({ kind: "explore", depth: 3, max_states: 30, ...rest }),
     })),
   ];
-  const wide = [...wideProbes(150, 20261001, "wide"), ...holdoutBatch()].map(([id, p]) => ({
+  // wide2: more dev cases of the same distribution, added after holdout batch 1 was spent.
+  const wide = [
+    ...wideProbes(150, 20261001, "wide"),
+    ...wideProbes(300, 20261002, "wide2"),
+    ...targetedWide(),
+    ...holdoutBatches(),
+  ].map(([id, p]) => ({
     id,
     rules: rulesForWide(p),
     input: JsonSchema.parse(p),

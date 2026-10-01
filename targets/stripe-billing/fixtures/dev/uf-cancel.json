@@ -63,22 +63,22 @@
       ],
       "requests": [
         {
-          "call": "GET /v1/billing_portal/sessions/bps_1ULd05DSnaJHjCbZDAi4YlOa",
+          "call": "GET /v1/billing_portal/sessions/bps_1ULiSiDSnaJHjCbZhgnwGMd9",
           "body": null,
           "status": 200
         },
         {
-          "call": "GET /v1/billing_portal/sessions/bps_1ULd05DSnaJHjCbZDAi4YlOa/customer",
+          "call": "GET /v1/billing_portal/sessions/bps_1ULiSiDSnaJHjCbZhgnwGMd9/customer",
           "body": null,
           "status": 200
         },
         {
-          "call": "GET /v1/billing_portal/sessions/bps_1ULd05DSnaJHjCbZDAi4YlOa/subscriptions",
+          "call": "GET /v1/billing_portal/sessions/bps_1ULiSiDSnaJHjCbZhgnwGMd9/subscriptions",
           "body": null,
           "status": 200
         },
         {
-          "call": "GET /v1/billing_portal/sessions/bps_1ULd05DSnaJHjCbZDAi4YlOa/payment_methods",
+          "call": "GET /v1/billing_portal/sessions/bps_1ULiSiDSnaJHjCbZhgnwGMd9/payment_methods",
           "body": null,
           "status": 200
         }
@@ -96,7 +96,7 @@
           79,
           20
         ],
-        "span environnement de test AcmeCo partners with Stripe for sim": [
+        "span environnement de test AcmeCo partners with Stripe for simplified billing.": [
           64,
           174,
           279,
@@ -221,12 +221,12 @@
       ],
       "requests": [
         {
-          "call": "GET /v1/billing_portal/sessions/bps_1ULd05DSnaJHjCbZDAi4YlOa/subscriptions/sub_1ULd03DSnaJHjCbZ6t7aJY1X",
+          "call": "GET /v1/billing_portal/sessions/bps_1ULiSiDSnaJHjCbZhgnwGMd9/subscriptions/sub_1ULiSgDSnaJHjCbZ6D5Wpve1",
           "body": null,
           "status": 200
         },
         {
-          "call": "GET /v1/billing_portal/sessions/bps_1ULd05DSnaJHjCbZDAi4YlOa/subscriptions/sub_1ULd03DSnaJHjCbZ6t7aJY1X/retention_coupon",
+          "call": "GET /v1/billing_portal/sessions/bps_1ULiSiDSnaJHjCbZhgnwGMd9/subscriptions/sub_1ULiSgDSnaJHjCbZ6D5Wpve1/retention_coupon",
           "body": null,
           "status": 200
         }
@@ -244,7 +244,7 @@
           79,
           20
         ],
-        "span environnement de test AcmeCo partners with Stripe for sim": [
+        "span environnement de test AcmeCo partners with Stripe for simplified billing.": [
           64,
           174,
           279,
@@ -298,7 +298,7 @@
           200,
           28
         ],
-        "span If you cancel this subscription, it will still be available ": [
+        "span If you cancel this subscription, it will still be available until the end of your billing period on November 5, 2026.": [
           592,
           279,
           442,
@@ -344,24 +344,24 @@
       ],
       "requests": [
         {
-          "call": "POST /v1/billing_portal/sessions/bps_1ULd05DSnaJHjCbZDAi4YlOa/subscriptions/sub_1ULd03DSnaJHjCbZ6t7aJY1X/cancel",
+          "call": "POST /v1/billing_portal/sessions/bps_1ULiSiDSnaJHjCbZhgnwGMd9/subscriptions/sub_1ULiSgDSnaJHjCbZ6D5Wpve1/cancel",
           "body": {
             "refund": "false"
           },
           "status": 200
         },
         {
-          "call": "GET /v1/billing_portal/sessions/bps_1ULd05DSnaJHjCbZDAi4YlOa/customer",
+          "call": "GET /v1/billing_portal/sessions/bps_1ULiSiDSnaJHjCbZhgnwGMd9/customer",
           "body": null,
           "status": 200
         },
         {
-          "call": "GET /v1/billing_portal/sessions/bps_1ULd05DSnaJHjCbZDAi4YlOa/subscriptions",
+          "call": "GET /v1/billing_portal/sessions/bps_1ULiSiDSnaJHjCbZhgnwGMd9/subscriptions",
           "body": null,
           "status": 200
         },
         {
-          "call": "GET /v1/billing_portal/sessions/bps_1ULd05DSnaJHjCbZDAi4YlOa/payment_methods",
+          "call": "GET /v1/billing_portal/sessions/bps_1ULiSiDSnaJHjCbZhgnwGMd9/payment_methods",
           "body": null,
           "status": 200
         }
@@ -379,7 +379,7 @@
           79,
           20
         ],
-        "span environnement de test AcmeCo partners with Stripe for sim": [
+        "span environnement de test AcmeCo partners with Stripe for simplified billing.": [
           64,
           174,
           279,
@@ -533,5 +533,5 @@
     }
   },
   "noise": [],
-  "recorded_at": "2026-10-01T05:58:11.965Z"
+  "recorded_at": "2026-10-01T11:48:08.050Z"
 }
