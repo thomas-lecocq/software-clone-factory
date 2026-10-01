@@ -491,6 +491,22 @@ describe("invariant 3: the guard hook keeps agents away from the evaluator", () 
   });
 });
 
+describe("invariant 3: the guard fails closed", () => {
+  it("still blocks when its log cannot be written", () => {
+    const hook = join(root, "harness", "hooks", "guard-oracle.sh");
+    const payload = {
+      agent_type: "builder",
+      tool_name: "Write",
+      tool_input: { file_path: "targets/t/fixtures/dev/a.json" },
+    };
+    const res = spawnSync("bash", [hook], {
+      input: JSON.stringify(payload),
+      env: { ...process.env, GUARD_LOG: "/nonexistent-root-dir/sub/guard.log" },
+    });
+    expect(res.status).toBe(2);
+  });
+});
+
 describe("invariant 6 and 7: clone and harness boundaries", () => {
   it.each(targets)("%s clone never reads fixtures", (t) => {
     for (const f of filesUnder(join(root, "targets", t, "clone")).filter((x) =>

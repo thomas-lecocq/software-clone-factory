@@ -4,6 +4,8 @@
 # around it; the stronger measures are the sandbox without holdout files and the committed lock.
 # Exit 2 blocks the tool call and shows stderr to the agent.
 set -euo pipefail
+# Fail closed: an unexpected error must block (exit 2), never fall through to exit 1, which allows.
+trap 'echo "blocked by guard-oracle: internal error" >&2; exit 2' ERR
 shopt -s nocasematch # macOS file systems are case-insensitive, so the matching must be too
 input="$(cat)"
 tool="$(jq -r '.tool_name // ""' <<<"$input")"
@@ -17,7 +19,9 @@ fi
 log="${GUARD_LOG:-$(dirname "$0")/../../logs/guard.log}"
 
 block() {
-  printf '%s\t%s\t%s\t%s\n' "$(date -u +%FT%TZ)" "$role" "$tool" "$1" >>"$log"
+  # Logging must never decide the outcome: a failed write here would exit 1, which Claude Code
+  # treats as "allow". The block below always runs.
+  { mkdir -p "$(dirname "$log")" && printf '%s\t%s\t%s\t%s\n' "$(date -u +%FT%TZ)" "$role" "$tool" "$1" >>"$log"; } 2>/dev/null || true
   echo "blocked by guard-oracle: $1" >&2
   exit 2
 }

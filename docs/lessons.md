@@ -30,5 +30,8 @@ One line per lesson, read at step 1 of the `replicate-slice` skill: where, sympt
   delete it afterwards.
 - **Checks.** An integrity check that passes when its input is missing is not a check. Fail closed,
   with an explicit, logged flag for the one context allowed to skip it.
+- **Hooks fail open by default.** A guard that could not write its log exited with code 1, which
+  Claude Code treats as "allow": every block was silently lifted in a fresh repository. A blocking
+  hook must exit 2 on any error, and be live-tested in the environment the agent actually runs in.
 - **Fresh copies.** A lock that hashed macOS hidden files broke `verify` on every fresh checkout.
   Run the deliverable from a fresh clone before calling it done.
