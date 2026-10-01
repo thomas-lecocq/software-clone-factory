@@ -408,7 +408,7 @@
     {
       "id": "INV-01",
       "area": "logic",
-      "statement": "An invoice whose amount due is above 0 and below 50 cents is not charged: amount_due 0, status paid, and the amount is added to the customer balance. The next invoice shows it as starting_balance and adds it to amount_due.",
+      "statement": "An invoice whose amount due is above 0 and below the minimum charge is not charged: amount_due 0, status paid, and the amount is added to the customer balance. The next invoice shows it as starting_balance and adds it to amount_due. In test mode in USD the minimum is 56 cents: the dev-t2-f probes leave 1 to 55 cents uncharged and charge 56 and above.",
       "provenance": {
         "kind": "observed",
         "ref": "dev fixtures and spent holdout batch 1, analysed in analysis/batch1-failures.md (2026-10-01)"

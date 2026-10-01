@@ -40,14 +40,13 @@ export function probes(): Probe[] {
  */
 import type { Probe, Side, TargetAdapter } from "../../harness/src/adapter.ts";
 import type { Json } from "../../harness/src/json.ts";
-import { startClone } from "./clone/server.ts";
 import { probes } from "./probes.ts";
 
 function run(probe: Probe, side: Side): Promise<Record<string, Json>> {
   return Promise.reject(new Error(\`adapter not written yet (\${probe.id} on \${side.kind})\`));
 }
 
-const adapter: TargetAdapter = { probes, run, startClone };
+const adapter: TargetAdapter = { probes, run, cloneEntry: "clone/server.ts" };
 export default adapter;
 `,
   "clone/server.ts": `/**

@@ -769,7 +769,7 @@ function targetedWide(): [string, WideInput][] {
           }),
         );
       }
-  for (const left of [1, 25, 49, 50, 51])
+  for (const left of [1, 25, 49, 50, 51, 52, 55, 56, 57, 58, 59, 60, 75, 99, 100, 150, 291])
     add(
       `f-left${String(left)}`,
       w({ items: [{ amount: 1621, quantity: 1 }], coupons: [once(1621 - left)] }),

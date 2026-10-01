@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { batchOf, fidelityReport, section, upperBound } from "../src/fidelity.ts";
+import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { batchOf, fidelityReport, looksPerSet, section, upperBound } from "../src/fidelity.ts";
 
 describe("fidelity report", () => {
   it("computes the one-sided exact upper bound", () => {
@@ -40,18 +43,46 @@ describe("fidelity report", () => {
         commit: "c1",
         dirty: false,
         sandbox: false,
-        holdoutLooks: 1,
+      },
+      looks: { hash: 3, hold: 2, "hold-b2": 1 },
+      plans: {
+        hold: { file: "analysis-plan.md", policyChanges: ["abc123 Mask recording-date text"] },
+        "hold-b2": { file: "analysis-plan-b2.md", policyChanges: [] },
       },
       gaps: null,
       breakerLogs: [],
-      policySincePlan: ["abc123 Mask recording-date text"],
     });
     const headings = md.split("\n").filter((l) => /^## \d\. /.test(l));
     expect(headings).toHaveLength(9);
-    expect(md).toContain("| Pre-registered batch `hold-b2-` | 473 of 473 | 0 | 0.63 % | 0.97 % |");
-    expect(md).toContain("| Pre-registered batch `hold-` | 448 of 473 | 25 | 7.30 % | 8.18 % |");
-    expect(md).toContain("| Hash-split holdout | 3 of 4 | 1 |");
+    expect(md).toContain(
+      "| Pre-registered batch `hold-b2-` | 473 of 473 | 0 | 0.63 % | 0.97 % | first and only look",
+    );
+    expect(md).toContain(
+      "| Pre-registered batch `hold-` | 448 of 473 | 25 | 7.30 % | 8.18 % | spent: 2 looks",
+    );
+    expect(md).toMatch(/\| Hash-split holdout \| 3 of 4 \| 1 \|.*looked at 3 time\(s\).*no claim/);
     expect(md).not.toMatch(/hold-\d/);
-    expect(md).toContain("Diff policy changed since the analysis plan was committed: abc123");
+    expect(md).toContain(
+      "Batch `hold-`: diff policy changed since `analysis-plan.md` was committed: abc123",
+    );
+    expect(md).toContain("Batch `hold-b2-`: diff policy unchanged");
+  });
+
+  it("counts looks per set across locks, legacy runs counting for every set", () => {
+    const dir = mkdtempSync(join(tmpdir(), "scf-looks-"));
+    const file = join(dir, "runs.jsonl");
+    const lines = [
+      { lock: "a", holdout: { total: 5 } },
+      { lock: "b", holdout: { total: 5 }, sets: ["hash", "hold"] },
+      { lock: "c", holdout: { total: 0 }, sets: [] },
+      { lock: "d", holdout: { total: 9 }, sets: ["hash", "hold", "hold-b2"] },
+    ];
+    writeFileSync(file, lines.map((l) => JSON.stringify(l)).join("\n") + "\n");
+    expect(looksPerSet(file, ["hash", "hold", "hold-b2"])).toEqual({
+      hash: 3,
+      hold: 3,
+      "hold-b2": 2,
+    });
+    rmSync(dir, { recursive: true, force: true });
   });
 });

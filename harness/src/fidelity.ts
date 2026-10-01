@@ -33,12 +33,13 @@ export interface FidelityInput {
     commit: string | null;
     dirty: boolean | null;
     sandbox: boolean;
-    holdoutLooks: number;
   };
+  // Scored runs that included each holdout set ("hash" or a batch prefix), this one included.
+  looks: Record<string, number>;
+  // Per batch prefix: its plan file and the commits that changed the diff policy since it.
+  plans: Record<string, { file: string; policyChanges: string[] }>;
   gaps: string | null;
   breakerLogs: string[];
-  // Commits that changed the diff policy after the analysis plan was committed.
-  policySincePlan: string[] | null;
 }
 
 // One-sided exact (Clopper-Pearson) upper bound on the failure rate, given k failures in n.
@@ -66,12 +67,20 @@ export function upperBound(k: number, n: number, alpha = 0.05): number {
 
 const pct = (x: number): string => `${(x * 100).toFixed(2)} %`;
 
-function measured(name: string, t: Tally): string {
-  if (t.total === 0) return `| ${name} | none | | | |`;
+function measured(name: string, t: Tally, status: string): string {
+  if (t.total === 0) return `| ${name} | none | | | | ${status} |`;
   const k = t.total - t.pass;
   const b95 = pct(upperBound(k, t.total));
   const b99 = pct(upperBound(k, t.total, 0.01));
-  return `| ${name} | ${String(t.pass)} of ${String(t.total)} | ${String(k)} | ${b95} | ${b99} |`;
+  return `| ${name} | ${String(t.pass)} of ${String(t.total)} | ${String(k)} | ${b95} | ${b99} | ${status} |`;
+}
+
+// Only a pre-registered batch on its single look carries a claim; every other set is reported
+// with the reason it cannot.
+function batchStatus(looks: number, plan: string | undefined): string {
+  if (plan === undefined) return `no plan found; ${String(looks)} look(s), no claim`;
+  if (looks <= 1) return `first and only look; plan \`${plan}\``;
+  return `spent: ${String(looks)} looks; its claim rests on the first (\`measurements.md\`)`;
 }
 
 // A `## <title>` section of GAPS.md, without its heading.
@@ -109,27 +118,39 @@ export function fidelityReport(f: FidelityInput): string {
     "Fixtures recorded from the real target, replayed against a freshly reset clone. Only holdout",
     "cases the builder never saw count as clean; dev cases are training data.",
     "",
-    "| Set | Passing | Failures | Upper bound on the failure rate, 95 % | Same, 99 % |",
-    "| --- | --- | --- | --- | --- |",
+    "| Set | Passing | Failures | Upper bound on the failure rate, 95 % | Same, 99 % | Status |",
+    "| --- | --- | --- | --- | --- | --- |",
     ...Object.entries(f.batches)
       .sort(([a], [b]) => a.localeCompare(b))
-      .map(([prefix, t]) => measured(`Pre-registered batch \`${prefix}-\``, t)),
-    measured("Hash-split holdout", f.hashHoldout),
-    measured("Dev (training, not a claim)", f.dev),
+      .map(([prefix, t]) =>
+        measured(
+          `Pre-registered batch \`${prefix}-\``,
+          t,
+          batchStatus(f.looks[prefix] ?? 1, f.plans[prefix]?.file),
+        ),
+      ),
+    measured(
+      "Hash-split holdout",
+      f.hashHoldout,
+      `looked at ${String(f.looks.hash ?? 1)} time(s) and holds cases designed after earlier failures: no claim`,
+    ),
+    measured("Dev", f.dev, "training data, no claim"),
     "",
     `Perceptual pixel differences reported, never scored: ${String(f.pixelsReported)}.`,
     "",
     "## 3. Bound",
     "",
-    "One-sided exact (Clopper-Pearson) bounds at 95 % and 99 %, valid for the distribution each set was",
-    "drawn from and for nothing outside it. Each pre-registered batch has its plan in an",
-    "`analysis-plan*.md` and is scored once; spent batches are listed in `measurements.md`; with no failure in n cases the 95 % bound is 1 − 0.05^(1/n).",
+    "One-sided exact (Clopper-Pearson) bounds at 95 % and 99 %, valid for the distribution each set",
+    "was drawn from and for nothing outside it. A claim rests only on a pre-registered batch's first",
+    "look, recorded in `measurements.md`. With no failure in n cases the 95 % bound is 1 − 0.05^(1/n).",
     "",
-    f.policySincePlan === null
-      ? "No analysis plan committed."
-      : f.policySincePlan.length === 0
-        ? "Diff policy unchanged since the analysis plan was committed."
-        : `Diff policy changed since the analysis plan was committed: ${f.policySincePlan.join("; ")}.`,
+    ...Object.entries(f.plans)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([prefix, p]) =>
+        p.policyChanges.length === 0
+          ? `- Batch \`${prefix}-\`: diff policy unchanged since \`${p.file}\` was committed.`
+          : `- Batch \`${prefix}-\`: diff policy changed since \`${p.file}\` was committed: ${p.policyChanges.join("; ")}.`,
+      ),
     "",
     "## 4. Coverage",
     "",
@@ -166,24 +187,31 @@ export function fidelityReport(f: FidelityInput): string {
     `- Evaluator lock: ${i.lockIntact ? "intact" : "BROKEN"} (\`${i.lockHash}\`).`,
     `- Commit: ${i.commit ?? "none (outside git)"}${i.dirty === true ? ", with uncommitted changes to the harness or targets" : ""}.`,
     `- Run inside a builder sandbox: ${i.sandbox ? "yes (the holdout is absent there)" : "no"}.`,
-    `- Scored runs that looked at the holdout under this lock, this one included: ${String(i.holdoutLooks)}. A`,
-    "  holdout that drove a decision is spent; see `measurements.md` for each batch's single look.",
+    `- Looks per holdout set, every lock included: ${
+      Object.entries(f.looks)
+        .map(([k, n]) => `${k} ${String(n)}`)
+        .join(", ") || "none"
+    }. Runs logged before sets were recorded count for every set.`,
     "",
   ].join("\n");
 }
 
 const RunLine = z.object({
-  lock: z.string(),
   holdout: z.object({ total: z.number() }),
+  sets: z.array(z.string()).optional(),
 });
 
-export function holdoutLooks(runsFile: string, lock: string): number {
-  if (!existsSync(runsFile)) return 0;
-  return readFileSync(runsFile, "utf8")
-    .split("\n")
-    .filter((l) => l.trim() !== "")
-    .map((l) => RunLine.safeParse(JSON.parse(l)))
-    .filter((r) => r.success && r.data.lock === lock && r.data.holdout.total > 0).length;
+// Counted over every run of the log, whatever its lock: a relock does not make a holdout fresh.
+export function looksPerSet(runsFile: string, sets: string[]): Record<string, number> {
+  const looks = Object.fromEntries(sets.map((s) => [s, 0]));
+  if (!existsSync(runsFile)) return looks;
+  for (const line of readFileSync(runsFile, "utf8").split("\n")) {
+    if (line.trim() === "") continue;
+    const r = RunLine.safeParse(JSON.parse(line));
+    if (!r.success || r.data.holdout.total === 0) continue;
+    for (const s of r.data.sets ?? sets) if (s in looks) looks[s] = (looks[s] ?? 0) + 1;
+  }
+  return looks;
 }
 
 export function breakerLogs(dir: string): string[] {

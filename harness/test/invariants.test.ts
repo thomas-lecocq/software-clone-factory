@@ -11,6 +11,8 @@ import {
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterAll, describe, expect, it } from "vitest";
+import { z } from "zod";
+import { startCloneProcess } from "../src/clone-process.ts";
 import {
   checkLock,
   loadFixtures,
@@ -212,6 +214,22 @@ describe("invariant 3: the guard hook keeps agents away from the evaluator", () 
         GUARD_LOG: "/dev/null",
       },
     }).status ?? -1;
+
+  it("exempts nobody inside a builder sandbox, the top-level session included", () => {
+    const write = {
+      tool_name: "Write",
+      tool_input: { file_path: "targets/t/fixtures/dev/a.json" },
+    };
+    expect(run(write)).toBe(0);
+    expect(run(write, { RH_SANDBOX: "1" })).toBe(2);
+    expect(run({ ...write, agent_type: "recorder" }, { RH_SANDBOX: "1" })).toBe(2);
+  });
+
+  it("is attached to every tool it has rules for, web tools included", () => {
+    const settings = readFileSync(join(root, ".claude", "settings.json"), "utf8");
+    for (const tool of ["Read", "Write", "Edit", "Bash", "Grep", "Glob", "WebFetch", "WebSearch"])
+      expect(settings).toMatch(new RegExp(`"matcher": "[^"]*\\b${tool}\\b`));
+  });
 
   it.each([
     [
@@ -676,6 +694,46 @@ describe("invariant 3: implementers see only a stripped sandbox", () => {
     expect(run.match(/(^|\s)(-v|--volume|--mount)\s/g)).toEqual([" -v "]);
     expect(run).toContain('-v "$sandbox:/work"');
     expect(script).toContain('make-sandbox.sh" "$repo" "$sandbox"');
+  });
+});
+
+describe("invariant 2: the clone never runs inside the verifier", () => {
+  const t = "_proc-test";
+  const dir = targetDir(t);
+  afterAll(() => {
+    rmSync(dir, { recursive: true, force: true });
+  });
+
+  it("starts the clone in another process, so a patched global stays there", async () => {
+    mkdirSync(join(dir, "clone"), { recursive: true });
+    writeFileSync(
+      join(dir, "clone", "server.ts"),
+      [
+        'import { startCloneServer } from "../../../harness/src/clone-kit.ts";',
+        "(globalThis as Record<string, unknown>).patchedByClone = true;",
+        "export const startClone = (port: number) =>",
+        "  startCloneServer({ seed: () => ({}), handle: () => ({ status: 200, body: { pid: process.pid } }) }, port);",
+        "",
+      ].join("\n"),
+    );
+    const clone = await startCloneProcess(t, "clone/server.ts", 4631);
+    try {
+      const res = await fetch(`${clone.url}/anything`);
+      const body = z.object({ pid: z.number() }).parse(await res.json());
+      expect(body.pid).not.toBe(process.pid);
+      expect("patchedByClone" in globalThis).toBe(false);
+      expect((await fetch(`${clone.url}/__reset`, { method: "POST" })).ok).toBe(true);
+    } finally {
+      await clone.close();
+    }
+  });
+
+  it("is what verify, explain and serve use", () => {
+    for (const f of ["verify.ts", "explain.ts", "cli.ts"]) {
+      const src = readFileSync(join(root, "harness", "src", f), "utf8");
+      expect(src, f).toContain("startCloneProcess(");
+      expect(src, f).not.toMatch(/adapter\)?\.startClone|from "\.\.\/\.\.\/targets/);
+    }
   });
 });
 

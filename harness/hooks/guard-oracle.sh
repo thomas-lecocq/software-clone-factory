@@ -27,9 +27,12 @@ block() {
 }
 
 # Default deny for subagents: any agent other than the recorder is treated as an implementer.
-case "$role" in
-  main | recorder) exit 0 ;;
-esac
+# Inside a builder sandbox nobody is exempt: there the top-level session is an implementer too.
+if [[ "${RH_SANDBOX:-}" != "1" ]]; then
+  case "$role" in
+    main | recorder) exit 0 ;;
+  esac
+fi
 
 oracle='(fixtures/|fixtures\.lock|policy\.json|rules\.json|(^|[ /])harness/|/verify/|docs/verification\.md|npm run record|cli\.ts (record|relock|explain))'
 

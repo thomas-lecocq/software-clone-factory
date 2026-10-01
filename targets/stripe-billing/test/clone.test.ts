@@ -4,6 +4,7 @@ import { join } from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import type { RunningClone } from "../../../harness/src/adapter.ts";
 import adapter from "../adapter.ts";
+import { startClone } from "../clone/server.ts";
 
 const probe = adapter.probes().find((p) => p.id === "d-pct20-sub");
 if (!probe) throw new Error("probe d-pct20-sub missing");
@@ -26,7 +27,7 @@ describe("invariant 4: recording refuses a non-test key", () => {
 describe("invariant 5: the clone is resettable and deterministic", () => {
   let clone: RunningClone;
   beforeAll(async () => {
-    clone = await adapter.startClone(4611);
+    clone = await startClone(4611);
   });
   afterAll(async () => {
     await clone.close();
@@ -49,7 +50,7 @@ describe("invariant 5: the clone is resettable and deterministic", () => {
     await attempt();
     await fetch(`${clone.url}/__reset`, { method: "POST" });
     const afterReset = await (await fetch(`${clone.url}/__state`)).text();
-    const fresh = await adapter.startClone(4612);
+    const fresh = await startClone(4612);
     const seed = await (await fetch(`${fresh.url}/__state`)).text();
     await fresh.close();
     expect(afterReset).toBe(seed);

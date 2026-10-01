@@ -3,6 +3,7 @@
  */
 import { join } from "node:path";
 import { parseArgs } from "node:util";
+import { startCloneProcess } from "./clone-process.ts";
 import { loadAdapter } from "./adapter.ts";
 import { checkLock, writeLock, type Split } from "./fixtures.ts";
 import { explain } from "./explain.ts";
@@ -81,7 +82,7 @@ if (command === "record") {
     values.split === "dev" ? ["dev"] : values.split === "all" ? ["dev", "holdout"] : ["holdout"];
   await explain(target, splits, port);
 } else if (command === "serve") {
-  const clone = await (await loadAdapter(target)).startClone(port);
+  const clone = await startCloneProcess(target, (await loadAdapter(target)).cloneEntry, port);
   console.log(`clone of ${target} listening on ${clone.url}`);
 } else {
   console.error(`unknown command ${command}`);

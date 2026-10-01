@@ -9,7 +9,6 @@ import Stripe from "stripe";
 import { z } from "zod";
 import type { Probe, Side, TargetAdapter } from "../../harness/src/adapter.ts";
 import { JsonSchema, type Json } from "../../harness/src/json.ts";
-import { startClone } from "./clone/server.ts";
 import { probes } from "./probes.ts";
 import { LifeInput, runLifecycle } from "./lifecycle.ts";
 import { ExploreInput, runExplore } from "./explore.ts";
@@ -162,5 +161,10 @@ async function run(probe: Probe, side: Side): Promise<Record<string, Json>> {
   };
 }
 
-const adapter: TargetAdapter = { probes, run, startClone };
+const recordedWith = (): Record<string, Json> => ({
+  stripe_api_version: Stripe.API_VERSION,
+  stripe_node: Stripe.PACKAGE_VERSION,
+});
+
+const adapter: TargetAdapter = { probes, run, cloneEntry: "clone/server.ts", recordedWith };
 export default adapter;

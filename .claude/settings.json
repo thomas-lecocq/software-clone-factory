@@ -2,7 +2,7 @@
   "hooks": {
     "PreToolUse": [
       {
-        "matcher": "Read|Write|Edit|MultiEdit|NotebookEdit|Bash|Grep|Glob",
+        "matcher": "Read|Write|Edit|MultiEdit|NotebookEdit|Bash|Grep|Glob|WebFetch|WebSearch",
         "hooks": [
           { "type": "command", "command": "\"$CLAUDE_PROJECT_DIR\"/harness/hooks/guard-oracle.sh" }
         ]

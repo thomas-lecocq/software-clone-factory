@@ -16,6 +16,7 @@ export const FixtureSchema = z.object({
   observed: z.record(z.string(), JsonSchema),
   noise: z.array(z.string()).describe("paths that differed between two recordings of this probe"),
   recorded_at: z.string(),
+  recorded_with: z.record(z.string(), JsonSchema).optional(),
 });
 export type Fixture = z.infer<typeof FixtureSchema>;
 export type Split = "dev" | "holdout";
@@ -120,6 +121,11 @@ function codeHashes(target: string): Record<string, string> {
     ...readdirSync(join(harness, "hooks")).map((n): [string, string] => [
       `harness/hooks/${n}`,
       join(harness, "hooks", n),
+    ]),
+    // The agent image decides what an implementer can run and see.
+    ...readdirSync(join(harness, "docker")).map((n): [string, string] => [
+      `harness/docker/${n}`,
+      join(harness, "docker", n),
     ]),
     ...readdirSync(harness)
       .filter((n) => n.endsWith(".sh"))

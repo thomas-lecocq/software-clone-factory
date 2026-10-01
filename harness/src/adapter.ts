@@ -25,7 +25,12 @@ export interface TargetAdapter {
   probes(): Probe[];
   // Returns named observations, e.g. { preview: <response body> }.
   run(probe: Probe, side: Side): Promise<Record<string, Json>>;
-  startClone(port: number): Promise<RunningClone>;
+  // The clone's entry module, relative to the target folder, exporting
+  // `startClone(port): Promise<RunningClone>`. The harness runs it in a separate process.
+  cloneEntry: string;
+  // What the recording depended on besides the probe (API and SDK versions), stored with each new
+  // fixture so that a later change on the target's side can be told apart from a clone bug.
+  recordedWith?(): Record<string, Json>;
 }
 
 function isAdapter(v: unknown): v is TargetAdapter {
@@ -36,8 +41,8 @@ function isAdapter(v: unknown): v is TargetAdapter {
     typeof v.probes === "function" &&
     "run" in v &&
     typeof v.run === "function" &&
-    "startClone" in v &&
-    typeof v.startClone === "function"
+    "cloneEntry" in v &&
+    typeof v.cloneEntry === "string"
   );
 }
 

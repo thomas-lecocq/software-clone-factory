@@ -43,6 +43,7 @@ export async function record(target: string, opts: RecordOptions): Promise<void>
       observed: Object.fromEntries(Object.entries(first).map(([k, v]) => [k, scrub(v, literals)])),
       noise,
       recorded_at: new Date().toISOString(),
+      ...(adapter.recordedWith ? { recorded_with: adapter.recordedWith() } : {}),
     });
     written += 1;
     logTiming(target, "record", { id: probe.id, runs: 2, seconds: secondsSince(started) });

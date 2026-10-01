@@ -4,6 +4,7 @@
  */
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { startCloneProcess } from "./clone-process.ts";
 import { loadAdapter } from "./adapter.ts";
 import { loadFixtures, targetDir, type Split } from "./fixtures.ts";
 import { diff, PolicySchema } from "./policy.ts";
@@ -13,7 +14,7 @@ export async function explain(target: string, splits: Split[], port: number): Pr
     JSON.parse(readFileSync(join(targetDir(target), "policy.json"), "utf8")),
   );
   const adapter = await loadAdapter(target);
-  const clone = await adapter.startClone(port);
+  const clone = await startCloneProcess(target, adapter.cloneEntry, port);
   try {
     for (const f of loadFixtures(target, splits)) {
       await fetch(`${clone.url}/__reset`, { method: "POST" });

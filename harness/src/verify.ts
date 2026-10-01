@@ -6,13 +6,21 @@
  * Per-case holdout results go only to `holdout-*` files, never copied into a builder sandbox.
  */
 import { execFileSync } from "node:child_process";
-import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import {
+  appendFileSync,
+  existsSync,
+  mkdirSync,
+  readdirSync,
+  readFileSync,
+  writeFileSync,
+} from "node:fs";
 import { join } from "node:path";
 import { z } from "zod";
+import { startCloneProcess } from "./clone-process.ts";
 import { loadAdapter, type TargetAdapter } from "./adapter.ts";
 import { checkLock, loadFixtures, sha256, targetDir, type Split } from "./fixtures.ts";
 import type { Json } from "./json.ts";
-import { batchOf, breakerLogs, fidelityReport, holdoutLooks, type Tally } from "./fidelity.ts";
+import { batchOf, breakerLogs, fidelityReport, looksPerSet, type Tally } from "./fidelity.ts";
 import { loadLedger, ruleStatuses, type RuleResult } from "./ledger.ts";
 import { logTiming, secondsSince } from "./timings.ts";
 import {
@@ -66,7 +74,7 @@ export async function verify(target: string, splits: Split[], port = 4599): Prom
   // Rule tags are specification, not recorded output: take them from the current probe set so a
   // rule found later can claim the fixtures that already exhibit it.
   const tags = new Map(adapter.probes().map((p) => [p.id, p.rules]));
-  const clone = await adapter.startClone(port);
+  const clone = await startCloneProcess(target, adapter.cloneEntry, port);
 
   const cases: CaseResult[] = [];
   let determinism: { identical: number; total: number };
@@ -162,6 +170,10 @@ export async function verify(target: string, splits: Split[], port = 4599): Prom
       held,
     ),
   );
+  // Which holdout sets this run looked at: "hash" and each pre-registered batch prefix.
+  const heldSets = [
+    ...new Set(held.map((c) => (c.id.startsWith("hold-") ? batchOf(c.id) : "hash"))),
+  ].sort();
   const run = {
     at: new Date().toISOString(),
     splits,
@@ -172,6 +184,7 @@ export async function verify(target: string, splits: Split[], port = 4599): Prom
     git: inGit(),
     ...gitState(),
     sandbox: process.env.RH_SANDBOX === "1",
+    sets: heldSets,
   };
   appendFileSync(join(out, "runs.jsonl"), `${JSON.stringify(run)}\n`);
   const tally = (cs: CaseResult[]): Tally => ({
@@ -203,11 +216,11 @@ export async function verify(target: string, splits: Split[], port = 4599): Prom
         commit: run.commit,
         dirty: run.dirty,
         sandbox: run.sandbox,
-        holdoutLooks: holdoutLooks(join(out, "runs.jsonl"), run.lock),
       },
+      looks: looksPerSet(join(out, "runs.jsonl"), heldSets),
+      plans: batchPlans(target),
       gaps: existsSync(gapsFile) ? readFileSync(gapsFile, "utf8") : null,
       breakerLogs: breakerLogs(dir),
-      policySincePlan: policySincePlan(target),
     }),
   );
 
@@ -302,33 +315,34 @@ function gitState(): { commit: string | null; dirty: boolean | null } {
   }
 }
 
-function policySincePlan(target: string): string[] | null {
+// Each analysis-plan*.md names its batch by its first probe ID (`hold-b2-001`). For each batch:
+// the plan file and the commits that changed the diff policy after that plan was committed.
+function batchPlans(target: string): Record<string, { file: string; policyChanges: string[] }> {
   const git = (...args: string[]): string =>
     execFileSync("git", args, { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim();
-  try {
-    const plan = git(
-      "log",
-      "--diff-filter=A",
-      "--format=%H",
-      "--",
-      `targets/${target}/analysis-plan.md`,
-    );
-    if (plan === "") return null;
-    const changes = git(
-      "log",
-      "--format=%h %s",
-      `${plan}..HEAD`,
-      "--",
-      `targets/${target}/policy.json`,
-    );
-    const dirty = git("status", "--porcelain", "--", `targets/${target}/policy.json`) !== "";
-    return [
-      ...(changes === "" ? [] : changes.split("\n")),
-      ...(dirty ? ["uncommitted changes"] : []),
-    ];
-  } catch {
-    return null;
+  const dir = targetDir(target);
+  const out: Record<string, { file: string; policyChanges: string[] }> = {};
+  for (const file of readdirSync(dir).filter((f) => /^analysis-plan.*\.md$/.test(f))) {
+    const prefix = /`(hold[\w-]*?)-001`/.exec(readFileSync(join(dir, file), "utf8"))?.[1];
+    if (prefix === undefined) continue;
+    try {
+      const added = git("log", "--diff-filter=A", "--format=%H", "--", `targets/${target}/${file}`);
+      const policy = `targets/${target}/policy.json`;
+      const changes =
+        added === "" ? "" : git("log", "--format=%h %s", `${added}..HEAD`, "--", policy);
+      const dirty = git("status", "--porcelain", "--", policy) !== "";
+      out[prefix] = {
+        file: added === "" ? `${file} (not committed)` : file,
+        policyChanges: [
+          ...(changes === "" ? [] : changes.split("\n")),
+          ...(dirty ? ["uncommitted changes"] : []),
+        ],
+      };
+    } catch {
+      out[prefix] = { file: `${file} (outside git)`, policyChanges: [] };
+    }
   }
+  return out;
 }
 
 function inGit(): boolean {
