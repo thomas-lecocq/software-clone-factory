@@ -272,6 +272,8 @@ export function committedLockProblems(target: string): string[] {
   return committed === local ? [] : ["fixtures.lock differs from the committed lock"];
 }
 
+// Outputs of verify itself never make a tree dirty. The `:(exclude,glob)` form is required: the
+// short `:!targets/*/verify` excluded nothing, and every run was logged as dirty.
 function gitState(): { commit: string | null; dirty: boolean | null } {
   try {
     const commit = execFileSync("git", ["rev-parse", "--short", "HEAD"], {
@@ -285,10 +287,10 @@ function gitState(): { commit: string | null; dirty: boolean | null } {
         "--",
         "harness",
         "targets",
-        ":!targets/*/verify",
-        ":!targets/*/GAPS.generated.md",
-        ":!targets/*/failures.jsonl",
-        ":!targets/*/timings.jsonl",
+        ":(exclude,glob)targets/*/verify/**",
+        ":(exclude,glob)targets/*/GAPS.generated.md",
+        ":(exclude,glob)targets/*/failures.jsonl",
+        ":(exclude,glob)targets/*/timings.jsonl",
       ],
       {
         encoding: "utf8",

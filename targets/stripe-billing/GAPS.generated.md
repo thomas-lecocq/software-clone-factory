@@ -15,11 +15,11 @@ account of divergences is `GAPS.md`.
 - PRO-10: not covered by a fixture; behaviour inferred from builder, from rand-004 and rand-011 (dev); unverified.
 - PER-01: not covered by a fixture; behaviour inferred from https://docs.stripe.com/billing/subscriptions/billing-cycle; unverified.
 - INT-01: not covered by a fixture; behaviour inferred from t-month-to-year-*, u-year-to-month-*, u-year-to-year (dev); builder pass 3 (dev fixtures), clone/NOTES.md pass 6; edited 2026-09-23 after the final measurement, statements only; unverified.
-- DSC-01: not covered by a fixture; behaviour inferred from RECON.md: 600 on the 3000 line; unverified.
+- DSC-01: not covered by a fixture; behaviour inferred from dev fixtures and spent holdout batch 1, analysed in analysis/batch1-failures.md (2026-10-01); unverified.
 - DSC-02: not covered by a fixture; behaviour inferred from RECON.md: 1600 'with 20.0% off' line; unverified.
 - DSC-03: not covered by a fixture; behaviour inferred from https://docs.stripe.com/billing/subscriptions/prorations (166/334 example); unverified.
 - DSC-04: not covered by a fixture; behaviour inferred from fresh2-002/081/124/140, u-classic-off-* (dev); builder pass 3 (dev fixtures), clone/NOTES.md pass 6; edited 2026-09-23 after the final measurement, statements only; unverified.
-- DSC-05: not covered by a fixture; behaviour inferred from https://docs.stripe.com/billing/subscriptions/coupons; unverified.
+- DSC-05: not covered by a fixture; behaviour inferred from dev fixtures and spent holdout batch 1, analysed in analysis/batch1-failures.md (2026-10-01); unverified.
 - MOD-01: not covered by a fixture; behaviour inferred from builder pass 3 (dev fixtures), clone/NOTES.md pass 6; edited 2026-09-23 after the final measurement, statements only; unverified.
 - ERR-01: not covered by a fixture; behaviour inferred from API reference, proration_date parameter; unverified.
 - UI-01: not covered by a fixture; behaviour inferred from RECON.md and recon/portal-walk.ts, walk of 2026-09-23; unverified.
@@ -45,6 +45,10 @@ account of divergences is `GAPS.md`.
 - UI-14: not covered by a fixture; behaviour inferred from trial walk and exploration of 2026-10-01 (ui.ts, explore.ts); unverified.
 - ITM-01: not covered by a fixture; behaviour inferred from widened distribution, 2026-10-01; to be checked against the wide fixtures; unverified.
 - DSC-06: not covered by a fixture; behaviour inferred from widened distribution, 2026-10-01; to be checked against the wide fixtures; unverified.
+- DSC-07: not covered by a fixture; behaviour inferred from dev fixtures and spent holdout batch 1, analysed in analysis/batch1-failures.md (2026-10-01); unverified.
+- DSC-08: not covered by a fixture; behaviour inferred from dev fixtures and spent holdout batch 1, analysed in analysis/batch1-failures.md (2026-10-01); unverified.
+- INT-02: not covered by a fixture; behaviour inferred from dev fixtures and spent holdout batch 1, analysed in analysis/batch1-failures.md (2026-10-01); unverified.
+- INV-01: not covered by a fixture; behaviour inferred from dev fixtures and spent holdout batch 1, analysed in analysis/batch1-failures.md (2026-10-01); unverified.
 
 Fields not compared exactly:
 
