@@ -67,8 +67,6 @@ function compare(field: PolicyField | undefined, path: string, ev?: Json, av?: J
   switch (field?.mode) {
     case "ignore":
       return [];
-    case "mask":
-      return JSON.stringify(ev) === JSON.stringify(av) ? [] : [d];
     case "type":
       return typeOf(ev) === typeOf(av) ? [] : [d];
     case "tolerance":
@@ -79,6 +77,8 @@ function compare(field: PolicyField | undefined, path: string, ev?: Json, av?: J
       const share = thumbnailShare(ev, av);
       return share <= field.max_share ? [] : [{ ...d, report: { share } }];
     }
+    // A mask is never chosen as a field's mode (see diff); listed for an exhaustive switch.
+    case "mask":
     case undefined:
       return JSON.stringify(ev) === JSON.stringify(av) ? [] : [d];
   }
@@ -109,7 +109,8 @@ export function diff(policy: Policy, expected: Json, actual: Json): FieldDiff[] 
   const a = prep(actual);
   const out: FieldDiff[] = [];
   for (const path of new Set([...e.keys(), ...a.keys()])) {
-    const field = policy.fields.find((f) => pathMatches(f.path, path));
+    // Masks rewrite text before the comparison; they never choose how a field is compared.
+    const field = policy.fields.find((f) => f.mode !== "mask" && pathMatches(f.path, path));
     out.push(...compare(field, path, e.get(path), a.get(path)));
   }
   return out.sort((x, y) => x.path.localeCompare(y.path));

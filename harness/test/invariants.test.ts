@@ -166,6 +166,18 @@ describe("diff policy", () => {
     ).toHaveLength(1);
   });
 
+  it("keeps a tolerance in force under a mask that covers the same path", () => {
+    const policy = {
+      canonicalIds: false,
+      fields: [
+        { path: "*.**", mode: "mask" as const, pattern: "X", why: "test only" },
+        { path: "*.layout.**", mode: "tolerance" as const, by: 16, why: "test only" },
+      ],
+    };
+    const e = { s: { layout: { a: [0, 0] } } };
+    expect(diff(policy, e, { s: { layout: { a: [5, 7] } } })).toEqual([]);
+  });
+
   it("reports perceptual differences without blocking the case", () => {
     const policy = {
       canonicalIds: false,
