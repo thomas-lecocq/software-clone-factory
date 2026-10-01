@@ -284,6 +284,7 @@ function gitState(): { commit: string | null; dirty: boolean | null } {
         ":!targets/*/verify",
         ":!targets/*/GAPS.generated.md",
         ":!targets/*/failures.jsonl",
+        ":!targets/*/timings.jsonl",
       ],
       {
         encoding: "utf8",
