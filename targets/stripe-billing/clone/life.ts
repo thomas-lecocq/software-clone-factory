@@ -1,209 +1,253 @@
 /**
- * The subscription lifecycle over test-clock time (slice 2): renewals, trial end, cancellation,
- * payment attempts and retries. Everything happens when a clock is advanced, in time order, so
- * the same script always gives the same invoices. The rules and the fixtures that pin them are in
- * NOTES.md, passes 4 and 5.
+ * Time on a test clock: renewals at the period end, payment attempts an hour later, retries of a
+ * failed payment, the end of a subscription set to cancel, and cancelling now (LIF-*).
  */
+import { allocate, creditLine, priceOf, recurringDescription, specOf, specsOf } from "./billing.ts";
 import {
-  activeDiscounts,
-  creditLine,
-  customerNow,
-  intervalMonths,
-  periodEndFor,
-  periodLine,
-  priceOf,
-  totals,
-} from "./billing.ts";
-import {
+  get,
   mint,
-  type Discount,
+  nowFor,
+  type Clock,
   type Invoice,
-  type LineData,
+  type Line,
   type State,
   type Subscription,
 } from "./state.ts";
+import { periodAt } from "./time.ts";
 
-/** Finalisation and the first payment attempt come one hour after an invoice is created. */
-const FIRST_ATTEMPT_DELAY = 3600;
-// A guess from one observation (l-payment-fails-retries: 3 attempts 5 days after the first).
-const RETRY_EVERY = 2 * 86400;
-const MAX_ATTEMPTS = 4;
+const HOUR = 3600;
+const DAY = 86400;
+// Retries after a failed renewal payment, counted from the first attempt (LIF-06: three attempts
+// within five days; the spacing in between is not pinned by the recordings).
+const RETRIES = [3 * DAY, 5 * DAY];
 
-interface NewInvoice {
-  lines: LineData[];
-  discounts: Discount[];
-  billing_reason: Invoice["billing_reason"];
-  created: number;
-  period_start: number;
-  period_end: number;
+function failing(state: State, customer: string): boolean {
+  const c = get(state.customers, customer);
+  const pm = c?.default_payment_method
+    ? get(state.payment_methods, c.default_payment_method)
+    : undefined;
+  return pm?.fails === true;
 }
 
-export function addInvoice(s: State, sub: Subscription, spec: NewInvoice): Invoice {
-  const invoice: Invoice = {
-    id: mint(s, "in"),
+export function invoiceTotal(inv: Invoice): number {
+  const sub = inv.lines.reduce((a, l) => a + l.amount, 0);
+  return sub - inv.total_discount_amounts.reduce((a, d) => a + d.amount, 0);
+}
+
+// Pending invoice items (prorations) of a subscription, moved onto an invoice.
+export function takePending(state: State, sub: Subscription, invoice: string): Line[] {
+  const out: Line[] = [];
+  for (const ii of Object.values(state.invoice_items)) {
+    if (ii.subscription !== sub.id || ii.invoice !== null) continue;
+    ii.invoice = invoice;
+    out.push({ ...ii.line, id: mint(state, "il") });
+  }
+  return out;
+}
+
+function renew(state: State, sub: Subscription): void {
+  const start = sub.period_end;
+  const interval = priceOf(state, sub.items[0]?.price ?? "").interval;
+  const end = periodAt(sub.anchor, interval, start)[1];
+  const id = mint(state, "in");
+  const pending = takePending(state, sub, id);
+  const lines: Line[] = sub.items.map((it) => {
+    const p = priceOf(state, it.price);
+    return {
+      id: mint(state, "il"),
+      amount: p.unit_amount * it.quantity,
+      description: recurringDescription(state, it.price, it.quantity),
+      period: { start, end },
+      price: it.price,
+      quantity: it.quantity,
+      proration: false,
+      discountable: true,
+      discount_amounts: [],
+      subscription_item: it.id,
+      invoice_item: null,
+      credited: null,
+      unit_amount_decimal: String(p.unit_amount),
+    };
+  });
+  const active = sub.discounts.filter((d) => {
+    const s = specOf(state, d);
+    return s !== undefined && !(s.once && get(state.discounts, d)?.used === true);
+  });
+  const specs = specsOf(state, active);
+  const alloc = allocate(
+    lines.map((l) => l.amount),
+    specs,
+  );
+  lines.forEach((l, i) => {
+    l.discount_amounts = specs.map((s, k) => ({ discount: s.id, amount: alloc[k]?.[i] ?? 0 }));
+  });
+  for (const s of specs) {
+    const d = get(state.discounts, s.id);
+    if (d && s.once) d.used = true;
+  }
+  sub.items.forEach((it, i) => {
+    const l = lines[i];
+    if (l) it.billed = { invoice: id, line: l.id, amount: l.amount, discounts: l.discount_amounts };
+  });
+  const all = [...pending, ...lines];
+  const inv: Invoice = {
+    id,
     customer: sub.customer,
     subscription: sub.id,
-    lines: spec.lines,
-    discounts: spec.discounts,
+    lines: all,
+    discounts: specs.map((s) => s.id),
+    total_discount_amounts: specs.map((s, k) => ({
+      discount: s.id,
+      amount: (alloc[k] ?? []).reduce((a, b) => a + b, 0),
+    })),
+    billing_reason: "subscription_cycle",
     status: "draft",
-    billing_reason: spec.billing_reason,
+    created: start,
+    period_start: sub.period_start,
+    period_end: start,
     attempt_count: 0,
-    next_attempt: spec.created + FIRST_ATTEMPT_DELAY,
-    first_attempt: null,
-    created: spec.created,
-    period_start: spec.period_start,
-    period_end: spec.period_end,
+    amount_paid: 0,
+    auto_advance: true,
+    next_payment_attempt: start + HOUR,
+    proration_date: null,
+    retries: [],
   };
-  s.invoices[invoice.id] = invoice;
-  sub.invoices.push(invoice.id);
-  sub.latest_invoice = invoice.id;
-  return invoice;
+  state.invoices[id] = inv;
+  sub.latest_invoice = id;
+  sub.period_start = start;
+  sub.period_end = end;
+  if (sub.status === "trialing") sub.status = "active";
 }
 
-export function amountDue(inv: Invoice): number {
-  return totals(inv.lines, inv.discounts).amount_due;
-}
-
-/** Finalise the invoice and try to collect it with the customer's default payment method. */
-export function collect(s: State, inv: Invoice, at: number): void {
-  const sub = s.subscriptions[inv.subscription];
-  inv.next_attempt = null;
-  if (amountDue(inv) === 0) {
+function attempt(state: State, inv: Invoice, at: number): void {
+  const sub = inv.subscription ? get(state.subscriptions, inv.subscription) : undefined;
+  const due = Math.max(0, invoiceTotal(inv));
+  if (due === 0) {
     inv.status = "paid";
+    inv.next_payment_attempt = null;
     return;
   }
-  const customer = s.customers[inv.customer];
-  const pm = customer?.default_payment_method ?? null;
-  const declines = pm === null || s.payment_methods[pm]?.declines === true;
   inv.attempt_count += 1;
-  inv.first_attempt ??= at;
-  if (!declines) {
+  if (!failing(state, inv.customer)) {
     inv.status = "paid";
+    inv.amount_paid = due;
+    inv.next_payment_attempt = null;
     if (sub?.status === "past_due") sub.status = "active";
     return;
   }
   inv.status = "open";
+  if (inv.attempt_count === 1) inv.retries = RETRIES.map((d) => at + d);
+  const next = inv.retries.shift();
+  inv.next_payment_attempt = next ?? null;
   if (sub && sub.status !== "canceled") sub.status = "past_due";
-  if (inv.attempt_count < MAX_ATTEMPTS) {
-    inv.next_attempt = inv.first_attempt + inv.attempt_count * RETRY_EVERY;
-  }
 }
 
-function renew(s: State, sub: Subscription): void {
-  const at = sub.current_period_end;
-  if (sub.cancel_at_period_end && sub.cancel_at !== null && sub.cancel_at <= at) {
-    sub.status = "canceled";
-    sub.ended_at = sub.cancel_at;
-    return;
-  }
-  const price = priceOf(s, sub.item.price);
-  const ended = { start: sub.current_period_start, end: at };
-  if (sub.status === "trialing") {
-    sub.status = "active";
-    sub.anchor = at;
-    sub.cycle_months = 0;
-  } else {
-    sub.cycle_months += intervalMonths(price.interval);
-  }
-  sub.current_period_start = at;
-  sub.current_period_end = periodEndFor(sub, price.interval);
-  const discounts = activeDiscounts(s, sub);
-  sub.period_discount = discounts[0] ?? null;
-  const line = periodLine(s, price, sub.item.quantity, at, sub.current_period_end, discounts);
-  line.id = mint(s, "il");
-  const lines = [...sub.pending, line];
-  sub.pending = [];
-  addInvoice(s, sub, {
-    lines,
-    discounts,
-    billing_reason: "subscription_cycle",
-    created: at,
-    period_start: ended.start,
-    period_end: ended.end,
-  });
-}
-
-type Event = { at: number; run: () => void };
-
-function nextEvent(s: State, clock: string, to: number): Event | null {
-  let best: Event | null = null;
-  const consider = (at: number, run: () => void): void => {
-    if (at <= to && (best === null || at < best.at)) best = { at, run };
-  };
-  for (const sub of Object.values(s.subscriptions)) {
-    if (s.customers[sub.customer]?.test_clock !== clock) continue;
-    for (const id of sub.invoices) {
-      const inv = s.invoices[id];
-      const at = inv?.next_attempt ?? null;
-      if (inv && at !== null) {
-        consider(at, () => {
-          collect(s, inv, at);
+// Runs every event of the clock's customers up to `to`, in time order.
+export function advanceClock(state: State, clock: Clock, to: number): void {
+  const customers = new Set(
+    Object.values(state.customers)
+      .filter((c) => c.clock === clock.id)
+      .map((c) => c.id),
+  );
+  for (let guard = 0; guard < 1000; guard += 1) {
+    const events: { at: number; run: () => void }[] = [];
+    const consider = (at: number, run: () => void): void => {
+      if (at <= to) events.push({ at, run });
+    };
+    for (const sub of Object.values(state.subscriptions)) {
+      if (!customers.has(sub.customer) || sub.status === "canceled") continue;
+      const cancelAt = sub.cancel_at;
+      if (cancelAt !== null && cancelAt <= sub.period_end) {
+        consider(cancelAt, () => {
+          sub.status = "canceled";
+          sub.ended_at = cancelAt;
         });
+        continue;
       }
-    }
-    if (sub.status !== "canceled") {
-      consider(sub.current_period_end, () => {
-        renew(s, sub);
+      consider(sub.period_end, () => {
+        if (sub.cancel_at_period_end) {
+          sub.status = "canceled";
+          sub.ended_at = sub.period_end;
+        } else {
+          renew(state, sub);
+        }
       });
     }
+    for (const inv of Object.values(state.invoices)) {
+      if (!customers.has(inv.customer)) continue;
+      if ((inv.status === "draft" && inv.auto_advance) || inv.status === "open") {
+        const at = inv.next_payment_attempt;
+        if (at !== null) {
+          consider(at, () => {
+            attempt(state, inv, at);
+          });
+        }
+      }
+    }
+    // The earliest event first; ties keep discovery order (subscriptions before invoices).
+    const chosen = events.reduce<{ at: number; run: () => void } | null>(
+      (best, e) => (best === null || e.at < best.at ? e : best),
+      null,
+    );
+    if (chosen === null) break;
+    clock.frozen_time = Math.max(clock.frozen_time, chosen.at);
+    chosen.run();
   }
-  return best;
-}
-
-/** Move a test clock forward, running every renewal and payment attempt due on the way. */
-export function advanceClock(s: State, clock: string, to: number): void {
-  const c = s.clocks[clock];
-  if (!c) return;
-  for (;;) {
-    const event: Event | null = nextEvent(s, clock, to);
-    if (event === null) break;
-    c.frozen_time = Math.max(c.frozen_time, event.at);
-    event.run();
-  }
-  c.frozen_time = to;
-}
-
-export function setCancelAtPeriodEnd(s: State, sub: Subscription, cancel: boolean): void {
-  sub.cancel_at_period_end = cancel;
-  sub.cancel_at = cancel ? sub.current_period_end : null;
-  sub.canceled_at = cancel ? customerNow(s, sub.customer) : null;
+  clock.frozen_time = to;
 }
 
 export function cancelNow(
-  s: State,
+  state: State,
   sub: Subscription,
   prorate: boolean,
   invoiceNow: boolean,
 ): void {
-  const now = customerNow(s, sub.customer);
-  if (prorate && now < sub.current_period_end) {
-    const before = sub.period_discount ? [sub.period_discount] : [];
-    const after = activeDiscounts(s, sub);
-    const listed = sub.billing_mode === "classic" ? after : [...before, ...after];
-    const line = creditLine(s, sub, now, listed);
-    line.id = mint(s, "il");
-    sub.pending.push(line);
-  }
-  if (invoiceNow && sub.pending.length > 0) {
-    const lines = sub.pending;
-    sub.pending = [];
-    addInvoice(s, sub, {
-      lines,
-      discounts: activeDiscounts(s, sub),
-      billing_reason: "subscription_cycle",
-      created: now,
-      period_start: sub.current_period_start,
-      period_end: now,
-    });
+  const now = nowFor(state, sub.customer);
+  if (prorate && now < sub.period_end) {
+    const credits = sub.items.map((it) => creditLine(state, sub, it, now).line);
+    if (invoiceNow) {
+      const id = mint(state, "in");
+      const pending = takePending(state, sub, id);
+      const lines: Line[] = [
+        ...pending,
+        ...credits.map((l) => ({ ...l, id: mint(state, "il"), invoice_item: mint(state, "ii") })),
+      ];
+      state.invoices[id] = {
+        id,
+        customer: sub.customer,
+        subscription: sub.id,
+        lines,
+        discounts: [],
+        total_discount_amounts: [],
+        billing_reason: "subscription_cycle",
+        status: "draft",
+        created: now,
+        period_start: sub.period_start,
+        period_end: now,
+        attempt_count: 0,
+        amount_paid: 0,
+        auto_advance: false,
+        next_payment_attempt: null,
+        proration_date: null,
+        retries: [],
+      };
+      sub.latest_invoice = id;
+    } else {
+      for (const l of credits) {
+        const id = mint(state, "ii");
+        state.invoice_items[id] = {
+          id,
+          customer: sub.customer,
+          subscription: sub.id,
+          line: { ...l, id: "", invoice_item: id },
+          invoice: null,
+        };
+      }
+    }
   }
   sub.status = "canceled";
-  sub.canceled_at ??= now;
   sub.ended_at = now;
-  sub.cancel_at = null;
+  sub.canceled_at ??= now;
   sub.cancel_at_period_end = false;
-}
-
-/** First period of a trial: `start -> start + days`, billed as a zero "Free trial" line. */
-export function trialEnd(start: number, days: number): number {
-  return start + days * 86400;
+  sub.cancel_at = null;
 }

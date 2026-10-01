@@ -12,6 +12,14 @@ const Field = z.discriminatedUnion("mode", [
   z.object({ path: z.string(), mode: z.literal("ignore"), why: Why }),
   z.object({ path: z.string(), mode: z.literal("type"), why: Why }),
   z.object({ path: z.string(), mode: z.literal("tolerance"), by: z.number().positive(), why: Why }),
+  // Replaces a pattern on both sides before comparing, in values and in keys under the path: for
+  // text that depends on something outside the probe, such as the day it was recorded.
+  z.object({
+    path: z.string(),
+    mode: z.literal("mask"),
+    pattern: z.string().min(1),
+    why: Why,
+  }),
   z.object({
     path: z.string(),
     mode: z.literal("perceptual"),
@@ -59,6 +67,8 @@ function compare(field: PolicyField | undefined, path: string, ev?: Json, av?: J
   switch (field?.mode) {
     case "ignore":
       return [];
+    case "mask":
+      return JSON.stringify(ev) === JSON.stringify(av) ? [] : [d];
     case "type":
       return typeOf(ev) === typeOf(av) ? [] : [d];
     case "tolerance":
@@ -74,8 +84,27 @@ function compare(field: PolicyField | undefined, path: string, ev?: Json, av?: J
   }
 }
 
+function masked(policy: Policy, flat: Map<string, Json>): Map<string, Json> {
+  const masks = policy.fields.filter((f) => f.mode === "mask");
+  if (masks.length === 0) return flat;
+  const out = new Map<string, Json>();
+  for (const [path, value] of flat) {
+    let p = path;
+    let v = value;
+    for (const m of masks) {
+      if (!pathMatches(m.path, path)) continue;
+      const re = new RegExp(m.pattern, "g");
+      p = p.replace(re, "<masked>");
+      if (typeof v === "string") v = v.replace(re, "<masked>");
+    }
+    out.set(p, v);
+  }
+  return out;
+}
+
 export function diff(policy: Policy, expected: Json, actual: Json): FieldDiff[] {
-  const prep = (v: Json): Map<string, Json> => flatten(policy.canonicalIds ? canonicalIds(v) : v);
+  const prep = (v: Json): Map<string, Json> =>
+    masked(policy, flatten(policy.canonicalIds ? canonicalIds(v) : v));
   const e = prep(expected);
   const a = prep(actual);
   const out: FieldDiff[] = [];

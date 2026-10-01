@@ -2,6 +2,12 @@
   "canonicalIds": true,
   "fields": [
     {
+      "path": "*.**",
+      "mode": "mask",
+      "pattern": "Expires \\d{2}/\\d{4}",
+      "why": "the test card's expiry is the recording month plus one year: it depends on the day a fixture was recorded, not on the probe"
+    },
+    {
       "path": "*.layout.**",
       "mode": "tolerance",
       "by": 16,

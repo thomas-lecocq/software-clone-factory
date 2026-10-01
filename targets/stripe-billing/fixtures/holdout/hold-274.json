@@ -1,0 +1,54 @@
+{
+  "id": "hold-274",
+  "rules": [
+    "ITM-01",
+    "PRO-05",
+    "PRO-06",
+    "PRO-08",
+    "PRO-09"
+  ],
+  "input": {
+    "kind": "wide",
+    "start": 1793813529,
+    "billing_mode": "flexible",
+    "interval": "month",
+    "items": [
+      {
+        "amount": 8278,
+        "quantity": 2
+      },
+      {
+        "amount": 6474,
+        "quantity": 10
+      }
+    ],
+    "coupons": [],
+    "change": {
+      "item": 1,
+      "amount": 8781,
+      "interval": null,
+      "quantity": 7,
+      "offset": 1,
+      "proration_behavior": "none",
+      "discount": null
+    }
+  },
+  "observed": {
+    "preview": {
+      "error": {
+        "type": "StripeInvalidRequestError",
+        "code": null,
+        "param": "proration_date",
+        "message": "Cannot specify proration date if no proration is being done"
+      }
+    },
+    "first_invoice": {
+      "subtotal": 81296,
+      "total": 81296,
+      "amount_due": 81296,
+      "status": "paid"
+    }
+  },
+  "noise": [],
+  "recorded_at": "2026-10-01T07:39:53.659Z"
+}

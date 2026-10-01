@@ -203,6 +203,7 @@ export async function verify(target: string, splits: Split[], port = 4599): Prom
       },
       gaps: existsSync(gapsFile) ? readFileSync(gapsFile, "utf8") : null,
       breakerLogs: breakerLogs(dir),
+      policySincePlan: policySincePlan(target),
     }),
   );
 
@@ -291,6 +292,35 @@ function gitState(): { commit: string | null; dirty: boolean | null } {
     return { commit, dirty: status.trim() !== "" };
   } catch {
     return { commit: null, dirty: null };
+  }
+}
+
+function policySincePlan(target: string): string[] | null {
+  const git = (...args: string[]): string =>
+    execFileSync("git", args, { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim();
+  try {
+    const plan = git(
+      "log",
+      "--diff-filter=A",
+      "--format=%H",
+      "--",
+      `targets/${target}/analysis-plan.md`,
+    );
+    if (plan === "") return null;
+    const changes = git(
+      "log",
+      "--format=%h %s",
+      `${plan}..HEAD`,
+      "--",
+      `targets/${target}/policy.json`,
+    );
+    const dirty = git("status", "--porcelain", "--", `targets/${target}/policy.json`) !== "";
+    return [
+      ...(changes === "" ? [] : changes.split("\n")),
+      ...(dirty ? ["uncommitted changes"] : []),
+    ];
+  } catch {
+    return null;
   }
 }
 
@@ -407,7 +437,9 @@ function fieldLine(f: PolicyField): string {
       ? `tolerance ${f.by}`
       : f.mode === "perceptual"
         ? `perceptual, reported above ${f.max_share * 100} % of cells, never scored`
-        : f.mode;
+        : f.mode === "mask"
+          ? `mask /${f.pattern}/`
+          : f.mode;
   return `- \`${f.path}\` (${how}): ${f.why}`;
 }
 

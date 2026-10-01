@@ -25,6 +25,9 @@ trap 'rm -rf "$sandbox"' EXIT
 "$repo/harness/make-sandbox.sh" "$repo" "$sandbox"
 
 mkdir -p "$repo/targets/$target/logs"
+# Hours of agent work must not vanish with the sandbox: the clone is copied back even when the run
+# fails, and the run's status is returned at the end.
+status=0
 docker run --rm \
   --env-file "$credential" -e RH_SANDBOX=1 \
   -v "$sandbox:/work" \
@@ -33,7 +36,7 @@ docker run --rm \
   --model claude-opus-5-5 \
   --permission-mode acceptEdits \
   --allowedTools "Bash Read Write Edit Grep Glob Agent WebFetch" \
-  --output-format stream-json --verbose | tee "$log" | jq -rj 'select(.type == "assistant") | .message.content[]? | select(.type == "text") | .text + "\n"'
+  --output-format stream-json --verbose | tee "$log" | jq -rj 'select(.type == "assistant") | .message.content[]? | select(.type == "text") | .text + "\n"' || status=$?
 
 # The last line of the stream carries the run's totals: duration, turns, cost and tokens per model.
 jq -c --arg agent "$agent" --arg stamp "$stamp" 'select(.type == "result")
@@ -46,3 +49,4 @@ if [ -n "$copy_back" ]; then
   rsync -a --delete "$sandbox/$copy_back/" "$repo/$copy_back/"
   echo "copied back $copy_back; score it in the repository with: npm run verify $target"
 fi
+exit "$status"

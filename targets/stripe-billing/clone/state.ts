@@ -1,19 +1,17 @@
-/**
- * In-memory state of the clone. Everything is plain data (records, arrays, numbers) so that
- * `/__state` can serialise it and `POST /__reset` can rebuild it from `seed()`.
- */
+/** In-memory account state of the clone. JSON-serialisable, rebuilt from scratch by `seed()`. */
+import type { Interval } from "./time.ts";
 
-export type Interval = "month" | "year";
+export type BillingMode = "flexible" | "classic";
 
 export interface Clock {
   id: string;
   frozen_time: number;
+  created: number;
 }
 
 export interface Product {
   id: string;
   name: string;
-  created: number;
 }
 
 export interface Price {
@@ -22,40 +20,72 @@ export interface Price {
   unit_amount: number;
   currency: string;
   interval: Interval;
-  created: number;
 }
 
 export interface Coupon {
   id: string;
   percent_off: number | null;
   amount_off: number | null;
-  currency: string | null;
   duration: "forever" | "once";
-  created: number;
-}
-
-export interface Customer {
-  id: string;
-  test_clock: string | null;
-  default_payment_method: string | null;
-  preferred_locales: string[];
-  created: number;
 }
 
 export interface PaymentMethod {
   id: string;
-  customer: string;
-  brand: string;
-  last4: string;
-  exp_month: number;
-  exp_year: number;
-  /** Test card that attaches but declines every charge (`pm_card_chargeCustomerFail`). */
-  declines: boolean;
+  customer: string | null;
+  fails: boolean;
+}
+
+export interface Customer {
+  id: string;
+  clock: string | null;
+  default_payment_method: string | null;
+  created: number;
 }
 
 export interface Discount {
   id: string;
   coupon: string;
+  customer: string;
+  subscription: string | null;
+  start: number;
+  // A once coupon is spent by the first invoice it discounts.
+  used: boolean;
+}
+
+// What the invoice that billed the current period charged for one item.
+export interface Billed {
+  invoice: string;
+  line: string;
+  amount: number;
+  discounts: { discount: string; amount: number }[];
+}
+
+export interface SubItem {
+  id: string;
+  price: string;
+  quantity: number;
+  created: number;
+  billed: Billed | null;
+}
+
+export interface Subscription {
+  id: string;
+  customer: string;
+  items: SubItem[];
+  billing_mode: BillingMode;
+  discounts: string[];
+  anchor: number;
+  period_start: number;
+  period_end: number;
+  status: "active" | "trialing" | "past_due" | "canceled";
+  created: number;
+  latest_invoice: string | null;
+  cancel_at_period_end: boolean;
+  cancel_at: number | null;
+  canceled_at: number | null;
+  ended_at: number | null;
+  trial_start: number | null;
+  trial_end: number | null;
 }
 
 export interface DiscountAmount {
@@ -63,142 +93,122 @@ export interface DiscountAmount {
   amount: number;
 }
 
-/** One invoice line, before it is rendered as a Stripe `line_item`. */
-export interface LineData {
+export interface Line {
   id: string;
   amount: number;
   description: string;
-  period_start: number;
-  period_end: number;
+  period: { start: number; end: number };
   price: string;
   quantity: number;
-  discountable: boolean;
   proration: boolean;
-  /** Credit for unused time: points back at the invoice line it credits. */
-  credit: boolean;
-  invoice_item: string | null;
-  unit_amount_decimal: string | null;
+  discountable: boolean;
   discount_amounts: DiscountAmount[];
+  subscription_item: string | null;
+  invoice_item: string | null;
+  credited: { invoice: string; line: string } | null;
+  unit_amount_decimal: string | null;
 }
-
-export type SubscriptionStatus = "trialing" | "active" | "past_due" | "canceled";
-
-export interface Subscription {
-  id: string;
-  customer: string;
-  billing_mode: "flexible" | "classic";
-  item: { id: string; price: string; quantity: number };
-  /** Billing cycle anchor: periods are anchor + n months, clamped, never chained. */
-  anchor: number;
-  /** Months from the anchor to the current period start. */
-  cycle_months: number;
-  current_period_start: number;
-  current_period_end: number;
-  status: SubscriptionStatus;
-  cancel_at_period_end: boolean;
-  cancel_at: number | null;
-  canceled_at: number | null;
-  ended_at: number | null;
-  trial_end: number | null;
-  /** Discount in force now (null once a `once` coupon has been spent). */
-  discount: Discount | null;
-  /** Discount that applied to the current, already paid, period. */
-  period_discount: Discount | null;
-  latest_invoice: string;
-  /** Every invoice of the subscription, oldest first. */
-  invoices: string[];
-  /** Proration items created by updates, billed with the next renewal. */
-  pending: LineData[];
-  created: number;
-}
-
-export type InvoiceStatus = "draft" | "open" | "paid";
 
 export interface Invoice {
   id: string;
   customer: string;
-  subscription: string;
-  lines: LineData[];
-  discounts: Discount[];
-  status: InvoiceStatus;
-  billing_reason: "subscription_create" | "subscription_cycle";
-  attempt_count: number;
-  /** Time of the next payment attempt while the invoice is draft or open. */
-  next_attempt: number | null;
-  /** Time of the first attempt: retries are scheduled from it. */
-  first_attempt: number | null;
+  subscription: string | null;
+  lines: Line[];
+  discounts: string[];
+  total_discount_amounts: DiscountAmount[];
+  billing_reason: string;
+  status: "draft" | "open" | "paid";
   created: number;
   period_start: number;
   period_end: number;
+  attempt_count: number;
+  amount_paid: number;
+  auto_advance: boolean;
+  next_payment_attempt: number | null;
+  proration_date: number | null;
+  // Seconds of the next retry, while a failed invoice is still open.
+  retries: number[];
 }
 
-export interface PortalConfiguration {
+export interface InvoiceItem {
   id: string;
-  products: { product: string; prices: string[] }[];
-  proration_behavior: "create_prorations" | "none" | "always_invoice";
+  customer: string;
+  subscription: string;
+  line: Line;
+  invoice: string | null;
+}
+
+export interface PortalConfig {
+  id: string;
   cancel_enabled: boolean;
-  created: number;
+  allowed_updates: string[];
+  products: { product: string; prices: string[] }[];
 }
 
 export interface PortalSession {
   id: string;
   customer: string;
   configuration: string;
-  token: string;
   created: number;
 }
 
 export interface State {
-  seq: number;
+  n: number;
   clocks: Record<string, Clock>;
   products: Record<string, Product>;
   prices: Record<string, Price>;
   coupons: Record<string, Coupon>;
   customers: Record<string, Customer>;
   payment_methods: Record<string, PaymentMethod>;
+  discounts: Record<string, Discount>;
   subscriptions: Record<string, Subscription>;
   invoices: Record<string, Invoice>;
-  portal_configurations: Record<string, PortalConfiguration>;
-  portal_sessions: Record<string, PortalSession>;
+  invoice_items: Record<string, InvoiceItem>;
+  configs: Record<string, PortalConfig>;
+  sessions: Record<string, PortalSession>;
 }
 
 export function seed(): State {
   return {
-    seq: 0,
+    n: 0,
     clocks: {},
     products: {},
     prices: {},
     coupons: {},
     customers: {},
     payment_methods: {},
+    discounts: {},
     subscriptions: {},
     invoices: {},
-    portal_configurations: {},
-    portal_sessions: {},
+    invoice_items: {},
+    configs: {},
+    sessions: {},
   };
 }
 
 const ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
-function base62(n: number): string {
-  let x = n;
-  let s = "";
-  do {
-    s = (ALPHABET[x % 62] ?? "0") + s;
-    x = Math.floor(x / 62);
-  } while (x > 0);
-  return s;
-}
-
-// Deterministic IDs drawn from the state's own counter, so a reset restarts the sequence. The
-// suffix is an injective function of the counter, long enough to read as a generated ID.
+// Deterministic IDs: the same calls after a reset mint the same IDs.
 export function mint(state: State, prefix: string): string {
-  state.seq += 1;
-  return `${prefix}_1U${base62(state.seq * 7919 + 104729).padStart(12, "0")}`;
+  state.n += 1;
+  const n = state.n;
+  let x = n * 7919 + 104729;
+  let s = "";
+  while (s.length < 14) {
+    s = (ALPHABET[x % 62] ?? "0") + s;
+    x = Math.floor(x / 62) + n * 31;
+  }
+  // Stripe IDs start with an upper-case letter or digit after the prefix; keep one fixed shape.
+  return `${prefix}_1${s}`;
 }
 
-/** Coupon IDs in the real product have no prefix. */
-export function mintBare(state: State): string {
-  state.seq += 1;
-  return `C${base62(state.seq * 7919 + 104729).padStart(7, "0")}`;
+export function get<T>(table: Record<string, T>, id: string): T | undefined {
+  return Object.hasOwn(table, id) ? table[id] : undefined;
+}
+
+// The clock time a customer lives on (its test clock), or the subscription's creation time.
+export function nowFor(state: State, customer: string): number {
+  const c = get(state.customers, customer);
+  const clock = c?.clock ? get(state.clocks, c.clock) : undefined;
+  return clock ? clock.frozen_time : Math.floor(Date.now() / 1000);
 }

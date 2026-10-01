@@ -37,6 +37,8 @@ export interface FidelityInput {
   };
   gaps: string | null;
   breakerLogs: string[];
+  // Commits that changed the diff policy after the analysis plan was committed.
+  policySincePlan: string[] | null;
 }
 
 // One-sided exact (Clopper-Pearson) upper bound on the failure rate, given k failures in n.
@@ -117,6 +119,12 @@ export function fidelityReport(f: FidelityInput): string {
     "One-sided exact (Clopper-Pearson) bounds at 95 % and 99 %, valid for the distribution each set was",
     "drawn from and for nothing outside it. A pre-registered batch has its plan in",
     "`analysis-plan.md`; with no failure in n cases the 95 % bound is 1 − 0.05^(1/n).",
+    "",
+    f.policySincePlan === null
+      ? "No analysis plan committed."
+      : f.policySincePlan.length === 0
+        ? "Diff policy unchanged since the analysis plan was committed."
+        : `Diff policy changed since the analysis plan was committed: ${f.policySincePlan.join("; ")}.`,
     "",
     "## 4. Coverage",
     "",

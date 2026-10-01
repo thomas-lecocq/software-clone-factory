@@ -153,6 +153,19 @@ describe("diff policy", () => {
     expect(diff(policy, e, { ...near, home: { ...near.home, screen: ["b"] } })).toHaveLength(1);
   });
 
+  it("masks a pattern in values and keys under a path", () => {
+    const policy = {
+      canonicalIds: false,
+      fields: [{ path: "*.**", mode: "mask" as const, pattern: "\\d{2}/\\d{4}", why: "test only" }],
+    };
+    const e = { s: { screen: ["Expires 09/2027"], layout: { "span 09/2027": [1] } } };
+    const a = { s: { screen: ["Expires 10/2027"], layout: { "span 10/2027": [1] } } };
+    expect(diff(policy, e, a)).toEqual([]);
+    expect(
+      diff(policy, e, { s: { screen: ["Expired 10/2027"], layout: a.s.layout } }),
+    ).toHaveLength(1);
+  });
+
   it("reports perceptual differences without blocking the case", () => {
     const policy = {
       canonicalIds: false,

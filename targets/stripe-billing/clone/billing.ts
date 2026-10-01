@@ -1,630 +1,474 @@
 /**
- * Billing arithmetic: prorations, discounts and the invoice objects built from them. The rules
- * and the fixtures that pin them are in NOTES.md; the rendering copies the shape of the target's
- * invoice objects field for field, because the verifier compares every field.
+ * The billing engine: discount allocation, proration arithmetic, and the plan of a subscription
+ * change (which lines it bills, now or at the next renewal). Pure functions over the state; the
+ * API layer turns their output into Stripe objects.
  */
-import type { Json } from "../../../harness/src/json.ts";
-import { addMonths, dayMonYear, money, percentLabel } from "./format.ts";
 import {
-  mint,
+  get,
+  type Billed,
   type Coupon,
-  type Discount,
   type DiscountAmount,
-  type Interval,
-  type InvoiceStatus,
-  type LineData,
-  type Price,
+  type Line,
   type State,
+  type SubItem,
   type Subscription,
 } from "./state.ts";
+import { addIntervals, money, periodAt, shortDate, type Interval } from "./time.ts";
 
-export const ACCOUNT = { country: "FR", name: "environnement de test AcmeCo" } as const;
+// ---------------------------------------------------------------- rounding
 
-export class ApiError extends Error {
-  constructor(
-    readonly status: number,
-    message: string,
-    readonly param: string | null = null,
-    readonly type = "invalid_request_error",
-  ) {
-    super(message);
-  }
+// round(num / den) half away from zero, on exact integers (den > 0).
+export function roundRatio(num: number, den: number): number {
+  const sign = num < 0 ? -1 : 1;
+  const a = Math.abs(num);
+  return sign * Math.floor((2 * a + den) / (2 * den));
 }
 
-export function must<T>(value: T | undefined, what: string, id: string, param: string): T {
-  if (value === undefined) throw new ApiError(404, `No such ${what}: '${id}'`, param);
-  return value;
+// Percent with up to four decimals, as an exact integer fraction of 1 000 000.
+const PPM = 1_000_000;
+const ppm = (percent: number): number => Math.round(percent * 10_000);
+
+// ---------------------------------------------------------------- discounts
+
+export interface DiscSpec {
+  id: string;
+  percent_off: number | null;
+  amount_off: number | null;
+  once: boolean;
 }
 
-export const priceOf = (s: State, id: string): Price => must(s.prices[id], "price", id, "price");
-export const couponOf = (s: State, id: string): Coupon =>
-  must(s.coupons[id], "coupon", id, "coupon");
-const productName = (s: State, price: Price): string => s.products[price.product]?.name ?? "";
-const couponFor = (s: State, d: Discount): Coupon => couponOf(s, d.coupon);
-
-/** The discount a coupon gives on a full-period amount. */
-export function discountOn(coupon: Coupon, base: number): number {
-  if (coupon.percent_off !== null) return Math.round((base * coupon.percent_off) / 100);
-  return Math.min(coupon.amount_off ?? 0, Math.max(base, 0));
-}
-
-export function couponLabel(coupon: Coupon): string {
-  return coupon.percent_off !== null
-    ? percentLabel(coupon.percent_off)
-    : money(coupon.amount_off ?? 0);
-}
-
-const withQty = (q: number, name: string): string => (q > 1 ? `${q} × ${name}` : name);
-
-export function customerNow(s: State, customerId: string): number {
-  const clock = s.customers[customerId]?.test_clock;
-  const frozen = clock !== null && clock !== undefined ? s.clocks[clock]?.frozen_time : undefined;
-  // Without a test clock the real product uses wall time; every probe runs on a clock.
-  return frozen ?? Math.floor(Date.now() / 1000);
-}
-
-/** The full-period line of a price, as billed at a renewal or on the first invoice. */
-export function periodLine(
-  s: State,
-  price: Price,
-  quantity: number,
-  start: number,
-  end: number,
-  discounts: Discount[],
-): LineData {
-  const amount = price.unit_amount * quantity;
+export function specOf(state: State, discountId: string): DiscSpec | undefined {
+  const d = get(state.discounts, discountId);
+  const c = d ? get(state.coupons, d.coupon) : undefined;
+  if (!d || !c) return undefined;
   return {
-    id: mint(s, "il_tmp"),
-    amount,
-    description: `${quantity} × ${productName(s, price)} (at ${money(price.unit_amount)} / ${price.interval})`,
-    period_start: start,
-    period_end: end,
-    price: price.id,
-    quantity,
-    discountable: true,
-    proration: false,
-    credit: false,
-    invoice_item: null,
-    unit_amount_decimal: String(price.unit_amount),
-    discount_amounts: discounts.map((d) => ({
-      discount: d.id,
-      amount: discountOn(couponFor(s, d), amount),
-    })),
+    id: d.id,
+    percent_off: c.percent_off,
+    amount_off: c.amount_off,
+    once: c.duration === "once",
   };
 }
 
-/** Months in one billing interval. */
-export const intervalMonths = (interval: Interval): number => (interval === "year" ? 12 : 1);
-
-/** End of the period that starts at the subscription's current period start, for `interval`. */
-export function periodEndFor(sub: Subscription, interval: Interval, periods = 1): number {
-  return addMonths(sub.anchor, sub.cycle_months + periods * intervalMonths(interval));
+export function specsOf(state: State, ids: string[]): DiscSpec[] {
+  return ids.map((id) => specOf(state, id)).filter((s): s is DiscSpec => s !== undefined);
 }
 
-interface Span {
-  start: number;
-  end: number;
-  date: number;
+// Discounts apply one after another; each is spread over the discountable lines in proportion to
+// what is left of them, with the rounding remainder on the last line. Result: [discount][line].
+export function allocate(bases: number[], discounts: DiscSpec[]): number[][] {
+  const left = bases.map((b) => Math.max(0, b));
+  return discounts.map((d) => {
+    const sum = left.reduce((a, b) => a + b, 0);
+    const out = left.map(() => 0);
+    if (sum <= 0) return out;
+    let total: number;
+    if (d.percent_off !== null) {
+      const p = ppm(d.percent_off);
+      total = roundRatio(sum * p, PPM);
+      left.forEach((b, i) => {
+        out[i] = Math.floor((b * p) / PPM);
+      });
+    } else {
+      total = Math.min(d.amount_off ?? 0, sum);
+      left.forEach((b, i) => {
+        out[i] = Math.floor((total * b) / sum);
+      });
+    }
+    // The rounding remainder goes one cent per line, from the last line backwards.
+    let rest = total - out.reduce((a, b) => a + b, 0);
+    const open = left.map((b, i) => (b > 0 ? i : -1)).filter((i) => i >= 0);
+    for (
+      let k = open.length - 1;
+      rest > 0 && open.length > 0;
+      k = k === 0 ? open.length - 1 : k - 1
+    ) {
+      const i = open[k] ?? 0;
+      out[i] = (out[i] ?? 0) + 1;
+      rest -= 1;
+    }
+    left.forEach((b, i) => {
+      left[i] = b - (out[i] ?? 0);
+    });
+    return out;
+  });
 }
 
-const isPercent = (s: State, d: Discount): boolean => couponFor(s, d).percent_off !== null;
-
-const offOf = (s: State, ds: Discount[], base: number): number =>
-  ds.reduce((sum, d) => sum + discountOn(couponFor(s, d), base), 0);
-
-/**
- * The prorated amount of a full-period `base` over `span.date -> span.end`, less the prorated
- * discounts (the mode-specific order is in NOTES.md, pass 6). The flexible charge uses
- * `1 - elapsed / P` in floating point, which is what makes 7.5 and 22.5 round down while 1501.5
- * rounds up (t-round-half-*, b-round-half; see NOTES.md, pass 3).
- */
-function prorated(
-  s: State,
-  mode: Subscription["billing_mode"],
-  base: number,
-  discounts: Discount[],
-  span: Span,
-  charge: boolean,
-): number {
-  const p = span.end - span.start;
-  const r = span.end - span.date;
-  const part = (x: number): number =>
-    charge && mode === "flexible"
-      ? Math.round(x * (1 - (span.date - span.start) / p))
-      : Math.round((x * r) / p);
-  if (mode === "classic") {
-    // Classic credit prorates the discounted period amount (fresh2-002, t-disc-round-classic-36).
-    if (!charge) return Math.max(part(base - offOf(s, discounts, base)), 0);
-    // Classic charge prorates the gross amount, then takes an amount-off coupon prorated on its
-    // own (fresh-016) and a percent coupon on the prorated line (fresh2-081).
-    const gross = part(base);
-    const off = discounts.reduce((sum, d) => {
-      const c = couponFor(s, d);
-      return sum + (isPercent(s, d) ? discountOn(c, gross) : part(discountOn(c, base)));
-    }, 0);
-    return Math.max(gross - off, 0);
+export function couponLabel(c: Pick<Coupon, "percent_off" | "amount_off">): string {
+  if (c.percent_off !== null) {
+    const p = c.percent_off;
+    return `${Number.isInteger(p * 10) ? p.toFixed(1) : String(p)}% off`;
   }
-  return Math.max(
-    part(base) - discounts.reduce((sum, d) => sum + part(discountOn(couponFor(s, d), base)), 0),
-    0,
-  );
+  return `${money(c.amount_off ?? 0)} off`;
 }
 
-const zeroAmounts = (ds: Discount[]): DiscountAmount[] => {
-  const seen = new Set<string>();
-  return ds
-    .filter((d) => (seen.has(d.id) ? false : (seen.add(d.id), true)))
-    .map((d) => ({ discount: d.id, amount: 0 }));
-};
-
-const withLabel = (s: State, ds: Discount[]): string => {
-  const first = ds[0];
-  return first ? ` (with ${couponLabel(couponFor(s, first))} off)` : "";
-};
-
-export interface Target {
-  price: Price;
-  quantity: number;
+function withDiscounts(specs: DiscSpec[]): string {
+  if (specs.length === 0) return "";
+  if (specs.length > 1) return " (with discounts)";
+  const [s] = specs;
+  return s ? ` (with ${couponLabel(s)})` : "";
 }
 
-/**
- * Credit for the unused time of the current item. `after` are the discounts listed on the line:
- * flexible mode also lists the credited period's own discount unless the caller replaced it.
- */
-export function creditLine(
-  s: State,
-  sub: Subscription,
-  date: number,
-  listed: Discount[],
-): LineData {
-  const old = priceOf(s, sub.item.price);
-  const q0 = sub.item.quantity;
-  const before = sub.period_discount ? [sub.period_discount] : [];
-  const span = { start: sub.current_period_start, end: sub.current_period_end, date };
-  const credit = prorated(s, sub.billing_mode, old.unit_amount * q0, before, span, false);
-  return {
-    id: mint(s, "il_tmp"),
-    amount: credit === 0 ? 0 : -credit,
-    description: `Unused time on ${withQty(q0, productName(s, old))}${withLabel(s, before)} after ${dayMonYear(date)}`,
-    period_start: date,
-    period_end: span.end,
-    price: old.id,
-    quantity: q0,
-    discountable: false,
-    proration: true,
-    credit: true,
-    invoice_item: mint(s, "ii"),
-    unit_amount_decimal: null,
-    discount_amounts: zeroAmounts(listed),
-  };
+// ---------------------------------------------------------------- lines
+
+export function priceOf(state: State, id: string) {
+  const p = get(state.prices, id);
+  if (!p) throw new Error(`unknown price ${id}`);
+  return p;
 }
 
-/** Credit for the unused time of the current item and charge for the rest of the new period. */
-export function prorationLines(
-  s: State,
-  sub: Subscription,
-  target: Target,
-  prorationDate: number,
-  after: Discount[],
-  replaced = false,
-): LineData[] {
-  const q0 = sub.item.quantity;
-  if (sub.item.price === target.price.id && q0 === target.quantity) return [];
-  if (prorationDate >= sub.current_period_end) return [];
-  const before = sub.period_discount ? [sub.period_discount] : [];
-  // Flexible mode also lists the spent discount of the credited period; classic does not
-  // (rand-039 against d-off500-once-sub). Discounts passed to the preview replace it
-  // (b-off300-sub-pct15-preview).
-  const listed = sub.billing_mode === "classic" || replaced ? after : [...before, ...after];
-  const credit = creditLine(s, sub, prorationDate, listed);
-  const newEnd = periodEndFor(sub, target.price.interval);
-  const span = { start: sub.current_period_start, end: newEnd, date: prorationDate };
-  const base = target.price.unit_amount * target.quantity;
-  return [
-    credit,
-    {
-      id: mint(s, "il_tmp"),
-      amount: prorated(s, sub.billing_mode, base, after, span, true),
-      description: `Remaining time on ${withQty(target.quantity, productName(s, target.price))}${withLabel(s, after)} after ${dayMonYear(prorationDate)}`,
-      period_start: prorationDate,
-      period_end: newEnd,
-      price: target.price.id,
-      quantity: target.quantity,
-      discountable: false,
-      proration: true,
-      credit: false,
-      invoice_item: mint(s, "ii"),
-      unit_amount_decimal: null,
-      discount_amounts: zeroAmounts(after),
-    },
-  ];
+export function productName(state: State, priceId: string): string {
+  const p = priceOf(state, priceId);
+  return get(state.products, p.product)?.name ?? "";
 }
 
-export interface Draft {
-  lines: LineData[];
-  discounts: Discount[];
-  created: number;
-  period_start: number;
-  period_end: number;
-  next_payment_attempt: number | null;
-  auto_advance: boolean;
-  proration_date: number;
+export function recurringDescription(state: State, priceId: string, quantity: number): string {
+  const p = priceOf(state, priceId);
+  return `${quantity} × ${productName(state, priceId)} (at ${money(p.unit_amount)} / ${p.interval})`;
+}
+
+const qtyPrefix = (q: number): string => (q > 1 ? `${q} × ` : "");
+
+export function intervalOf(state: State, sub: Subscription): Interval {
+  const first = sub.items[0];
+  return first ? priceOf(state, first.price).interval : "month";
+}
+
+// ---------------------------------------------------------------- change plan
+
+export interface ItemChange {
+  id: string;
+  price: string | null;
+  quantity: number | null;
 }
 
 export type Behavior = "create_prorations" | "none" | "always_invoice";
 
-export interface Change {
-  target: Target;
-  behavior: Behavior;
-  prorationDate: number | null;
-  /** Discounts of the previewed invoice: the request's, or the subscription's. */
-  discounts: Discount[];
-  /** True when the request's discounts replace the subscription's. */
-  replaced?: boolean;
+export interface PlannedItem {
+  id: string;
+  price: string;
+  quantity: number;
 }
 
-/** The discounts still in force on a subscription: a `once` coupon is spent by the first invoice. */
-export function activeDiscounts(s: State, sub: Subscription): Discount[] {
-  const d = sub.discount;
-  return d && couponFor(s, d).duration !== "once" ? [d] : [];
+export interface Plan {
+  // Proration lines, without IDs.
+  prorations: Omit<Line, "id" | "invoice_item">[];
+  // The discounts each proration line actually carries (for its discount list).
+  own: DiscSpec[][];
+  items: PlannedItem[];
+  // Discounts of the new state (a once coupon passed to the preview included).
+  discounts: string[];
+  immediate: boolean;
+  // A classic interval change restarts the cycle at the clock time.
+  reset: boolean;
+  period_start: number;
+  period_end: number;
+  anchor: number;
+  interval: Interval;
+  proration_date: number;
+  now: number;
 }
 
-/**
- * Classic mode resets the billing cycle on an interval change (u-year-to-month-classic-60d): an
- * immediate invoice with the credit for the old period and a full new period from now.
- */
-function intervalReset(
-  s: State,
+export interface PlanError {
+  message: string;
+  param: string | null;
+}
+
+export interface PlanInput {
+  changes: ItemChange[];
+  proration_date: number | null;
+  behavior: Behavior | null;
+  // Discount IDs replacing the subscription's, or null to keep them.
+  discounts: string[] | null;
+  now: number;
+}
+
+function creditDiscounts(
+  state: State,
+  billed: Billed | null,
+): { spec: DiscSpec; amount: number }[] {
+  if (!billed) return [];
+  return billed.discounts
+    .filter((d) => d.amount !== 0)
+    .map((d) => ({ spec: specOf(state, d.discount), amount: d.amount }))
+    .filter((x): x is { spec: DiscSpec; amount: number } => x.spec !== undefined);
+}
+
+// Credit for the unused time of an item, from `prd` to the period end, carrying the discounts the
+// item got on the invoice that billed the period (PRO-01, DSC-04).
+export function creditLine(
+  state: State,
   sub: Subscription,
-  change: Change,
-  now: number,
+  it: SubItem,
   prd: number,
-): Draft {
-  const pending = sub.pending.map((l) => ({ ...l, id: mint(s, "il_tmp") }));
-  const credit = prd < sub.current_period_end ? [creditLine(s, sub, prd, change.discounts)] : [];
-  const { price, quantity } = change.target;
-  const end = addMonths(now, intervalMonths(price.interval));
-  const line = periodLine(s, price, quantity, now, end, []);
-  line.discount_amounts = discountAmountsFor(s, change.discounts, [line]);
+): { line: Omit<Line, "id" | "invoice_item">; own: DiscSpec[] } {
+  const oldPrice = priceOf(state, it.price);
+  const P = sub.period_end - sub.period_start;
+  const r = sub.period_end - prd;
+  const b = oldPrice.unit_amount * it.quantity;
+  const carried = creditDiscounts(state, it.billed);
+  let credit: number;
+  if (sub.billing_mode === "classic") {
+    // Classic: the coupons apply to the credited item on its own (an amount-off coupon in full,
+    // not its share of a multi-item invoice), then the net amount is prorated.
+    const D = allocate(
+      [b],
+      carried.map((c) => c.spec),
+    ).reduce((a, x) => a + (x[0] ?? 0), 0);
+    credit = -roundRatio((b - D) * r, P);
+  } else {
+    credit = -(roundRatio(b * r, P) - carried.reduce((a, c) => a + roundRatio(c.amount * r, P), 0));
+  }
   return {
-    discounts: change.discounts,
-    proration_date: prd,
-    lines: [...pending, ...credit, line],
-    created: now,
-    period_start: now,
-    period_end: now,
-    next_payment_attempt: null,
-    auto_advance: false,
+    line: {
+      amount: credit,
+      description: `Unused time on ${qtyPrefix(it.quantity)}${productName(state, it.price)}${withDiscounts(carried.map((c) => c.spec))} after ${shortDate(prd)}`,
+      period: { start: prd, end: sub.period_end },
+      price: it.price,
+      quantity: it.quantity,
+      proration: true,
+      discountable: false,
+      discount_amounts: [],
+      subscription_item: it.id,
+      credited: it.billed ? { invoice: it.billed.invoice, line: it.billed.line } : null,
+      unit_amount_decimal: null,
+    },
+    own: carried.map((c) => c.spec),
   };
 }
 
-/** The invoice a change produces: the next renewal, or an immediate invoice. */
-export function draftFor(s: State, sub: Subscription, change: Change): Draft {
-  const start = sub.current_period_start;
-  const end = sub.current_period_end;
-  if (change.prorationDate !== null) {
-    if (change.behavior === "none") {
-      throw new ApiError(
-        400,
-        "Cannot specify proration date if no proration is being done",
-        "proration_date",
-      );
-    }
-    if (change.prorationDate < start || change.prorationDate > end) {
-      throw new ApiError(
-        400,
-        `Cannot specify proration date outside of current subscription period or current phase. The value should be between ${start} and ${end}.`,
-        "proration_date",
-      );
-    }
-  }
-  const now = customerNow(s, sub.customer);
-  const prd = change.prorationDate ?? now;
-  const interval = change.target.price.interval;
-  const oldInterval = priceOf(s, sub.item.price).interval;
-  if (interval !== oldInterval && change.behavior !== "none") {
-    if (sub.billing_mode === "classic") return intervalReset(s, sub, change, now, prd);
-    const newEnd = periodEndFor(sub, interval);
-    if (prd > newEnd) {
-      throw new ApiError(
-        400,
-        `You cannot specify \`proration_date\` past the updated subscription period end when using flexible billing mode. The value should be less than ${newEnd}.`,
-      );
-    }
-  }
-  const prorations =
-    change.behavior === "none"
-      ? []
-      : prorationLines(s, sub, change.target, prd, change.discounts, change.replaced === true);
-  const pending = sub.pending.map((l) => ({ ...l, id: mint(s, "il_tmp") }));
-  const base = { discounts: change.discounts, proration_date: prd };
-
-  if (change.behavior === "always_invoice") {
+export function planChange(state: State, sub: Subscription, input: PlanInput): Plan | PlanError {
+  const behavior = input.behavior ?? "create_prorations";
+  if (behavior === "none" && input.proration_date !== null) {
     return {
-      ...base,
-      created: now,
-      period_start: now,
-      period_end: now,
-      lines: [...pending, ...prorations],
-      next_payment_attempt: null,
-      auto_advance: false,
+      message: "Cannot specify proration date if no proration is being done",
+      param: "proration_date",
     };
   }
-  // In flexible mode an interval change keeps the anchor (t-month-to-year-*, b-year-to-month):
-  // the renewal moves to the end of the new interval counted from the current period start.
-  const renewal = periodEndFor(sub, interval);
-  const next = periodEndFor(sub, interval, 2);
-  const line = periodLine(s, change.target.price, change.target.quantity, renewal, next, []);
-  const lines = [...pending, ...prorations, line];
-  line.discount_amounts = discountAmountsFor(s, change.discounts, [line]);
-  return {
-    ...base,
-    lines,
-    created: renewal,
-    period_start: start,
-    period_end: renewal,
-    next_payment_attempt: renewal + 3600,
-    auto_advance: true,
-  };
-}
-
-/**
- * Invoice-level discount amounts for the discountable lines: a percent applies to each line, an
- * amount is spread over the lines in proportion to their amounts (DSC-03, one line in every dev
- * fixture). Returns the amounts of `lines[0]` when called for one line.
- */
-function discountAmountsFor(s: State, discounts: Discount[], lines: LineData[]): DiscountAmount[] {
-  const line = lines[0];
-  if (!line) return [];
-  const total = lines.reduce((sum, l) => sum + Math.max(l.amount, 0), 0);
-  return discounts.map((d) => {
-    const c = couponFor(s, d);
-    if (c.percent_off !== null) return { discount: d.id, amount: discountOn(c, line.amount) };
-    const all = discountOn(c, total);
-    const share = total === 0 ? 0 : Math.round((all * Math.max(line.amount, 0)) / total);
-    return { discount: d.id, amount: share };
+  const prd = input.proration_date ?? input.now;
+  if (prd < sub.period_start || prd > sub.period_end) {
+    return {
+      message: `Cannot specify proration date outside of current subscription period or current phase. The value should be between ${sub.period_start} and ${sub.period_end}.`,
+      param: "proration_date",
+    };
+  }
+  const oldInterval = intervalOf(state, sub);
+  const items: PlannedItem[] = sub.items.map((it) => {
+    const ch = input.changes.find((c) => c.id === it.id);
+    if (!ch) return { id: it.id, price: it.price, quantity: it.quantity };
+    const priceChanged = ch.price !== null && ch.price !== it.price;
+    return {
+      id: it.id,
+      price: ch.price ?? it.price,
+      quantity: ch.quantity ?? (priceChanged ? 1 : it.quantity),
+    };
   });
+  const firstPlanned = items[0];
+  const newInterval = firstPlanned ? priceOf(state, firstPlanned.price).interval : oldInterval;
+  const discounts =
+    input.discounts ?? sub.discounts.filter((id) => get(state.discounts, id)?.used !== true);
+  const chargeSpecs = specsOf(state, discounts);
+
+  let periodStart = sub.period_start;
+  let periodEnd = sub.period_end;
+  let anchor = sub.anchor;
+  let reset = false;
+  const intervalChange = newInterval !== oldInterval;
+  if (intervalChange) {
+    if (sub.billing_mode === "classic") {
+      reset = true;
+      periodStart = input.now;
+      anchor = input.now;
+      periodEnd = addIntervals(input.now, newInterval, 1);
+    } else {
+      periodEnd = addIntervals(sub.period_start, newInterval, 1);
+      if (periodEnd < sub.period_end && prd >= periodEnd) {
+        return {
+          message: `You cannot specify \`proration_date\` past the updated subscription period end when using flexible billing mode. The value should be less than ${periodEnd}.`,
+          param: null,
+        };
+      }
+    }
+  }
+
+  const prorations: Plan["prorations"] = [];
+  const own: DiscSpec[][] = [];
+  const prorates = behavior !== "none" && prd < sub.period_end;
+  if (prorates) {
+    sub.items.forEach((it: SubItem, i) => {
+      const next = items[i];
+      if (!next || (next.price === it.price && next.quantity === it.quantity)) return;
+      const credit = creditLine(state, sub, it, prd);
+      prorations.push(credit.line);
+      own.push(credit.own);
+      if (reset) return;
+      // Charge for the remaining time on the new item, over the new period.
+      const newPrice = priceOf(state, next.price);
+      const n = newPrice.unit_amount * next.quantity;
+      const P2 = periodEnd - periodStart;
+      const r2 = periodEnd - prd;
+      const e2 = prd - periodStart;
+      const D2 = allocate([n], chargeSpecs).map((x) => x[0] ?? 0);
+      const base =
+        sub.billing_mode === "classic" ? roundRatio(n * r2, P2) : Math.round(n * (1 - e2 / P2));
+      // Flexible discounts the full-period amount, then prorates the discount (DSC-02); classic
+      // prorates first and takes a percent-off on the prorated amount (DSC-04).
+      let left = base;
+      const prorated = chargeSpecs.map((s, k) => {
+        const d =
+          sub.billing_mode === "classic" && s.percent_off !== null
+            ? roundRatio(Math.max(0, left) * ppm(s.percent_off), PPM)
+            : roundRatio((D2[k] ?? 0) * r2, P2);
+        left -= d;
+        return d;
+      });
+      const applied = chargeSpecs.filter((_, k) => (prorated[k] ?? 0) !== 0);
+      const charge = left;
+      prorations.push({
+        amount: charge,
+        description: `Remaining time on ${qtyPrefix(next.quantity)}${productName(state, next.price)}${withDiscounts(applied)} after ${shortDate(prd)}`,
+        period: { start: prd, end: periodEnd },
+        price: next.price,
+        quantity: next.quantity,
+        proration: true,
+        discountable: false,
+        discount_amounts: [],
+        subscription_item: it.id,
+        credited: null,
+        unit_amount_decimal: null,
+      });
+      own.push(applied);
+    });
+  }
+  const immediate = reset || (behavior === "always_invoice" && prorations.length > 0);
+  return {
+    prorations,
+    own,
+    items,
+    discounts,
+    immediate,
+    reset,
+    period_start: periodStart,
+    period_end: periodEnd,
+    anchor,
+    interval: newInterval,
+    proration_date: prd,
+    now: input.now,
+  };
 }
 
-export interface Totals {
-  subtotal: number;
-  discount: number;
-  total: number;
-  amount_due: number;
-  ending_balance: number;
+export function isPlanError(p: Plan | PlanError): p is PlanError {
+  return "message" in p;
+}
+
+// ---------------------------------------------------------------- invoice assembly
+
+export interface Draft {
+  lines: Line[];
+  discounts: string[];
   total_discount_amounts: DiscountAmount[];
-}
-
-export function totals(lines: LineData[], discounts: Discount[]): Totals {
-  const subtotal = lines.reduce((sum, l) => sum + l.amount, 0);
-  const tda = discounts.map((d) => ({
-    discount: d.id,
-    amount: lines.reduce(
-      (sum, l) =>
-        sum +
-        l.discount_amounts.filter((x) => x.discount === d.id).reduce((a, x) => a + x.amount, 0),
-      0,
-    ),
-  }));
-  const discount = tda.reduce((sum, x) => sum + x.amount, 0);
-  const total = subtotal - discount;
-  return {
-    subtotal,
-    discount,
-    total,
-    amount_due: Math.max(total, 0),
-    ending_balance: Math.min(total, 0),
-    total_discount_amounts: tda,
-  };
-}
-
-function lineJson(s: State, sub: Subscription, invoice: string, l: LineData): Json {
-  const price = priceOf(s, l.price);
-  const paid = s.invoices[sub.latest_invoice];
-  const credited = paid?.lines.find((x) => x.price === l.price) ?? paid?.lines[0];
-  return {
-    id: l.id,
-    object: "line_item",
-    amount: l.amount,
-    currency: price.currency,
-    description: l.description,
-    discount_amounts: l.discount_amounts.map((d) => ({ amount: d.amount, discount: d.discount })),
-    discountable: l.discountable,
-    discounts: [],
-    invoice,
-    livemode: false,
-    metadata: {},
-    parent: {
-      invoice_item_details: null,
-      subscription_item_details: {
-        invoice_item: l.invoice_item,
-        proration: l.proration,
-        proration_details: {
-          credited_items:
-            l.credit && paid && credited
-              ? { invoice: paid.id, invoice_line_items: [credited.id] }
-              : null,
-        },
-        subscription: sub.id,
-        subscription_item: sub.item.id,
-      },
-      type: "subscription_item_details",
-    },
-    period: { end: l.period_end, start: l.period_start },
-    pretax_credit_amounts: l.discount_amounts.map((d) => ({
-      amount: d.amount,
-      discount: d.discount,
-      type: "discount",
-    })),
-    pricing: {
-      price_details: { price: price.id, product: price.product },
-      type: "price_details",
-      unit_amount_decimal: l.unit_amount_decimal,
-    },
-    quantity: l.quantity,
-    quantity_decimal: String(l.quantity),
-    subtotal: l.amount,
-    taxes: [],
-  };
-}
-
-export interface InvoiceMeta {
-  id: string;
-  status: InvoiceStatus;
-  attempt_count: number;
-  billing_reason: string;
   created: number;
   period_start: number;
   period_end: number;
-  next_payment_attempt: number | null;
-  auto_advance: boolean;
-  proration_date: number | null;
+  immediate: boolean;
 }
 
-export function invoiceJson(
-  s: State,
+// The invoice a plan produces: now (immediate) or at the next renewal (prorations plus the next
+// full period of every item).
+export function draftFromPlan(
+  state: State,
   sub: Subscription,
-  meta: InvoiceMeta,
-  lines: LineData[],
-  discounts: Discount[],
-): Json {
-  const t = totals(lines, discounts);
-  const customer = s.customers[sub.customer];
-  const paid = meta.status === "paid";
-  const finalized = meta.status !== "draft";
+  plan: Plan,
+  ids: { line: () => string; item: () => string },
+  mode: Subscription["billing_mode"],
+): Draft {
+  // once coupons never discount the renewal (DSC-05) nor show on the invoice.
+  const top = plan.discounts.filter((id) => specOf(state, id)?.once === false);
+  const topSpecs = specsOf(state, top);
+  const lines: Line[] = plan.prorations.map((p) => ({
+    ...p,
+    id: ids.line(),
+    invoice_item: ids.item(),
+  }));
+  const recurring: Line[] = [];
+  if (plan.reset) {
+    for (const it of plan.items) {
+      const changed = plan.prorations.some((p) => p.subscription_item === it.id);
+      if (!changed) continue;
+      recurring.push(recurringLine(state, it, plan.period_start, plan.period_end, ids.line()));
+    }
+  } else if (!plan.immediate) {
+    const next = periodAt(plan.anchor, plan.interval, plan.period_end)[1];
+    for (const it of plan.items) {
+      recurring.push(recurringLine(state, it, plan.period_end, next, ids.line()));
+    }
+  }
+  const alloc = allocate(
+    recurring.map((l) => l.amount),
+    topSpecs,
+  );
+  recurring.forEach((l, i) => {
+    l.discount_amounts = topSpecs.map((s, k) => ({ discount: s.id, amount: alloc[k]?.[i] ?? 0 }));
+  });
+  lines.forEach((l, i) => {
+    const mine = plan.own[i] ?? [];
+    // Observed only (no documented rule): which discounts a proration line lists, at 0.
+    const isCredit = l.amount < 0 || l.description.startsWith("Unused");
+    let list: string[];
+    if (mode === "classic") list = top;
+    else if (plan.immediate && !isCredit) list = mine.map((s) => s.id);
+    else if (top.length > 0) list = plan.immediate ? top : top.slice(0, 1);
+    else list = mine.map((s) => s.id);
+    l.discount_amounts = list.map((discount) => ({ discount, amount: 0 }));
+  });
+  const all = [...lines, ...recurring];
+  const tda = top.map((discount) => ({
+    discount,
+    amount: all.reduce(
+      (a, l) =>
+        a +
+        l.discount_amounts.filter((d) => d.discount === discount).reduce((x, d) => x + d.amount, 0),
+      0,
+    ),
+  }));
+  const immediate = plan.immediate;
   return {
-    id: meta.id,
-    object: "invoice",
-    account_country: ACCOUNT.country,
-    account_name: ACCOUNT.name,
-    account_tax_ids: null,
-    amount_due: t.amount_due,
-    amount_overpaid: 0,
-    amount_paid: paid ? t.amount_due : 0,
-    amount_remaining: paid ? 0 : t.amount_due,
-    amount_shipping: 0,
-    application: null,
-    attempt_count: meta.attempt_count,
-    attempted: meta.attempt_count > 0,
-    auto_advance: meta.auto_advance,
-    automatic_tax: {
-      disabled_reason: null,
-      enabled: false,
-      liability: null,
-      provider: null,
-      status: null,
-    },
-    automatically_finalizes_at: null,
-    billing_reason: meta.billing_reason,
-    collection_method: "charge_automatically",
-    created: meta.created,
-    currency: "usd",
-    custom_fields: null,
-    customer: sub.customer,
-    customer_account: null,
-    customer_address: null,
-    customer_email: null,
-    customer_name: null,
-    customer_phone: null,
-    customer_shipping: null,
-    customer_tax_exempt: "none",
-    customer_tax_ids: [],
-    default_payment_method: null,
-    default_source: null,
-    default_tax_rates: [],
-    description: null,
-    discounts: discounts.map((d) => d.id),
-    due_date: null,
-    effective_at: finalized ? meta.created : null,
-    ending_balance: finalized ? 0 : t.ending_balance,
-    footer: null,
-    from_invoice: null,
-    hosted_invoice_url: null,
-    invoice_pdf: null,
-    issuer: { type: "self" },
-    last_finalization_error: null,
-    latest_revision: null,
-    lines: {
-      object: "list",
-      data: lines.map((l) => lineJson(s, sub, meta.id, l)),
-      has_more: false,
-      total_count: lines.length,
-      url: `/v1/invoices/${meta.id}/lines`,
-    },
-    livemode: false,
-    metadata: {},
-    next_payment_attempt: meta.next_payment_attempt,
-    number: null,
-    on_behalf_of: null,
-    parent: {
-      quote_details: null,
-      subscription_details: {
-        metadata: {},
-        subscription: sub.id,
-        ...(meta.proration_date !== null
-          ? { subscription_proration_date: meta.proration_date }
-          : {}),
-      },
-      type: "subscription_details",
-    },
-    payment_settings: {
-      default_mandate: null,
-      payment_method_options: null,
-      payment_method_types: null,
-    },
-    period_end: meta.period_end,
-    period_start: meta.period_start,
-    post_payment_credit_notes_amount: 0,
-    pre_payment_credit_notes_amount: 0,
-    receipt_number: null,
-    rendering: null,
-    shipping_cost: null,
-    shipping_details: null,
-    starting_balance: 0,
-    statement_descriptor: null,
-    status: meta.status,
-    status_transitions: {
-      finalized_at: finalized ? meta.created : null,
-      marked_uncollectible_at: null,
-      paid_at: paid ? meta.created : null,
-      voided_at: null,
-    },
-    subtotal: t.subtotal,
-    subtotal_excluding_tax: t.subtotal,
-    test_clock: customer?.test_clock ?? null,
-    total: t.total,
-    total_discount_amounts: t.total_discount_amounts.map((d) => ({
-      amount: d.amount,
-      discount: d.discount,
-    })),
-    total_excluding_tax: t.total,
-    total_pretax_credit_amounts: t.total_discount_amounts.map((d) => ({
-      amount: d.amount,
-      discount: d.discount,
-      type: "discount",
-    })),
-    total_taxes: [],
-    webhooks_delivered_at: null,
+    lines: all,
+    discounts: top,
+    total_discount_amounts: tda,
+    created: immediate ? plan.now : plan.period_end,
+    period_start: immediate ? plan.now : sub.period_start,
+    period_end: immediate ? plan.now : plan.period_end,
+    immediate,
   };
 }
 
-export function previewJson(s: State, sub: Subscription, draft: Draft): Json {
-  return invoiceJson(
-    s,
-    sub,
-    {
-      id: mint(s, "upcoming_in"),
-      status: "draft",
-      attempt_count: 0,
-      billing_reason: "upcoming",
-      created: draft.created,
-      period_start: draft.period_start,
-      period_end: draft.period_end,
-      next_payment_attempt: draft.next_payment_attempt,
-      auto_advance: draft.auto_advance,
-      proration_date: draft.proration_date,
-    },
-    draft.lines,
-    draft.discounts,
-  );
+export function recurringLine(
+  state: State,
+  it: PlannedItem,
+  start: number,
+  end: number,
+  id: string,
+): Line {
+  const p = priceOf(state, it.price);
+  return {
+    id,
+    amount: p.unit_amount * it.quantity,
+    description: recurringDescription(state, it.price, it.quantity),
+    period: { start, end },
+    price: it.price,
+    quantity: it.quantity,
+    proration: false,
+    discountable: true,
+    discount_amounts: [],
+    subscription_item: it.id,
+    invoice_item: null,
+    credited: null,
+    unit_amount_decimal: String(p.unit_amount),
+  };
+}
+
+export function totals(lines: Line[], tda: DiscountAmount[]) {
+  const subtotal = lines.reduce((a, l) => a + l.amount, 0);
+  const discount = tda.reduce((a, d) => a + d.amount, 0);
+  return { subtotal, total: subtotal - discount };
 }

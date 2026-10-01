@@ -39,11 +39,13 @@ describe("fidelity report", () => {
       },
       gaps: null,
       breakerLogs: [],
+      policySincePlan: ["abc123 Mask recording-date text"],
     });
     const headings = md.split("\n").filter((l) => /^## \d\. /.test(l));
     expect(headings).toHaveLength(9);
     expect(md).toContain("| Pre-registered holdout batch | 473 of 473 | 0 | 0.63 % | 0.97 % |");
     expect(md).toContain("| Hash-split holdout | 3 of 4 | 1 |");
     expect(md).not.toMatch(/hold-\d/);
+    expect(md).toContain("Diff policy changed since the analysis plan was committed: abc123");
   });
 });

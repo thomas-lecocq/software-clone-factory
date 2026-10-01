@@ -1,0 +1,64 @@
+{
+  "id": "hold-459",
+  "rules": [
+    "DSC-01",
+    "DSC-02",
+    "INT-01",
+    "PER-01",
+    "PRO-01",
+    "PRO-02",
+    "PRO-03",
+    "PRO-04",
+    "PRO-07",
+    "PRO-08",
+    "PRO-09"
+  ],
+  "input": {
+    "kind": "wide",
+    "start": 1793293929,
+    "billing_mode": "flexible",
+    "interval": "year",
+    "items": [
+      {
+        "amount": 50884,
+        "quantity": 1
+      }
+    ],
+    "coupons": [
+      {
+        "percent_off": 15,
+        "duration": "forever"
+      }
+    ],
+    "change": {
+      "item": 0,
+      "amount": 6177,
+      "interval": "month",
+      "quantity": 1,
+      "offset": 25086314,
+      "proration_behavior": "always_invoice",
+      "discount": {
+        "percent_off": 17,
+        "duration": "forever"
+      }
+    }
+  },
+  "observed": {
+    "preview": {
+      "error": {
+        "type": "StripeInvalidRequestError",
+        "code": null,
+        "param": null,
+        "message": "You cannot specify `proration_date` past the updated subscription period end when using flexible billing mode. The value should be less than 1795972329."
+      }
+    },
+    "first_invoice": {
+      "subtotal": 50884,
+      "total": 43251,
+      "amount_due": 43251,
+      "status": "paid"
+    }
+  },
+  "noise": [],
+  "recorded_at": "2026-10-01T08:15:12.708Z"
+}

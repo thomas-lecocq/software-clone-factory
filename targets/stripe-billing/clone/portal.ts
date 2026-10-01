@@ -1,345 +1,335 @@
 /**
- * Customer Portal: configurations and sessions (public API), the portal's own JSON endpoints under
- * `/v1/billing_portal/sessions/<bps>/...` that the page calls, and the page itself. The JSON
- * endpoints return display-ready strings; the page only lays them out.
+ * The Customer Portal: the configuration and session API, the portal page, and the JSON
+ * endpoints the page calls under /v1/billing_portal/sessions/<bps>/... (UI-01..14).
  */
-import { z } from "zod";
-import type { CloneRequest } from "../../../harness/src/clone-kit.ts";
+import type { CloneRequest, CloneResponse } from "../../../harness/src/clone-kit.ts";
 import type { Json } from "../../../harness/src/json.ts";
-import { parse, type Handler } from "./api.ts";
+import { arr, fail, num, obj, ok, str } from "./api.ts";
 import {
-  ACCOUNT,
-  ApiError,
-  activeDiscounts,
-  couponOf,
-  customerNow,
-  discountOn,
-  draftFor,
-  must,
+  allocate,
+  draftFromPlan,
+  isPlanError,
+  planChange,
   priceOf,
-  prorationLines,
-  totals,
-  type Draft,
+  productName,
+  specsOf,
+  type DiscSpec,
+  type ItemChange,
 } from "./billing.ts";
-import { longDate, monthDay, money, shortRange } from "./format.ts";
-import { setCancelAtPeriodEnd } from "./life.ts";
-import { portalHtml } from "./portal-page.ts";
-import { mint, type PortalSession, type State, type Subscription } from "./state.ts";
+import { ACCOUNT_NAME, CARD } from "./objects.ts";
+import { portalPage } from "./page.ts";
+import {
+  get,
+  mint,
+  nowFor,
+  type Line,
+  type PortalSession,
+  type State,
+  type Subscription,
+} from "./state.ts";
 
-const ConfigurationBody = z.object({
-  features: z.object({
-    payment_method_update: z.object({ enabled: z.enum(["true", "false"]) }).optional(),
-    subscription_cancel: z.object({ enabled: z.enum(["true", "false"]) }).optional(),
-    subscription_update: z
-      .object({
-        enabled: z.enum(["true", "false"]),
-        default_allowed_updates: z.array(z.string()).optional(),
-        proration_behavior: z.enum(["create_prorations", "none", "always_invoice"]).optional(),
-        products: z
-          .array(z.object({ product: z.string(), prices: z.array(z.string()) }))
-          .optional(),
-      })
-      .optional(),
-  }),
-});
-const SessionBody = z.object({
-  customer: z.string(),
-  configuration: z.string().optional(),
-  return_url: z.string().optional(),
-});
-const UpdateBody = z.object({ price: z.string() });
+type Params = Record<string, Json>;
 
-function createConfiguration(s: State, body: Json): Json {
-  const b = parse(ConfigurationBody, body);
-  const update = b.features.subscription_update;
-  const updates = update?.enabled === "true";
-  if (updates && b.features.payment_method_update?.enabled !== "true") {
-    throw new ApiError(
-      400,
-      "Cannot enable subscription updates while payment method update is disabled.",
-    );
-  }
-  const products = update?.products ?? [];
-  for (const p of products) {
-    must(s.products[p.product], "product", p.product, "features[subscription_update][products]");
-    const intervals = p.prices.map((id) => priceOf(s, id).interval);
-    if (new Set(intervals).size !== intervals.length) {
-      throw new ApiError(400, "For each product, its price must have unique billing intervals");
-    }
-  }
-  const id = mint(s, "bpc");
-  s.portal_configurations[id] = {
-    id,
-    products,
-    proration_behavior: update?.proration_behavior ?? "none",
-    cancel_enabled: b.features.subscription_cancel?.enabled === "true",
-    created: 0,
-  };
-  return {
-    id,
-    object: "billing_portal.configuration",
-    active: true,
-    features: {
-      payment_method_update: { enabled: b.features.payment_method_update?.enabled === "true" },
-      subscription_update: {
-        enabled: updates,
-        default_allowed_updates: update?.default_allowed_updates ?? [],
-        products: products.map((p) => ({ product: p.product, prices: p.prices })),
-        proration_behavior: update?.proration_behavior ?? "none",
-      },
-    },
-    is_default: false,
-    livemode: false,
-    metadata: {},
-  };
+// Discounts that will apply to the next renewal (forever coupons; a spent once coupon is gone).
+function renewalSpecs(state: State, sub: Subscription): DiscSpec[] {
+  return specsOf(state, sub.discounts).filter((s) => !s.once);
 }
 
-function createSession(s: State, body: Json, origin: string): Json {
-  const b = parse(SessionBody, body);
-  const customer = must(s.customers[b.customer], "customer", b.customer, "customer");
-  const configuration = b.configuration ?? Object.keys(s.portal_configurations)[0];
-  if (configuration === undefined) {
-    throw new ApiError(
-      400,
-      "No configuration provided and your default configuration has not been created.",
-    );
-  }
-  must(s.portal_configurations[configuration], "configuration", configuration, "configuration");
-  const id = mint(s, "bps");
-  const token = `test_${id.slice(4)}`;
-  const created = customerNow(s, customer.id);
-  s.portal_sessions[id] = { id, customer: customer.id, configuration, token, created };
-  return {
-    id,
-    object: "billing_portal.session",
-    configuration,
-    created,
-    customer: customer.id,
-    flow: null,
-    livemode: false,
-    locale: null,
-    on_behalf_of: null,
-    return_url: b.return_url ?? null,
-    url: `${origin}/p/session/${token}`,
-  };
+function couponText(s: DiscSpec): string {
+  if (s.percent_off !== null) return `${String(s.percent_off)}% off`;
+  return `$${((s.amount_off ?? 0) / 100).toFixed(2)} off`;
 }
 
-const perInterval = (interval: string): string => `per ${interval}`;
-
-function customerSubscriptions(s: State, session: PortalSession): Subscription[] {
-  return Object.values(s.subscriptions).filter((x) => x.customer === session.customer);
+// The recurring amount of a set of items after the renewal discounts.
+function recurringNet(
+  state: State,
+  sub: Subscription,
+  items: { price: string; quantity: number }[],
+): number {
+  const bases = items.map((it) => priceOf(state, it.price).unit_amount * it.quantity);
+  const alloc = allocate(bases, renewalSpecs(state, sub));
+  const off = alloc.reduce((a, row) => a + row.reduce((x, y) => x + y, 0), 0);
+  return bases.reduce((a, b) => a + b, 0) - off;
 }
 
-function upcomingFor(s: State, sub: Subscription): Draft {
-  const price = priceOf(s, sub.item.price);
-  return draftFor(s, sub, {
-    target: { price, quantity: sub.item.quantity },
+function pendingLines(state: State, sub: Subscription): Line[] {
+  return Object.values(state.invoice_items)
+    .filter((ii) => ii.subscription === sub.id && ii.invoice === null)
+    .map((ii) => ii.line);
+}
+
+// The next invoice of a subscription: pending prorations plus the renewal, discounted.
+function upcoming(state: State, sub: Subscription): Json {
+  const now = nowFor(state, sub.customer);
+  const plan = planChange(state, sub, {
+    changes: [],
+    proration_date: null,
     behavior: "create_prorations",
-    prorationDate: null,
-    discounts: activeDiscounts(s, sub),
+    discounts: null,
+    now,
   });
-}
-
-function lineLabel(s: State, l: Draft["lines"][number]): string {
-  const name = s.products[priceOf(s, l.price).product]?.name ?? "";
-  if (!l.proration) return name;
-  return l.credit ? `Prorated credit from ${name}` : `Prorated charge for ${name}`;
-}
-
-function invoiceSummary(s: State, draft: Draft): Json {
-  const t = totals(draft.lines, draft.discounts);
-  const groups: { range: string; lines: { label: string; amount: string }[] }[] = [];
-  for (const l of draft.lines) {
-    const range = shortRange(l.period_start, l.period_end);
-    let group = groups.at(-1);
-    if (group?.range !== range) {
-      group = { range, lines: [] };
-      groups.push(group);
-    }
-    group.lines.push({ label: lineLabel(s, l), amount: money(l.amount) });
-  }
-  const recurringOnly = draft.lines.every((l) => !l.proration);
+  if (isPlanError(plan)) return null;
+  let n = 0;
+  const draft = draftFromPlan(
+    state,
+    sub,
+    plan,
+    {
+      line: () => `il_tmp_${String((n += 1))}`,
+      item: () => `ii_tmp_${String((n += 1))}`,
+    },
+    sub.billing_mode,
+  );
+  const pending = pendingLines(state, sub);
+  const lines = [...pending, ...draft.lines];
+  const subtotal = lines.reduce((a, l) => a + l.amount, 0);
+  const discounts = draft.total_discount_amounts.map((d) => {
+    const spec = specsOf(state, [d.discount])[0];
+    return { label: spec ? couponText(spec) : "", amount: d.amount };
+  });
+  const total = subtotal - discounts.reduce((a, d) => a + d.amount, 0);
+  const label = (l: Line): string => {
+    const name = productName(state, l.price);
+    if (!l.proration) return name;
+    return l.amount < 0 || l.description.startsWith("Unused")
+      ? `Prorated credit from ${name}`
+      : `Prorated charge for ${name}`;
+  };
   return {
-    amount_due: money(t.amount_due),
-    subtotal: money(t.subtotal),
-    total: money(t.total),
-    groups,
-    discounts: t.total_discount_amounts.map((d) => {
-      const discount = draft.discounts.find((x) => x.id === d.discount);
-      const c = discount ? couponOf(s, discount.coupon) : null;
-      const label =
-        c?.percent_off !== null && c?.percent_off !== undefined
-          ? `${c.percent_off}% off`
-          : `${money(c?.amount_off ?? 0)} off`;
-      return { label, amount: money(-d.amount) };
+    prorations: pending.map((l) => ({
+      label: label(l),
+      amount: l.amount,
+      start: sub.period_start,
+      end: sub.period_end,
+    })),
+    renewal: draft.lines.map((l) => ({
+      label: label(l),
+      amount: l.amount,
+      quantity: l.quantity,
+      start: l.period.start,
+      end: l.period.end,
+    })),
+    subtotal,
+    discounts,
+    has_discount: discounts.some((d) => d.amount !== 0),
+    total,
+    amount_due: Math.max(0, total),
+  };
+}
+
+function subscriptionView(state: State, sub: Subscription): Json {
+  return {
+    id: sub.id,
+    status: sub.status,
+    period_start: sub.period_start,
+    period_end: sub.period_end,
+    cancel_at: sub.cancel_at,
+    items: sub.items.map((it) => {
+      const p = priceOf(state, it.price);
+      return {
+        id: it.id,
+        price: it.price,
+        product: p.product,
+        name: productName(state, it.price),
+        unit_amount: p.unit_amount,
+        interval: p.interval,
+        quantity: it.quantity,
+      };
     }),
-    show: !recurringOnly || draft.discounts.length > 0,
-    open: draft.discounts.length > 0,
+    net: recurringNet(state, sub, sub.items),
+    pending: pendingLines(state, sub).length,
+    upcoming: upcoming(state, sub),
   };
 }
 
-function subscriptionSummary(s: State, session: PortalSession, sub: Subscription): Json {
-  const config = s.portal_configurations[session.configuration];
-  const price = priceOf(s, sub.item.price);
-  const gross = price.unit_amount * sub.item.quantity;
-  const off = activeDiscounts(s, sub).reduce(
-    (sum, d) => sum + discountOn(couponOf(s, d.coupon), gross),
-    0,
-  );
-  return {
-    id: sub.id,
-    plan: s.products[price.product]?.name ?? "",
-    amount: money(gross - off),
-    per: perInterval(price.interval),
-    next_billing_date: longDate(sub.current_period_end),
-    cancel_enabled: config?.cancel_enabled === true,
-    cancels: sub.cancel_at_period_end && sub.cancel_at !== null ? monthDay(sub.cancel_at) : null,
-    upcoming: invoiceSummary(s, upcomingFor(s, sub)),
-  };
+function sessionOf(state: State, id: string): PortalSession | undefined {
+  return get(state.sessions, id);
 }
 
-function plans(s: State, session: PortalSession, sub: Subscription): Json {
-  const config = must(
-    s.portal_configurations[session.configuration],
-    "configuration",
-    session.configuration,
-    "configuration",
+function subsOf(state: State, customer: string): Subscription[] {
+  return Object.values(state.subscriptions).filter(
+    (s) => s.customer === customer && s.status !== "canceled",
   );
-  return {
-    id: sub.id,
-    current_price: sub.item.price,
-    plans: config.products.flatMap((p) =>
-      p.prices.map((id) => {
-        const price = priceOf(s, id);
+}
+
+function sessionApi(
+  state: State,
+  session: PortalSession,
+  method: string,
+  rest: string[],
+  p: Params,
+): CloneResponse {
+  const config = get(state.configs, session.configuration);
+  const [a, b, c] = rest;
+  if (method === "GET" && a === undefined) {
+    return ok({
+      id: session.id,
+      object: "billing_portal.session",
+      customer: session.customer,
+      account_name: ACCOUNT_NAME,
+      configuration: {
+        id: session.configuration,
+        cancel_enabled: config?.cancel_enabled ?? false,
+        allowed_updates: config?.allowed_updates ?? [],
+      },
+    });
+  }
+  if (method === "GET" && a === "customer") {
+    return ok({ id: session.customer, object: "customer", balance: 0 });
+  }
+  if (method === "GET" && a === "payment_methods") {
+    const cus = get(state.customers, session.customer);
+    return ok({
+      object: "list",
+      data: cus?.default_payment_method
+        ? [{ id: cus.default_payment_method, ...CARD, default: true }]
+        : [],
+    });
+  }
+  if (method === "GET" && a === "subscriptions" && b === undefined) {
+    return ok({
+      object: "list",
+      data: subsOf(state, session.customer).map((s) => subscriptionView(state, s)),
+    });
+  }
+  if (method === "GET" && a === "update_preview") {
+    const sub = subsOf(state, session.customer)[0];
+    if (!sub) return fail(404, "No subscription");
+    const changes: ItemChange[] = arr(p.items).map((raw) => {
+      const it = obj(raw);
+      return { id: str(it.id) ?? "", price: str(it.price), quantity: num(it.quantity) };
+    });
+    const items = sub.items.map((it) => {
+      const ch = changes.find((x) => x.id === it.id);
+      return { price: ch?.price ?? it.price, quantity: ch?.quantity ?? it.quantity };
+    });
+    return ok({
+      object: "billing_portal.update_preview",
+      recurring_amount: recurringNet(state, sub, items),
+      has_discount: renewalSpecs(state, sub).length > 0,
+      generates_immediate_invoice: false,
+      next_billing_date: sub.period_end,
+    });
+  }
+  if (a !== "subscriptions" || b === undefined) return fail(404, "Not found");
+  const sub = get(state.subscriptions, b);
+  if (!sub || sub.customer !== session.customer) return fail(404, "No such subscription");
+  if (method === "GET" && c === undefined) {
+    const plans = (config?.products ?? []).flatMap((prod) =>
+      prod.prices.map((priceId) => {
+        const pr = priceOf(state, priceId);
         return {
-          price: id,
-          name: s.products[p.product]?.name ?? "",
-          amount: money(price.unit_amount),
-          per: perInterval(price.interval),
-          current: id === sub.item.price,
+          product: prod.product,
+          price: priceId,
+          name: productName(state, priceId),
+          unit_amount: pr.unit_amount,
+          interval: pr.interval,
         };
       }),
-    ),
-  };
-}
-
-function updatePreview(s: State, sub: Subscription, priceId: string): Json {
-  const price = priceOf(s, priceId);
-  const discounts = activeDiscounts(s, sub);
-  const change = {
-    target: { price, quantity: sub.item.quantity },
-    behavior: "create_prorations" as const,
-    prorationDate: null,
-    discounts,
-  };
-  const upcoming = draftFor(s, sub, change);
-  const recurring = upcoming.lines.filter((l) => !l.proration);
-  const rt = totals(recurring, discounts);
-  return {
-    latest_invoice: null,
-    upcoming_invoice: invoiceSummary(s, upcoming),
-    recurring_invoice: { total: money(rt.total), has_discount: rt.discount > 0 },
-    generates_immediate_invoice: false,
-    reset_billing_cycle_anchor: false,
-    schedule_update_at_period_end: false,
-    plan: s.products[price.product]?.name ?? "",
-    starting: longDate(sub.current_period_end),
-    interval: price.interval === "year" ? "yearly" : "monthly",
-  };
-}
-
-function applyUpdate(s: State, session: PortalSession, sub: Subscription, priceId: string): Json {
-  const price = priceOf(s, priceId);
-  const now = customerNow(s, sub.customer);
-  const target = { price, quantity: sub.item.quantity };
-  const lines = prorationLines(s, sub, target, now, activeDiscounts(s, sub));
-  sub.pending.push(...lines);
-  sub.item = { ...sub.item, price: price.id };
-  return subscriptionSummary(s, session, sub);
-}
-
-function sessionOf(s: State, id: string): PortalSession {
-  return must(s.portal_sessions[id], "billing portal session", id, "session");
-}
-
-function subscriptionOf(s: State, session: PortalSession, id: string): Subscription {
-  const sub = customerSubscriptions(s, session).find((x) => x.id === id);
-  return must(sub, "subscription", id, "subscription");
-}
-
-export function portalRoutes(req: CloneRequest): [string, RegExp, Handler][] {
-  const host = req.headers.host;
-  const origin = `http://${typeof host === "string" ? host : "127.0.0.1"}`;
-  const m = /^\/v1\/billing_portal\/sessions\/(bps_[A-Za-z0-9]+)(?:\/(.*))?$/.exec(req.path);
-  const rest = m?.[2] ?? "";
-  const subPath = /^subscriptions\/([^/]+)(?:\/(cancel|reactivate|retention_coupon))?$/.exec(rest);
-  const sub = subPath?.[1];
-  const action = subPath?.[2];
-  const routes: [string, RegExp, Handler][] = [
-    ["POST", /^\/v1\/billing_portal\/configurations$/, (s, body) => createConfiguration(s, body)],
-    ["POST", /^\/v1\/billing_portal\/sessions$/, (s, body) => createSession(s, body, origin)],
-  ];
-  if (!m) return routes;
-  const at = (method: string, handler: (s: State, session: PortalSession) => Json): void => {
-    routes.push([
-      method,
-      /^\/v1\/billing_portal\/sessions\/(bps_[A-Za-z0-9]+)/,
-      (s, _b, id) => handler(s, sessionOf(s, id)),
-    ]);
-  };
-  if (rest === "") {
-    at("GET", (s, session) => ({
-      id: session.id,
-      customer: session.customer,
-      configuration: session.configuration,
-      account: { name: ACCOUNT.name },
-    }));
-  } else if (rest === "customer") {
-    at("GET", (s, session) => ({ id: session.customer, name: null, email: null }));
-  } else if (rest === "subscriptions") {
-    at("GET", (s, session) => ({
-      data: customerSubscriptions(s, session).map((x) => subscriptionSummary(s, session, x)),
-    }));
-  } else if (rest === "payment_methods") {
-    at("GET", (s, session) => {
-      const customer = s.customers[session.customer];
-      return {
-        data: Object.values(s.payment_methods)
-          .filter((p) => p.customer === session.customer)
-          .map((p) => ({
-            id: p.id,
-            label: `${p.brand === "visa" ? "Visa" : p.brand} •••• ${p.last4}`,
-            expires: `${String(p.exp_month).padStart(2, "0")}/${p.exp_year}`,
-            default: customer?.default_payment_method === p.id,
-          })),
-      };
-    });
-  } else if (rest === "update_preview") {
-    at("GET", (s, session) => {
-      const subId = req.query.get("subscription") ?? "";
-      return updatePreview(s, subscriptionOf(s, session, subId), req.query.get("price") ?? "");
-    });
-  } else if (sub !== undefined && action === "retention_coupon") {
-    at("GET", (s, session) => ({ subscription: subscriptionOf(s, session, sub).id, coupon: null }));
-  } else if (sub !== undefined && action !== undefined) {
-    at("POST", (s, session) => {
-      const x = subscriptionOf(s, session, sub);
-      setCancelAtPeriodEnd(s, x, action === "cancel");
-      return subscriptionSummary(s, session, x);
-    });
-  } else if (sub !== undefined) {
-    at("GET", (s, session) => plans(s, session, subscriptionOf(s, session, sub)));
-    at("POST", (s, session) =>
-      applyUpdate(s, session, subscriptionOf(s, session, sub), parse(UpdateBody, req.body).price),
     );
+    return ok({ ...obj(subscriptionView(state, sub)), plans });
   }
-  return routes;
+  if (method === "GET" && c === "retention_coupon") return ok({ coupon: null });
+  const now = nowFor(state, sub.customer);
+  if (method === "POST" && c === "cancel") {
+    sub.cancel_at = sub.period_end;
+    sub.canceled_at = now;
+    return ok(subscriptionView(state, sub));
+  }
+  if (method === "POST" && c === "reactivate") {
+    sub.cancel_at = null;
+    sub.canceled_at = null;
+    sub.cancel_at_period_end = false;
+    return ok(subscriptionView(state, sub));
+  }
+  if (method === "POST" && c === undefined) {
+    const changes: ItemChange[] = arr(p.recurring_items).map((raw) => {
+      const it = obj(raw);
+      return { id: str(it.id) ?? "", price: str(it.price), quantity: num(it.quantity) };
+    });
+    const plan = planChange(state, sub, {
+      changes,
+      proration_date: null,
+      behavior: "create_prorations",
+      discounts: null,
+      now,
+    });
+    if (isPlanError(plan)) return fail(400, plan.message, plan.param);
+    for (const l of plan.prorations) {
+      const id = mint(state, "ii");
+      state.invoice_items[id] = {
+        id,
+        customer: sub.customer,
+        subscription: sub.id,
+        line: { ...l, id: "", invoice_item: id },
+        invoice: null,
+      };
+    }
+    sub.items.forEach((it) => {
+      const next = plan.items.find((x) => x.id === it.id);
+      if (next) {
+        it.price = next.price;
+        it.quantity = next.quantity;
+      }
+    });
+    return ok(subscriptionView(state, sub));
+  }
+  return fail(404, "Not found");
 }
 
-export function portalPage(req: CloneRequest, s: State): string | null {
-  const m = /^\/p\/session\/([A-Za-z0-9_]+)$/.exec(req.path);
-  if (req.method !== "GET" || !m) return null;
-  const session = Object.values(s.portal_sessions).find((x) => x.token === m[1]);
-  if (!session) return null;
-  return portalHtml(session.id, ACCOUNT.name);
+export function handlePortal(state: State, req: CloneRequest, p: Params): CloneResponse | null {
+  const parts = req.path.split("/").filter((s) => s !== "");
+  if (
+    parts[0] === "p" &&
+    parts[1] === "session" &&
+    parts[2] !== undefined &&
+    req.method === "GET"
+  ) {
+    const id = parts[2].replace(/^test_/, "bps_");
+    const session = sessionOf(state, id);
+    if (!session) return { status: 404, body: "Not found", contentType: "text/plain" };
+    return { status: 200, body: portalPage(session.id), contentType: "text/html; charset=utf-8" };
+  }
+  if (parts[0] !== "v1" || parts[1] !== "billing_portal") return null;
+  const [, , kind, id, ...rest] = parts;
+  if (kind === "configurations" && req.method === "POST" && id === undefined) {
+    const features = obj(p.features);
+    const cancel = obj(features.subscription_cancel);
+    const update = obj(features.subscription_update);
+    const cfgId = mint(state, "bpc");
+    state.configs[cfgId] = {
+      id: cfgId,
+      cancel_enabled: cancel.enabled === "true",
+      allowed_updates: arr(update.default_allowed_updates).map((x) => str(x) ?? ""),
+      products: arr(update.products).map((raw) => {
+        const pr = obj(raw);
+        return { product: str(pr.product) ?? "", prices: arr(pr.prices).map((x) => str(x) ?? "") };
+      }),
+    };
+    return ok({ id: cfgId, object: "billing_portal.configuration" });
+  }
+  if (kind === "sessions" && req.method === "POST" && id === undefined) {
+    const customer = str(p.customer) ?? "";
+    if (!get(state.customers, customer)) return fail(404, `No such customer: '${customer}'`);
+    const sid = mint(state, "bps");
+    state.sessions[sid] = {
+      id: sid,
+      customer,
+      configuration: str(p.configuration) ?? "",
+      created: nowFor(state, customer),
+    };
+    const host = typeof req.headers.host === "string" ? req.headers.host : "127.0.0.1";
+    return ok({
+      id: sid,
+      object: "billing_portal.session",
+      customer,
+      url: `http://${host}/p/session/${sid.replace(/^bps_/, "test_")}`,
+    });
+  }
+  if (kind === "sessions" && id !== undefined) {
+    const session = sessionOf(state, id);
+    if (!session) return fail(404, `No such session: '${id}'`);
+    return sessionApi(state, session, req.method, rest, p);
+  }
+  return null;
 }
