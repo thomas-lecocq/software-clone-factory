@@ -777,6 +777,23 @@ function targetedWide(): [string, WideInput][] {
   return out;
 }
 
+// Probes proposed by a breaker round: inputs chosen to make the clone fail, outside the generators'
+// distribution. Adversarial by construction, so they are dev (`dev-` prefix) and carry no claim.
+const BreakerRound = z.object({
+  probes: z.array(
+    z.object({
+      id: z.string().startsWith("dev-"),
+      rules: z.array(z.string()).min(1),
+      input: JsonSchema,
+    }),
+  ),
+});
+function breakerProbes(file: string): Probe[] {
+  const path = join(import.meta.dirname, file);
+  if (!existsSync(path)) return [];
+  return BreakerRound.parse(JSON.parse(readFileSync(path, "utf8"))).probes;
+}
+
 // Dedicated holdout batches, one per pre-registered plan (analysis-plan*.md). Their seeds live in a
 // holdout-* file, which never enters a builder sandbox: there the batches simply do not exist.
 // Batch IDs start with `hold-`, which `splitOf` sends to the holdout whatever their hash.
@@ -1315,5 +1332,12 @@ export function probes(): Probe[] {
     rules: rulesForWide(p),
     input: JsonSchema.parse(p),
   }));
-  return [...logic, ...walkthroughs, ...slice2, ...uiFull, ...wide];
+  return [
+    ...logic,
+    ...walkthroughs,
+    ...slice2,
+    ...uiFull,
+    ...wide,
+    ...breakerProbes("breaker-round1.json"),
+  ];
 }

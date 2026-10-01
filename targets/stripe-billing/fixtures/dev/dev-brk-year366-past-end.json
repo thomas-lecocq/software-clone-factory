@@ -1,0 +1,50 @@
+{
+  "id": "dev-brk-year366-past-end",
+  "rules": [
+    "ERR-01"
+  ],
+  "input": {
+    "kind": "wide",
+    "start": 1803859200,
+    "billing_mode": "flexible",
+    "interval": "year",
+    "items": [
+      {
+        "amount": 36600,
+        "quantity": 1
+      }
+    ],
+    "coupons": [],
+    "change": {
+      "item": 0,
+      "amount": 73200,
+      "interval": null,
+      "quantity": null,
+      "offset": 31622401,
+      "proration_behavior": null,
+      "discount": null
+    }
+  },
+  "observed": {
+    "preview": {
+      "error": {
+        "type": "StripeInvalidRequestError",
+        "code": null,
+        "param": "proration_date",
+        "message": "Cannot specify proration date outside of current subscription period or current phase. The value should be between 1803859200 and 1835481600."
+      }
+    },
+    "first_invoice": {
+      "subtotal": 36600,
+      "total": 36600,
+      "amount_due": 36600,
+      "status": "paid"
+    }
+  },
+  "noise": [],
+  "recorded_at": "2026-10-01T20:37:48.614Z",
+  "recorded_with": {
+    "stripe_api_version": "2026-08-26.dahlia",
+    "stripe_node": "22.6.2"
+  }
+}

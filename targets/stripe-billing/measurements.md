@@ -37,3 +37,9 @@ spent: it may be analysed, but no later claim rests on it.
 - **Diff policy** changed between plan and look: none.
 - The same run rescored the spent batch 1 at 473 of 473 and the hash-split holdout at 176 of
   176; neither carries a claim.
+
+## Secondary uses of batch 2 (no claim)
+
+- **Ablation of the second builder pass:** the clone measured on batch 1 (`7238f46`) scored on
+  batch 2 in a separate worktree, 2026-10-01: 451 of 473 (22 failures; bound 6.58 % at 95 %).
+  It never saw batch 2 either; the result says what the pass driven by batch 1's analysis added.

@@ -1,78 +1,93 @@
 # Gaps: stripe-billing
 
 Owner: main session. The hand-written account of where the clone is wrong, might be wrong, or was
-never compared. The generated list is `GAPS.generated.md`; the scores are in `verify/report.md`.
-Final measurement (2026-09-23 18:25Z, `verify/runs.jsonl`): clean holdout `fresh2` 29 of 29
-(Wilson 95 % 0.88 to 1.00; exact one-sided 95 % upper bound on the divergence rate 9.8 %, over the
-random distribution only), slice 2 holdout 5 of 5, all fixtures 329 of 329.
+never compared. The generated list is `GAPS.generated.md`; scores are in `verify/` and every
+claim's single look is in `measurements.md`.
+
+## Scope
+
+Stripe Billing in **test mode**, USD, through the public API and the hosted Customer Portal:
+
+- **Slice 1:** the preview (`invoices.createPreview`) of a mid-cycle change on a subscription of 1
+  to 3 items sharing a monthly or yearly interval: new price, new quantity or both, at any second
+  of the first period, with 0 to 2 subscription coupons (percent or amount off, forever or once)
+  and an optional preview coupon, in flexible or classic billing mode, under the three proration
+  behaviours. The portal's plan change flow.
+- **Slice 2:** cancel at period end, reactivate, cancel now, renewals and a failing card over test
+  clocks; the portal's cancel and renew flow.
+
+The one claim with a pre-registered bound is on slice 1's `WIDE_DISTRIBUTION` (`probes.ts`):
+below 1 % of cases diverge, at 99 % confidence (holdout batch 2, 473 of 473). Everything else
+below is counts without a claim.
+
+**A quarter of that batch is easy.** Of its 473 cases, 74 are Stripe errors (70 of them the
+`none` behaviour given a proration date) and 50 are changes that change nothing. On the 349 other
+cases, with no failure either, the bound is 0.85 % at 95 % and 1.31 % at 99 %: on substantive
+changes alone the result is "below 1 % at 95 %", not at 99 %. This split was not in the plan, so it
+is descriptive only; the pre-registered claim stands as stated.
 
 ## Measured divergences
 
-None in the final measurement. Divergences measured earlier and since fixed through new dev
-probes (never by reading the holdout):
+None in the claim's measurement (batch 2, 473 of 473). Measured earlier and fixed through new dev
+probes, never by reading a holdout the clone was later scored on:
 
-| Iteration | Holdout case                | Behaviour                                           | Fixed by                                        |
-| --------- | --------------------------- | --------------------------------------------------- | ----------------------------------------------- |
-| 1         | `d-month-to-year`           | interval change prorated, not reset                 | `t-month-to-year-*` dev probes                  |
-| 1         | `d-pct20-sub-pct15-preview` | two coupons on the credit line                      | `t-two-coupons-*`, `b-off300-sub-pct15-preview` |
-| 1         | `rand-005`                  | one cent, classic mode, percent coupon              | `t-disc-round-*`                                |
-| 2         | `fresh-007`                 | one cent, classic mode, amount-off `once` coupon    | `u-classic-off-*`                               |
-| 2         | `t-year-to-month`           | proration date past the new monthly period rejected | `u-year-to-month-*`                             |
+| When                        | Where                 | Behaviour                                                       | Fixed by                        |
+| --------------------------- | --------------------- | --------------------------------------------------------------- | ------------------------------- |
+| Batch 1 (448 of 473)        | 8 cases               | percent coupon over several lines: rounded on the total, spread | `dev-t2-a*`, DSC-01             |
+| Batch 1                     | 7 cases               | once coupon passed to the preview: listed, at 0 when immediate  | `dev-t2-b*`, DSC-05             |
+| Batch 1                     | 5 cases               | credit-line discount list in immediate flexible invoices        | `dev-t2-c*`, DSC-07             |
+| Batch 1                     | 2 cases               | flexible credit whose discount prorates to 0                    | `dev-t2-d*`, DSC-08             |
+| Batch 1                     | 2 cases               | interval change with the proration date at the period end       | `dev-t2-e*`, INT-02             |
+| Batch 1                     | 1 case                | first invoice under the minimum charge goes to the balance      | `dev-t2-f*`, INV-01             |
+| Dev, after the batch 2 look | `dev-t2-f-left56..58` | minimum charge is 56 cents; the measured clone uses 59          | not fixed in the measured clone |
 
-Those holdout cases pass now, but they are spent and prove nothing further.
+The analysis of batch 1 is `analysis/batch1-failures.md`. The clone measured before that analysis
+(`7238f46`) also fails 22 of batch 2's 473 cases: the second builder pass is what closed the gap.
 
 ## Rules that fit the fixtures but are thin
 
-- **Amount-off allocation across several lines (DSC-03).** Never observed: every probe has one
-  discountable line.
-- **Classic percent charge.** One fixture (`fresh2-081`) separates the candidate formulas.
-
-- **Rounding at exactly .5 (PRO-04).** Six `.5` lines in dev. The builder's model (credits away
-  from zero, classic charges half up, flexible charges as a floating-point effect) fits all six,
-  but is a hypothesis with six data points.
-- **Retry schedule after a failed payment (LIF-06).** One data point (3 attempts after 5 days).
-- **Classic vs flexible (MOD-01).** One-cent differences under percent coupons; the documented
-  difference in totals was never reproduced.
-- **UI (UI-01 to UI-10).** 8 walkthroughs; 5 of the 15 slice 2 fixtures and none of the slice 1
-  walkthroughs are in the holdout.
+- **DSC-07 (credit-line discounts in immediate flexible invoices).** Implemented as a decision
+  table over the observed cases, not as a mechanism (`clone/NOTES.md`). It holds on batch 2; an
+  input outside the distribution may fall in a cell no fixture filled.
+- **PRO-04 (rounding at exactly .5)** and **MOD-01 (classic vs flexible)**: few separating cases.
+- **LIF-03 and LIF-04** have no dev fixture: coded from their statements only, unverified.
 
 ## Compared nowhere (outside the probe space)
 
-Not covered by a fixture; behaviour inferred from the documentation at most; unverified:
-taxes, currencies other than USD, several items per subscription, metered and tiered prices,
-subscription schedules, prorated trials, coupons with `repeating` duration, promotion codes,
-customer balance applied to later invoices, 3D Secure and other payment failures than
-`pm_card_chargeCustomerFail`, portal flows other than plan change and cancel/renew, the portal's
-retention coupon (its endpoint is called but never returns an offer in our configuration),
-the cancellation reason dialog (disabled in every walkthrough).
+Not covered by a fixture, unverified: taxes, currencies other than USD, more than three items,
+mixed intervals in one subscription, metered and tiered prices, schedules, trials during a
+change, `repeating` coupons, promotion codes, customer balance beyond the minimum-charge case,
+3D Secure and payment failures other than `pm_card_chargeCustomerFail`, portal flows other than
+plan change, quantity change and cancel/renew, the retention coupon, the cancellation reason
+dialog, **live mode** (assumed equal to test mode).
 
 ## Blind spots by design
 
-- **Lifecycle snapshots are a projection** (`lifecycle.ts`): status, cancellation dates, period,
-  latest invoice amounts and lines, invoice count. Other subscription and invoice fields are not
-  compared in slice 2. Slice 1 previews are compared field by field, all 74 top-level fields.
-- **UI snapshots drop link targets** (`- /url:` lines): they carry session secrets and internal
-  paths.
-- **UI request bodies are not compared**: a walkthrough records the method and path of each portal
-  request (`ui.ts`), not its body or response.
-- **Card expiry** ("Expires 09/2027") follows the real date on Stripe; it is a constant in the
-  clone. The fixtures are frozen, so they will keep passing after Stripe's test card rolls over:
-  the divergence becomes invisible, not visible.
-- **Test mode only.** Live mode is assumed to compute the same invoices; unverified.
-- **Account constants** (country `FR`, name pseudonymised to "AcmeCo") are seed data.
+- **Lifecycle snapshots and the post-flow account state are projections** (`lifecycle.ts`,
+  `ui.ts`): fields outside them are not compared. Previews are compared field by field.
+- **Screens:** link targets are dropped (they carry session secrets); element boxes are compared
+  within 16 px; the thumbnail is reported, never scored; the test card's expiry text is masked
+  (`policy.json`), since it depends on the recording day.
+- **Time bombs.** The card expiry follows the real date; the portal prints a year on dates that
+  are not in the current real year, so screens recorded in 2026 will differ from Stripe's in 2027.
+  Fixtures are frozen, so the clone keeps passing: the divergence becomes invisible.
+- **The hash-split holdout's inputs** are visible to the builder in `probes.ts` (outputs are not).
+  Pre-registered batches have hidden seeds.
 
 ## Evaluator integrity
 
-- **Clean measures:** `fresh2` (29 of 29) and the slice 2 holdout (5 of 5). Spent or informed:
-  the v1 holdout, `fresh-*` (quoted after iteration 2), and the `t-*`, `b-*` and `u-*` probes.
-- **Builder pass 3 ran in the sandbox** (`harness/run-builder.sh`): no holdout files, no audit, no
-  git history; only `clone/` copied back. File-level isolation only: `node_modules` was a symlink
-  back into the repository and the sandbox held `.env` during that run (both fixed after audit 3),
-  and nothing stops a same-user process from reading the repository by absolute path. Passes 1 and 2 ran in the repository under the weaker,
-  hook-only isolation that audit 2 bypassed; the final clean measure does not rest on them, but the
-  clone they wrote is the base pass 3 extended.
-- **Verify runs are logged** from 2026-09-23 17:33Z (`verify/runs.jsonl`); `fresh2` holdout was
-  scored once, in the final run. Earlier "measured once" statements rest on the journal.
-- **Regressions:** nine during builder pass 2, reviewed with root causes in `failures.jsonl`.
-- **Rule edits after measurement:** INT-01 and four provenances changed in `rules.json` after
-  iteration 2's run; statements do not change scores, but the report's provenance column did.
+- **One builder run per clone version.** The claim is about this clone, not about the factory's
+  ability to build such clones every time; see `variance.md` for further builds.
+- **The hash-split holdout is not clean:** looked at under several clone versions, and it holds
+  cases designed after earlier failures. It is reported with that status and carries no claim.
+- **Both batch runs were logged `dirty: true`** because the dirty-tree check excluded nothing (a
+  pathspec bug, fixed in `1c64c83`); the scored code is the stated commit (`measurements.md`).
+- **No ablation of the factory's components.** Record-first, the sandbox, the holdout batches
+  and the guard were never switched off one at a time, so none of them can be credited with the
+  result on its own. The one ablation run is of the second builder pass (`measurements.md`).
+- **Guardrails are string matching.** The guard hook blocks by pattern and can be phrased around;
+  isolation rests on the container and the sandbox copy. The container has network access (no
+  Stripe key inside); code hosts are refused by the guard, not by the network.
+- **Auditors** found 12 of 12 planted defects (`audit/results/`); the defects and the auditor
+  prompt share one author, and precision was adjudicated by that same author.
+- **Account constants** (country `FR`, name pseudonymised to "AcmeCo") are seed data.
