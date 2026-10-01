@@ -2,7 +2,16 @@
  * Time on a test clock: renewals at the period end, payment attempts an hour later, retries of a
  * failed payment, the end of a subscription set to cancel, and cancelling now (LIF-*).
  */
-import { allocate, creditLine, priceOf, recurringDescription, specOf, specsOf } from "./billing.ts";
+import {
+  allocate,
+  amountDue,
+  creditLine,
+  deferSmall,
+  priceOf,
+  recurringDescription,
+  specOf,
+  specsOf,
+} from "./billing.ts";
 import {
   get,
   mint,
@@ -111,7 +120,15 @@ function renew(state: State, sub: Subscription): void {
     next_payment_attempt: start + HOUR,
     proration_date: null,
     retries: [],
+    starting_balance: 0,
+    deferred: 0,
   };
+  // The customer balance moves onto the renewal invoice; a credit beyond its total stays.
+  const cus = get(state.customers, sub.customer);
+  if (cus) {
+    inv.starting_balance = cus.balance;
+    cus.balance = Math.min(0, invoiceTotal(inv) + cus.balance);
+  }
   state.invoices[id] = inv;
   sub.latest_invoice = id;
   sub.period_start = start;
@@ -121,8 +138,8 @@ function renew(state: State, sub: Subscription): void {
 
 function attempt(state: State, inv: Invoice, at: number): void {
   const sub = inv.subscription ? get(state.subscriptions, inv.subscription) : undefined;
-  const due = Math.max(0, invoiceTotal(inv));
-  if (due === 0) {
+  const due = amountDue(inv);
+  if (due === 0 || deferSmall(state, inv)) {
     inv.status = "paid";
     inv.next_payment_attempt = null;
     return;
@@ -230,6 +247,8 @@ export function cancelNow(
         next_payment_attempt: null,
         proration_date: null,
         retries: [],
+        starting_balance: 0,
+        deferred: 0,
       };
       sub.latest_invoice = id;
     } else {

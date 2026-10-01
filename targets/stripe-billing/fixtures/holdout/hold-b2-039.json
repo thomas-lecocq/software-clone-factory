@@ -1,0 +1,53 @@
+{
+  "id": "hold-b2-039",
+  "rules": [
+    "DSC-01",
+    "PRO-05",
+    "PRO-06",
+    "PRO-09",
+    "PRO-10"
+  ],
+  "input": {
+    "kind": "wide",
+    "start": 1811159237,
+    "billing_mode": "flexible",
+    "interval": "month",
+    "items": [
+      {
+        "amount": 9648,
+        "quantity": 8
+      }
+    ],
+    "coupons": [],
+    "change": {
+      "item": 0,
+      "amount": 4927,
+      "interval": null,
+      "quantity": null,
+      "offset": 1540482,
+      "proration_behavior": "none",
+      "discount": {
+        "percent_off": 60,
+        "duration": "forever"
+      }
+    }
+  },
+  "observed": {
+    "preview": {
+      "error": {
+        "type": "StripeInvalidRequestError",
+        "code": null,
+        "param": "proration_date",
+        "message": "Cannot specify proration date if no proration is being done"
+      }
+    },
+    "first_invoice": {
+      "subtotal": 77184,
+      "total": 77184,
+      "amount_due": 77184,
+      "status": "paid"
+    }
+  },
+  "noise": [],
+  "recorded_at": "2026-10-01T12:47:23.123Z"
+}

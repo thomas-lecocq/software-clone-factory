@@ -1,6 +1,6 @@
 /** Stripe-shaped JSON for the clone's objects. Constants here are the recorded account's. */
 import type { Json } from "../../../harness/src/json.ts";
-import { priceOf, totals } from "./billing.ts";
+import { amountDue, priceOf, totals } from "./billing.ts";
 import {
   get,
   type Coupon,
@@ -71,7 +71,8 @@ export function lineJson(
 
 export function invoiceJson(state: State, inv: Invoice, preview: boolean): Json {
   const { subtotal, total } = totals(inv.lines, inv.total_discount_amounts);
-  const due = Math.max(0, total);
+  const due = amountDue(inv);
+  const ending = Math.min(0, total + inv.starting_balance);
   const paid = inv.status === "paid" ? inv.amount_paid : 0;
   const customer = get(state.customers, inv.customer);
   const tda = inv.total_discount_amounts;
@@ -119,11 +120,7 @@ export function invoiceJson(state: State, inv: Invoice, preview: boolean): Json 
     discounts: [...inv.discounts],
     due_date: null,
     effective_at: null,
-    ending_balance: preview
-      ? Math.min(0, total)
-      : inv.status === "draft"
-        ? null
-        : Math.min(0, total),
+    ending_balance: preview ? ending : inv.status === "draft" ? null : ending,
     footer: null,
     from_invoice: null,
     hosted_invoice_url: null,
@@ -165,7 +162,7 @@ export function invoiceJson(state: State, inv: Invoice, preview: boolean): Json 
     rendering: null,
     shipping_cost: null,
     shipping_details: null,
-    starting_balance: 0,
+    starting_balance: inv.starting_balance,
     statement_descriptor: null,
     status: inv.status,
     status_transitions: {

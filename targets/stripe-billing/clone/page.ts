@@ -29,7 +29,6 @@ svg { display: inline-block; vertical-align: middle; }
   border-radius: 4px; background: #ffde92; color: #a82c00; }
 #side .intro { position: absolute; left: 64px; top: 174px; display: block; width: 279px;
   height: 92px; line-height: 23px; font-size: 18px; color: #414552; }
-#side .intro::after { content: "plified billing."; }
 #side footer { position: absolute; left: 64px; top: 718px; width: 300px; }
 #side .powered { position: absolute; left: 0; top: 2px; display: inline-block; width: 112px;
   height: 17px; line-height: 17px; font-size: 12px; color: #687385; white-space: nowrap; }
@@ -39,7 +38,7 @@ svg { display: inline-block; vertical-align: middle; }
   color: #687385; }
 #side .terms { position: absolute; left: 0; width: 35px; }
 #side .privacy { position: absolute; left: 43px; width: 41px; }
-#main { position: absolute; left: 592px; top: 0; width: 608px; padding-bottom: 64px; }
+#col { position: absolute; left: 592px; top: 0; width: 608px; padding-bottom: 64px; }
 .up { text-transform: uppercase; }
 .label { display: inline-block; height: 17px; line-height: 17px; font-size: 13.6px; font-weight: 600;
   color: #414552; }
@@ -170,8 +169,9 @@ svg { display: inline-block; vertical-align: middle; }
 .renew .pname { margin-top: 18px; }
 .tip { position: absolute; left: 700px; top: 150px; width: 300px; padding: 8px; font-size: 13px;
   line-height: 18px; background: #fff; border: 1px solid #d5dbe1; border-radius: 6px; }
-.addpm-form { margin-top: 30px; width: 464px; }
-.addpm-form iframe { display: block; width: 464px; height: 120px; border: 0; }
+.addpm-form { width: 464px; }
+#cardframe { display: none; margin-top: 30px; width: 464px; height: 120px; border: 0; }
+#cardframe.on { display: block; }
 .addpm-form label { display: block; margin-top: 16px; font-size: 14px; }
 .blk { display: block; width: fit-content; }
 .confirm + .wide { margin-top: 48px; }
@@ -188,6 +188,8 @@ const CLIENT = `
   var st = { screen: 'home', session: null, customer: null, subs: null, pms: null, detail: null,
     preview: null, sel: null, upOpen: null, qtyOpen: false, confOpen: false };
   var main = document.getElementById('main');
+  var below = document.getElementById('below');
+  var cardFrame = document.getElementById('cardframe');
 
   function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
   function money(c) {
@@ -444,10 +446,14 @@ const CLIENT = `
     h += '<button class="wide secondary" data-act="home">Go back</button>';
     return h + '</div>';
   }
+  // The card form's frame is part of the page from the start and only shown here: a frame
+  // attached after load keeps the page from ever being network-idle.
   function addPmHtml() {
     var h = crumbs([{ text: 'Billing', act: 'home', w: 40 }, { text: 'Payment method', w: 110 }]);
-    h += '<span class="title blk">Add payment method</span><div class="addpm-form"><iframe title="" src="about:blank"></iframe>';
-    h += '<label><input type="checkbox" checked><svg width="16" height="16" viewBox="0 0 16 16"><rect x="1" y="1" width="14" height="14" rx="3" fill="#635bff"/></svg> <span>Use as default payment method</span></label></div>';
+    return h + '<span class="title blk">Add payment method</span>';
+  }
+  function addPmBelow() {
+    var h = '<div class="addpm-form"><label><input type="checkbox" checked><svg width="16" height="16" viewBox="0 0 16 16"><rect x="1" y="1" width="14" height="14" rx="3" fill="#635bff"/></svg> <span>Use as default payment method</span></label></div>';
     h += '<button class="wide primary" disabled style="margin-top:24px;opacity:.5">Add' + icons + '</button>';
     h += '<button class="wide secondary" data-act="noop">Go back</button>';
     return h;
@@ -461,6 +467,9 @@ const CLIENT = `
     else if (st.screen === 'renew') h = reviewHtml('renew');
     else if (st.screen === 'addpm') h = addPmHtml();
     main.innerHTML = h;
+    var card = st.screen === 'addpm';
+    cardFrame.className = card ? 'on' : '';
+    below.innerHTML = card ? addPmBelow() : '';
     var info = main.querySelector('.info');
     if (info) {
       info.addEventListener('mouseenter', function () { var t = main.querySelector('.tip'); if (t) t.style.display = 'block'; });
@@ -521,10 +530,10 @@ export function portalPage(sessionId: string): string {
 <body data-session="${esc(sessionId)}">
 <div id="side">
 <div class="brand"><span class="logo"></span><span class="acct">${name}</span> <span class="sandbox">Sandbox</span></div>
-<span class="intro">${name} partners with Stripe for sim</span>
+<span class="intro">${name} partners with Stripe for simplified billing.</span>
 <footer><a class="powered" href="https://stripe.com">Powered by ${STRIPE_LOGO}</a><div class="legal"><a class="terms" href="https://stripe.com/legal/end-users">Terms</a> <a class="privacy" href="https://stripe.com/privacy">Privacy</a></div></footer>
 </div>
-<div id="main"></div>
+<div id="col"><div id="main"></div><iframe id="cardframe" title="" src="about:blank"></iframe><div id="below"></div></div>
 <iframe id="hc" title="" src="about:blank"></iframe>
 <script>${CLIENT}</script>
 </body></html>`;

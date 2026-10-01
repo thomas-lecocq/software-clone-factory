@@ -93,10 +93,10 @@ Layout: boxes are keyed by element tag and `innerText` (so `text-transform: uppe
 which fixes which elements may own text. Two recorded artefacts are reproduced, not reasoned
 about:
 
-- The account name was replaced by a shorter literal when the fixtures were scrubbed, so the
-  intro's key is cut at "...for sim". The intro span holds exactly that text and "plified
-  billing." comes from a `::after` pseudo-element (in the accessibility tree, not in `innerText`).
-  The account name keeps the recorded width (259 px) for the same reason.
+- (Removed in pass 4.) The intro's layout key used to be cut at "...for sim" and the clone
+  reproduced it with a `::after` pseudo-element. The uf-* walkthroughs were re-captured with
+  whole keys, so the intro span now holds the whole sentence. The account name keeps the
+  captured width (259 px).
 - Fonts: Liberation Sans, sizes tuned so that every box of the eight uf- fixtures lands within the
   policy's 16 px.
 
@@ -119,3 +119,75 @@ together. Determinism: 10 of 10 sampled fixtures identical after reset.
 
 Not covered by any dev fixture (unverified): LIF-03 (end of a subscription set to cancel at
 period end) and LIF-04 (reactivate before the end) are implemented from their statements only.
+
+## Pass 4: corrected rules after holdout batch 1 (DSC-01, DSC-05, DSC-07, DSC-08, INT-02, INV-01)
+
+Baseline (local replay of the 667 logic/lifecycle dev cases): 611 pass, 56 fail: dev-t2-a* (8),
+-b* (10), -c* (7), -d* (12), -e* (6), -f* (5), wide2-014/045/053 (credit list), wide2-061/069/290
+(credit off by a cent), wide2-281 (allocation). The holdout analysis was read for the rule
+statements only; no amount or case ID from it is used in code.
+
+Rules as read from the dev cases:
+
+- DSC-01: percent-off total = round(pct x S) over what is left of the discountable lines,
+  spread floor(total x line / S), remainder one cent per line from the last line (same as
+  amount-off). The first invoice uses it too, so a flexible credit moves with it. Expected to
+  flip: dev-t2-a*, wide2-281, wide2-061/069/290.
+- DSC-05: a once coupon passed to the preview is on the invoice (`discounts`,
+  `total_discount_amounts`) when the change prorates nothing (it then discounts the renewal) and
+  in an immediate invoice (at 0 there). Only a non-immediate invoice with prorations leaves it
+  off. Expected: dev-t2-b-noop-* (4), dev-t2-b-always-* (6, with DSC-07).
+- DSC-07 (flexible, immediate invoice), credit line list, as the dev cases pin it:
+  invoice has no discount -> nothing; credit carried nothing -> the invoice's discounts;
+  the carried discounts that survive DSC-08 are none -> nothing; exactly one -> that one (even
+  when the invoice's discount is another coupon: dev-t2-c-forever-forever, -c-forever-once,
+  -b-always-flexible-forever); two -> the invoice's discounts. The rules.json wording ("lists
+  the invoice's discounts unless everything it carries is a used once coupon") disagrees with
+  dev-t2-c-forever-forever and dev-t2-b-always-flexible-forever, where a single carried forever
+  coupon is listed instead of the passed one. Implemented the fixture reading.
+- DSC-08: flexible credit drops a carried discount whose prorated amount round(D r / P) is 0,
+  from the description and the line's own list. Expected: dev-t2-d-flexible-* (12),
+  dev-t2-e-m2y-flexible-pct-end1.
+- INT-02: no "prd < period end" gate any more. A credit with r = 0 and a charge with r2 = 0 are
+  omitted; a classic interval change bills a full new period for each changed item even without
+  a credit line. Expected: dev-t2-e-*-end0 (6).
+- INV-01: an invoice whose amount due is above 0 and below the minimum charge is marked paid,
+  amount_due 0, and the amount goes to the customer balance; the next preview shows it as
+  starting_balance and adds it to amount_due. Contradiction: rules.json says "below 50
+  cents", but dev-t2-f-left50 and dev-t2-f-left51 (50 and 51 cents) are not charged either;
+  fresh2-132 (291) is charged. The threshold is somewhere in 52..291. The account is French,
+  so the minimum is probably 0.50 EUR converted; the clone uses 59 cents (an assumption, not
+  pinned by any dev case). Expected: dev-t2-f-* (5).
+
+Outcome (local replay, 678 logic and lifecycle cases): first attempt 677 of 678. Every predicted
+case flipped; wide2-157 broke on DSC-07. It carries a once coupon that took the whole first
+invoice and a 2 % forever coupon that got 0 there; Stripe lists the invoice's coupon, not the
+once coupon. So "carried" counts every discount on the billed line, zero amounts included
+(classic still prorates only the non-zero ones). Second attempt, the rule as implemented:
+
+    immediate flexible credit list =
+      []                     if the invoice has no discount
+      invoice's discounts    if the billed line had no discount
+      []                     if no carried discount survives DSC-08
+      the surviving one      if the billed line had exactly one discount
+      invoice's discounts    otherwise
+
+678 of 678 after it. This table fits every dev case but reads like a lookup table more than a
+mechanism; the holdout may hold combinations (two carried, one surviving) it does not cover.
+
+uf-* re-captured with whole layout keys: the intro span now holds the whole sentence and the
+`::after` trick is gone. 15 of 15 ui-/uf- pass locally.
+
+x-quantity speed. Measured on the clone with a timed copy of the explorer loop: 18 states, 41
+edges, 42 replays, 261 s; per replay about 5-7 s, the same as x-basic (17 replays, 92-102 s). The
+quantity screens themselves settle like the others (one 500 ms network-idle wait after load,
+three 500 ms polls per click). I could not reproduce 28 minutes here, but timings.jsonl shows
+one earlier 2394 s verify. One real stall was found: the card form's iframe was created by
+`innerHTML` when "Add payment method" opened, and after a cancel the page then never became
+network-idle, so `settle` waited out its 5 s timeout twice (17 s for one replay instead of 7 s).
+Fix: the frame is in the page from the start and only shown on that screen, so no frame
+attaches after load. After the fix every settle on that path takes 0-1 ms, and x-quantity takes
+250 s in the local replay. Nothing detects the explorer.
+
+Result: `npm run verify stripe-billing` 696 of 696 dev fixtures pass (whole run 415 s). Every
+rule with dev fixtures is verified; LIF-03 and LIF-04 still have none (unverified).

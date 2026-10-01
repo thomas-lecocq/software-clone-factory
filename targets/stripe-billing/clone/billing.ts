@@ -8,6 +8,7 @@ import {
   type Billed,
   type Coupon,
   type DiscountAmount,
+  type Invoice,
   type Line,
   type State,
   type SubItem,
@@ -61,19 +62,14 @@ export function allocate(bases: number[], discounts: DiscSpec[]): number[][] {
     const sum = left.reduce((a, b) => a + b, 0);
     const out = left.map(() => 0);
     if (sum <= 0) return out;
-    let total: number;
-    if (d.percent_off !== null) {
-      const p = ppm(d.percent_off);
-      total = roundRatio(sum * p, PPM);
-      left.forEach((b, i) => {
-        out[i] = Math.floor((b * p) / PPM);
-      });
-    } else {
-      total = Math.min(d.amount_off ?? 0, sum);
-      left.forEach((b, i) => {
-        out[i] = Math.floor((total * b) / sum);
-      });
-    }
+    // A percent-off takes round(pct x sum) and spreads it like an amount-off (DSC-01).
+    const total =
+      d.percent_off !== null
+        ? roundRatio(sum * ppm(d.percent_off), PPM)
+        : Math.min(d.amount_off ?? 0, sum);
+    left.forEach((b, i) => {
+      out[i] = Math.floor((total * b) / sum);
+    });
     // The rounding remainder goes one cent per line, from the last line backwards.
     let rest = total - out.reduce((a, b) => a + b, 0);
     const open = left.map((b, i) => (b > 0 ? i : -1)).filter((i) => i >= 0);
@@ -154,9 +150,15 @@ export interface Plan {
   prorations: Omit<Line, "id" | "invoice_item">[];
   // The discounts each proration line actually carries (for its discount list).
   own: DiscSpec[][];
+  // Per proration line: how many discounts a credit line carried (null for a charge).
+  carried: (number | null)[];
   items: PlannedItem[];
+  // Items whose price or quantity changes.
+  changed: string[];
   // Discounts of the new state (a once coupon passed to the preview included).
   discounts: string[];
+  // Whether the discounts were passed with the change rather than kept from the subscription.
+  passed: boolean;
   immediate: boolean;
   // A classic interval change restarts the cycle at the clock time.
   reset: boolean;
@@ -200,13 +202,16 @@ export function creditLine(
   sub: Subscription,
   it: SubItem,
   prd: number,
-): { line: Omit<Line, "id" | "invoice_item">; own: DiscSpec[] } {
+): { line: Omit<Line, "id" | "invoice_item">; own: DiscSpec[]; carried: number } {
   const oldPrice = priceOf(state, it.price);
   const P = sub.period_end - sub.period_start;
   const r = sub.period_end - prd;
   const b = oldPrice.unit_amount * it.quantity;
   const carried = creditDiscounts(state, it.billed);
   let credit: number;
+  // Flexible: a carried discount whose prorated amount rounds to 0 is not applied (DSC-08);
+  // classic prorates the net amount in one step and keeps every label.
+  let applied = carried.map((c) => c.spec);
   if (sub.billing_mode === "classic") {
     // Classic: the coupons apply to the credited item on its own (an amount-off coupon in full,
     // not its share of a multi-item invoice), then the net amount is prorated.
@@ -216,12 +221,14 @@ export function creditLine(
     ).reduce((a, x) => a + (x[0] ?? 0), 0);
     credit = -roundRatio((b - D) * r, P);
   } else {
-    credit = -(roundRatio(b * r, P) - carried.reduce((a, c) => a + roundRatio(c.amount * r, P), 0));
+    const prorated = carried.map((c) => roundRatio(c.amount * r, P));
+    credit = -(roundRatio(b * r, P) - prorated.reduce((a, x) => a + x, 0));
+    applied = carried.filter((_, k) => (prorated[k] ?? 0) !== 0).map((c) => c.spec);
   }
   return {
     line: {
       amount: credit,
-      description: `Unused time on ${qtyPrefix(it.quantity)}${productName(state, it.price)}${withDiscounts(carried.map((c) => c.spec))} after ${shortDate(prd)}`,
+      description: `Unused time on ${qtyPrefix(it.quantity)}${productName(state, it.price)}${withDiscounts(applied)} after ${shortDate(prd)}`,
       period: { start: prd, end: sub.period_end },
       price: it.price,
       quantity: it.quantity,
@@ -232,7 +239,9 @@ export function creditLine(
       credited: it.billed ? { invoice: it.billed.invoice, line: it.billed.line } : null,
       unit_amount_decimal: null,
     },
-    own: carried.map((c) => c.spec),
+    own: applied,
+    // Discounts on the billed line, those it got nothing from included (DSC-07).
+    carried: it.billed?.discounts.length ?? 0,
   };
 }
 
@@ -292,14 +301,24 @@ export function planChange(state: State, sub: Subscription, input: PlanInput): P
 
   const prorations: Plan["prorations"] = [];
   const own: DiscSpec[][] = [];
-  const prorates = behavior !== "none" && prd < sub.period_end;
-  if (prorates) {
+  const carried: (number | null)[] = [];
+  const changed = sub.items
+    .filter((it, i) => {
+      const next = items[i];
+      return next !== undefined && (next.price !== it.price || next.quantity !== it.quantity);
+    })
+    .map((it) => it.id);
+  if (behavior !== "none") {
     sub.items.forEach((it: SubItem, i) => {
       const next = items[i];
-      if (!next || (next.price === it.price && next.quantity === it.quantity)) return;
-      const credit = creditLine(state, sub, it, prd);
-      prorations.push(credit.line);
-      own.push(credit.own);
+      if (!next || !changed.includes(it.id)) return;
+      // A credit with no remaining time is omitted (INT-02).
+      if (prd < sub.period_end) {
+        const credit = creditLine(state, sub, it, prd);
+        prorations.push(credit.line);
+        own.push(credit.own);
+        carried.push(credit.carried);
+      }
       if (reset) return;
       // Charge for the remaining time on the new item, over the new period.
       const newPrice = priceOf(state, next.price);
@@ -307,6 +326,7 @@ export function planChange(state: State, sub: Subscription, input: PlanInput): P
       const P2 = periodEnd - periodStart;
       const r2 = periodEnd - prd;
       const e2 = prd - periodStart;
+      if (r2 <= 0) return;
       const D2 = allocate([n], chargeSpecs).map((x) => x[0] ?? 0);
       const base =
         sub.billing_mode === "classic" ? roundRatio(n * r2, P2) : Math.round(n * (1 - e2 / P2));
@@ -337,14 +357,18 @@ export function planChange(state: State, sub: Subscription, input: PlanInput): P
         unit_amount_decimal: null,
       });
       own.push(applied);
+      carried.push(null);
     });
   }
   const immediate = reset || (behavior === "always_invoice" && prorations.length > 0);
   return {
     prorations,
     own,
+    carried,
     items,
+    changed,
     discounts,
+    passed: input.discounts !== null,
     immediate,
     reset,
     period_start: periodStart,
@@ -381,8 +405,16 @@ export function draftFromPlan(
   ids: { line: () => string; item: () => string },
   mode: Subscription["billing_mode"],
 ): Draft {
-  // once coupons never discount the renewal (DSC-05) nor show on the invoice.
-  const top = plan.discounts.filter((id) => specOf(state, id)?.once === false);
+  // A once coupon passed with the change (DSC-05) is on the invoice when the change prorates
+  // nothing (it then discounts the renewal) or when the invoice is immediate; with prorations
+  // at the next renewal it discounts only the remaining-time charge. A once coupon kept from the
+  // subscription never discounts a later invoice.
+  const passedOnceShows = plan.immediate || plan.prorations.length === 0;
+  const top = plan.discounts.filter((id) => {
+    const s = specOf(state, id);
+    if (!s) return false;
+    return !s.once || (plan.passed && passedOnceShows);
+  });
   const topSpecs = specsOf(state, top);
   const lines: Line[] = plan.prorations.map((p) => ({
     ...p,
@@ -392,8 +424,7 @@ export function draftFromPlan(
   const recurring: Line[] = [];
   if (plan.reset) {
     for (const it of plan.items) {
-      const changed = plan.prorations.some((p) => p.subscription_item === it.id);
-      if (!changed) continue;
+      if (!plan.changed.includes(it.id)) continue;
       recurring.push(recurringLine(state, it, plan.period_start, plan.period_end, ids.line()));
     }
   } else if (!plan.immediate) {
@@ -410,14 +441,21 @@ export function draftFromPlan(
     l.discount_amounts = topSpecs.map((s, k) => ({ discount: s.id, amount: alloc[k]?.[i] ?? 0 }));
   });
   lines.forEach((l, i) => {
-    const mine = plan.own[i] ?? [];
+    const mine = (plan.own[i] ?? []).map((s) => s.id);
+    const carried = plan.carried[i] ?? null;
     // Observed only (no documented rule): which discounts a proration line lists, at 0.
-    const isCredit = l.amount < 0 || l.description.startsWith("Unused");
     let list: string[];
     if (mode === "classic") list = top;
-    else if (plan.immediate && !isCredit) list = mine.map((s) => s.id);
-    else if (top.length > 0) list = plan.immediate ? top : top.slice(0, 1);
-    else list = mine.map((s) => s.id);
+    else if (plan.immediate) {
+      if (carried === null) list = mine;
+      // DSC-07, as the dev cases pin it: see NOTES.md, pass 4.
+      else if (top.length === 0) list = [];
+      else if (carried === 0) list = top;
+      else if (mine.length === 0) list = [];
+      else if (carried === 1) list = mine;
+      else list = top;
+    } else if (top.length > 0) list = top.slice(0, 1);
+    else list = mine;
     l.discount_amounts = list.map((discount) => ({ discount, amount: 0 }));
   });
   const all = [...lines, ...recurring];
@@ -465,6 +503,34 @@ export function recurringLine(
     credited: null,
     unit_amount_decimal: String(p.unit_amount),
   };
+}
+
+// The smallest amount the account charges (INV-01). The dev cases pin it above 51 cents and at
+// most 291; 59 cents is 0.50 EUR (the French account's minimum) converted, an assumption.
+export const MIN_CHARGE = 59;
+
+// What an invoice asks for: its total plus the starting balance, less an amount deferred to the
+// customer balance because it was below the minimum charge.
+export function amountDue(inv: {
+  lines: Line[];
+  total_discount_amounts: DiscountAmount[];
+  starting_balance: number;
+  deferred: number;
+}): number {
+  const { total } = totals(inv.lines, inv.total_discount_amounts);
+  return Math.max(0, total + inv.starting_balance) - inv.deferred;
+}
+
+// Charges below the minimum are not attempted: the amount goes to the customer balance.
+export function deferSmall(state: State, inv: Invoice): boolean {
+  const due = amountDue(inv);
+  if (due <= 0 || due >= MIN_CHARGE) return false;
+  inv.deferred += due;
+  const c = get(state.customers, inv.customer);
+  if (c) c.balance += due;
+  inv.status = "paid";
+  inv.next_payment_attempt = null;
+  return true;
 }
 
 export function totals(lines: Line[], tda: DiscountAmount[]) {

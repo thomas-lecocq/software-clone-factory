@@ -3,6 +3,8 @@ import type { CloneRequest, CloneResponse } from "../../../harness/src/clone-kit
 import type { Json } from "../../../harness/src/json.ts";
 import {
   allocate,
+  amountDue,
+  deferSmall,
   draftFromPlan,
   isPlanError,
   planChange,
@@ -150,13 +152,14 @@ export function billFirstInvoice(state: State, sub: Subscription, now: number): 
     next_payment_attempt: null,
     proration_date: null,
     retries: [],
+    starting_balance: 0,
+    deferred: 0,
   };
-  const due = Math.max(
-    0,
-    lines.reduce((a, l) => a + l.amount, 0) - tda.reduce((a, d) => a + d.amount, 0),
-  );
-  inv.amount_paid = due;
-  inv.attempt_count = due > 0 ? 1 : 0;
+  if (!deferSmall(state, inv)) {
+    const due = amountDue(inv);
+    inv.amount_paid = due;
+    inv.attempt_count = due > 0 ? 1 : 0;
+  }
   state.invoices[id] = inv;
   sub.latest_invoice = id;
   return inv;
@@ -265,6 +268,8 @@ function previewInvoice(state: State, p: Params): CloneResponse {
     next_payment_attempt: draft.immediate ? null : draft.created + 3600,
     proration_date: plan.proration_date,
     retries: [],
+    starting_balance: get(state.customers, sub.customer)?.balance ?? 0,
+    deferred: 0,
   };
   return ok(invoiceJson(state, inv, true));
 }
@@ -376,7 +381,7 @@ export function handleApi(state: State, req: CloneRequest, p: Params): CloneResp
       const now = clock ? (get(state.clocks, clock)?.frozen_time ?? 0) : 0;
       const pmToken = str(p.payment_method);
       const pm = pmToken ? paymentMethodFrom(state, pmToken, id) : null;
-      state.customers[id] = { id, clock, default_payment_method: pm, created: now };
+      state.customers[id] = { id, clock, default_payment_method: pm, created: now, balance: 0 };
       return ok({
         id,
         object: "customer",

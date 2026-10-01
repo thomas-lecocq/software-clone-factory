@@ -40,6 +40,8 @@ export interface Customer {
   clock: string | null;
   default_payment_method: string | null;
   created: number;
+  // What the customer owes (positive) or is owed (negative), carried to the next invoice.
+  balance: number;
 }
 
 export interface Discount {
@@ -128,6 +130,10 @@ export interface Invoice {
   proration_date: number | null;
   // Seconds of the next retry, while a failed invoice is still open.
   retries: number[];
+  // The customer balance the invoice starts from (added to what is due).
+  starting_balance: number;
+  // An amount due below the minimum charge, moved to the customer balance instead (INV-01).
+  deferred: number;
 }
 
 export interface InvoiceItem {
