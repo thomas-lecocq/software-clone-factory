@@ -22,15 +22,7 @@ docker image inspect "$image" >/dev/null 2>&1 || docker build -q -t "$image" -f 
 
 sandbox="$(mktemp -d "${TMPDIR:-/tmp}/scf-sandbox-$agent-XXXX")"
 trap 'rm -rf "$sandbox"' EXIT
-rsync -a \
-  --exclude .git --exclude node_modules --exclude 'fixtures/holdout' --exclude 'holdout-*' \
-  --exclude audit --exclude 'recon/out' --exclude 'targets/*/logs' --exclude '*.env' \
-  --exclude '.env*' --exclude '.scrub*' \
-  "$repo/" "$sandbox/"
-if find "$sandbox" \( -iname '*holdout*' -o -name '*.env' -o -name '.env*' -o -name '.scrub*' -o -name audit \) -print | grep -q .; then
-  echo "refusing: holdout, audit, env or scrub material found in the sandbox" >&2
-  exit 2
-fi
+"$repo/harness/make-sandbox.sh" "$repo" "$sandbox"
 
 mkdir -p "$repo/targets/$target/logs"
 docker run --rm \

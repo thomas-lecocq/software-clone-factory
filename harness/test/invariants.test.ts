@@ -1,5 +1,14 @@
 import { spawnSync } from "node:child_process";
-import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
+import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterAll, describe, expect, it } from "vitest";
 import { checkLock, loadFixtures, targetDir, writeFixture, writeLock } from "../src/fixtures.ts";
@@ -504,6 +513,58 @@ describe("invariant 3: the guard fails closed", () => {
       env: { ...process.env, GUARD_LOG: "/nonexistent-root-dir/sub/guard.log" },
     });
     expect(res.status).toBe(2);
+  });
+});
+
+describe("invariant 3: implementers see only a stripped sandbox", () => {
+  const make = join(root, "harness", "make-sandbox.sh");
+  const work = mkdtempSync(join(tmpdir(), "scf-sandbox-test-"));
+  afterAll(() => {
+    rmSync(work, { recursive: true, force: true });
+  });
+
+  function repoWith(files: string[]): string {
+    const src = mkdtempSync(join(work, "src-"));
+    for (const f of files) {
+      mkdirSync(join(src, f, ".."), { recursive: true });
+      writeFileSync(join(src, f), "x");
+    }
+    return src;
+  }
+
+  it("copies the clone and dev fixtures, and nothing that must stay out", () => {
+    const kept = ["targets/t/clone/server.ts", "targets/t/fixtures/dev/a.json", "harness/x.ts"];
+    const dropped = [
+      ".git/config",
+      ".env",
+      ".agent.env",
+      ".scrub.json",
+      "audit/auditor.md",
+      "targets/t/fixtures/holdout/b.json",
+      "targets/t/holdout-ids.json",
+      "targets/t/logs/builder.log",
+      "targets/t/recon/out/raw.json",
+    ];
+    const src = repoWith([...kept, ...dropped]);
+    const dest = mkdtempSync(join(work, "dest-"));
+    const r = spawnSync(make, [src, dest], { encoding: "utf8" });
+    expect(r.status, r.stderr).toBe(0);
+    for (const f of kept) expect(existsSync(join(dest, f)), f).toBe(true);
+    for (const f of dropped) expect(existsSync(join(dest, f)), f).toBe(false);
+  });
+
+  it("refuses when holdout material slips past the copy filters", () => {
+    const src = repoWith(["targets/t/notes-holdout.md"]);
+    const r = spawnSync(make, [src, mkdtempSync(join(work, "dest-"))], { encoding: "utf8" });
+    expect(r.status).toBe(2);
+  });
+
+  it("mounts the sandbox alone into the agent container", () => {
+    const script = readFileSync(join(root, "harness", "sandbox.sh"), "utf8");
+    const run = script.slice(script.indexOf("docker run"), script.indexOf("| tee"));
+    expect(run.match(/(^|\s)(-v|--volume|--mount)\s/g)).toEqual([" -v "]);
+    expect(run).toContain('-v "$sandbox:/work"');
+    expect(script).toContain('make-sandbox.sh" "$repo" "$sandbox"');
   });
 });
 
