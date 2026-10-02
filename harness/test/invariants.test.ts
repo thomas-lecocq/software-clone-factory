@@ -208,8 +208,10 @@ describe("invariant 3: the guard hook keeps agents away from the evaluator", () 
   const run = (payload: object, env: Record<string, string> = {}): number =>
     spawnSync("bash", [hook], {
       input: JSON.stringify(payload),
+      // The ambient RH_SANDBOX (set inside a builder container) must not decide these cases.
       env: {
         ...process.env,
+        RH_SANDBOX: "",
         ...env,
         GUARD_LOG: "/dev/null",
       },

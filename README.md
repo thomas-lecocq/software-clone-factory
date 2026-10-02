@@ -43,9 +43,43 @@ out of every copy an auditor or a builder sees.
   invoice preview API and the Customer Portal screens.
 - **Slice 2:** cancel and renew in the portal, and the subscription lifecycle over test clocks.
 
-The clone in this repository was built by the builder agent. Its measured fidelity, gaps and blind
-spots are in [`targets/stripe-billing/GAPS.md`](targets/stripe-billing/GAPS.md). A rebuild from
-scratch in an isolated container, against a larger pre-registered holdout, is in progress.
+## Results
+
+All numbers come from `npm run verify` and are logged in
+[`targets/stripe-billing/measurements.md`](targets/stripe-billing/measurements.md); what they do
+not cover is in [`GAPS.md`](targets/stripe-billing/GAPS.md).
+
+**The claim.** On slice 1's widened distribution (a mid-cycle change previewed with
+`invoices.createPreview`: 1 to 3 items, monthly or yearly, 0 to 2 coupons, quantities 1 to 10, any
+second of the period), in Stripe **test mode**, the clone diverges on **fewer than 1 % of cases, at
+99 % confidence**: 473 of 473 on a holdout batch whose size, distribution and decision rule were
+committed before it was recorded, scored once.
+
+**How it got there, failures included.**
+
+| Step                                                   | Result                         |
+| ------------------------------------------------------ | ------------------------------ |
+| Builder agent, from an empty server, in the container  | 382 of 387 dev, 1 h, about $16 |
+| Pre-registered batch 1, single look                    | **448 of 473: claim rejected** |
+| Analysis of the 25 failures by a separate session      | six root causes, all discounts |
+| 379 new dev probes, one more builder pass (32 min, $7) | 696 of 696 dev                 |
+| Pre-registered batch 2 (new seed), single look         | **473 of 473: claim holds**    |
+
+**What the claim does not say.**
+
+- A quarter of batch 2 is easy (Stripe errors, changes that change nothing). On the 349
+  substantive cases the bound is 0.85 % at 95 % and 1.31 % at 99 %: "below 1 %" holds at 95 % only.
+- It is in-distribution. A breaker agent then chose 40 inputs to make the clone fail (100 %
+  coupons, quantity 0, very large amounts, several items changing interval): the clone fails **12
+  of 40**.
+- It is about this clone. Two more builds from scratch, with the same inputs, score 472 of 473 each on
+  batch 2, failing different cases ([`variance.md`](targets/stripe-billing/variance.md)): the 99 %
+  result is the best build's, not every build's.
+- It is test mode only, USD only, and none of the factory's components was ablated.
+
+**The auditors were measured.** On copies of the repository with 12 planted defects, the committed
+auditor prompt found 12 of 12 (recall at least 77.9 % at 95 %), and its other findings led to real
+fixes, such as running the clone in a separate process so that it cannot patch the scorer.
 
 Not affiliated with Stripe. The clone reimplements observed behaviour of the public API in test
 mode; it contains no Stripe code, and no documentation text beyond short quotes.

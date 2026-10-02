@@ -43,3 +43,5 @@ spent: it may be analysed, but no later claim rests on it.
 - **Ablation of the second builder pass:** the clone measured on batch 1 (`7238f46`) scored on
   batch 2 in a separate worktree, 2026-10-01: 451 of 473 (22 failures; bound 6.58 % at 95 %).
   It never saw batch 2 either; the result says what the pass driven by batch 1's analysis added.
+- **Builder variance:** two more clones built from scratch (`variance.md`), each scored once on
+  batch 2 in its own worktree: 472 of 473 each, failing different cases.
