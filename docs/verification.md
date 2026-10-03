@@ -12,7 +12,8 @@ follows it. Read it before writing any harness component or target.
    hashes, and that the lock equals the committed one, before every run.
 2. **Agents never write the score.** Only `verify` produces the scorecard. Implementer agents work
    in a sandbox copy that holds no holdout, no audit material, no secrets and no git history; only
-   their clone is copied back. A guard hook inside the sandbox is a second line, not the guarantee.
+   their clone is copied back. The clone runs in its own process, so its code cannot reach the
+   scorer. A guard hook inside the sandbox is a second line, not the guarantee.
 3. **Every claim has a scorecard line.** Fidelity is stated as "N of M fixtures pass", with the
    holdout reported apart from dev, its confidence bound given, and the method and level named.
    Behaviour without a fixture is reported as unknown, never as matching.
@@ -28,10 +29,12 @@ follows it. Read it before writing any harness component or target.
 - **Seedable and resettable:** every run starts from a known state; `POST /__reset` restores it,
   and the same probe run twice after a reset gives identical output.
 - **Differential:** the same code drives the target and the clone; outputs are compared field by
-  field, with a per-field policy (exact, normalised, ignored), each exception justified in one line.
+  field, with a per-field policy (exact, normalised, tolerance, masked, ignored), each exception justified in one line.
 - **Screens:** a UI fixture is an action trace plus normalised state (visible text, enabled or
-  disabled controls, requests fired), never a raw capture. Visual differences are measured by
-  deterministic diffs; an LLM may triage flagged differences, never score them.
+  disabled controls, requests fired with their bodies, element boxes, the account state the flow
+  left behind), never a raw capture; at most a small masked thumbnail, reported and never scored.
+  Visual differences are measured by deterministic diffs; an LLM may triage flagged differences,
+  never score them.
 
 ## Measurement
 
@@ -42,7 +45,8 @@ follows it. Read it before writing any harness component or target.
   the divergence rate is 1 − 0.05^(1/n): about 3/n. A "below 1 %" claim needs at least 299 clean
   cases. The bound only holds over the distribution the probes were drawn from, which is stated.
 - **Pre-registered.** Before recording a holdout batch, its distribution, size, threshold and
-  stopping rule are committed in `targets/<t>/analysis-plan.md`.
+  stopping rule are committed in a `targets/<t>/analysis-plan*.md`, one per batch, and the batch is
+  scored once (`measurements.md`).
 - **Logged.** Every `verify` run is appended to `verify/runs.jsonl` (time, splits, results, lock,
   commit, sandbox), so the number of looks at a holdout is a fact.
 

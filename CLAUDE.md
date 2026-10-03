@@ -18,7 +18,7 @@ Prettier, Vitest, zod at every boundary, Playwright. `npm run check` clean befor
    `harness/docker/Dockerfile`), which mounts only a sandbox copy with no holdout (hash-split, or
    a `hold-` batch with its seed), no audit material, no env or scrub files and no git history;
    only the requested folder (the clone) is copied back. Inside it, `harness/hooks/guard-oracle.sh`
-   is a guardrail that blocks evaluator writes and holdout or audit reads, and logs blocked attempts.
+   is a guardrail that blocks evaluator writes and holdout or audit reads, and logs what it blocks.
 4. Recording refuses any Stripe key that is not a test key.
 5. Clone state lives in memory only. `POST /__reset` restores the seed; the same probe run twice
    after reset gives identical output.
