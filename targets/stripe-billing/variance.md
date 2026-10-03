@@ -21,5 +21,7 @@ cost, Opus 5.5). No claim rests on this file: batch 2's claim is about clone A o
   the analysis that followed batch 1. They compare with A after its second pass.
 - **A fourth build was interrupted** after 68 minutes ($8) when the host went to sleep; its
   partial clone passed 699 of 708 dev fixtures. It is not counted.
-- **Three builds are a small sample.** They show that results vary by a case or so per 473 on
-  this distribution; they do not estimate how often a build would do worse.
+- **Three builds are a small sample.** All three meet "below 1 % at 95 %" on batch 2. From 3 of 3,
+  the probability that a new build meets that bar is at least 37 % at 95 % confidence
+  (1 − 0.05^(1/3) = 63 % is the most it could miss by); about 29 builds would be needed to say
+  "at least 90 %". This assumes builds are independent, and B and C had identical inputs.
