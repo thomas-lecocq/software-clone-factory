@@ -72,8 +72,8 @@ committed before it was recorded, scored once.
 
 **What the claim does not say.**
 
-- A quarter of batch 2 is easy (Stripe errors, changes that change nothing). On the 349
-  substantive cases the bound is 0.85 % at 95 % and 1.31 % at 99 %: "below 1 %" holds at 95 % only.
+- A quarter of batch 2 is easy (Stripe errors, changes that change nothing). On the 343
+  substantive cases the bound is 0.87 % at 95 % and 1.33 % at 99 %: "below 1 %" holds at 95 % only.
 - It is in-distribution. A breaker agent then chose 40 inputs to make the clone fail (100 %
   coupons, quantity 0, very large amounts, several items changing interval): the clone fails **12
   of 40**.

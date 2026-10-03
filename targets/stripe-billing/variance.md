@@ -3,7 +3,8 @@
 How much a clone's measured fidelity depends on the particular builder run. Each build starts
 from an empty server in the agent container (`harness/sandbox.sh`), never sees a holdout, and is
 scored once per set afterwards. Durations and costs come from `timings.jsonl` (API-equivalent
-cost, Opus 5.5). No claim rests on this file: batch 2's claim is about clone A only.
+cost, Opus 5.5); builds B and C ran in worktrees that were not kept, so their lines are copied in
+by hand and marked `reconstructed`. No claim rests on this file: batch 2's claim is about clone A only.
 
 | Build | Inputs                                                 | Time and cost         | Dev       | Batch 2   | Batch 1 (spent) |
 | ----- | ------------------------------------------------------ | --------------------- | --------- | --------- | --------------- |

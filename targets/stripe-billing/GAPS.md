@@ -21,8 +21,8 @@ below 1 % of cases diverge, at 99 % confidence (holdout batch 2, 473 of 473). Ev
 below is counts without a claim.
 
 **A quarter of that batch is easy.** Of its 473 cases, 74 are Stripe errors (70 of them the
-`none` behaviour given a proration date) and 50 are changes that change nothing. On the 349 other
-cases, with no failure either, the bound is 0.85 % at 95 % and 1.31 % at 99 %: on substantive
+`none` behaviour given a proration date) and 56 are changes that change nothing (50 with no change at all, 6 that
+ask for the current quantity). On the 343 other cases, with no failure either, the bound is 0.87 % at 95 % and 1.33 % at 99 %: on substantive
 changes alone the result is "below 1 % at 95 %", not at 99 %. This split was not in the plan, so it
 is descriptive only; the pre-registered claim stands as stated.
 
@@ -90,4 +90,8 @@ dialog, **live mode** (assumed equal to test mode).
   Stripe key inside); code hosts are refused by the guard, not by the network.
 - **Auditors** found 12 of 12 planted defects (`audit/results/`); the defects and the auditor
   prompt share one author, and precision was adjudicated by that same author.
+- **Account fragment in history.** Recorded object IDs carried an account-specific fragment;
+  it is scrubbed from the current tree (`a783617`) but kept in earlier commits, since rewriting
+  history would change the hashes that `measurements.md` cites as pre-registration evidence. It
+  is not a secret.
 - **Account constants** (country `FR`, name pseudonymised to "AcmeCo") are seed data.

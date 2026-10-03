@@ -57,9 +57,20 @@ jq -c --arg agent "$agent" --arg stamp "$stamp" 'select(.type == "result")
      seconds: (.duration_ms / 1000), turns: .num_turns, cost_usd: .total_cost_usd,
      usage: .usage, models: .modelUsage, ok: (.subtype == "success")}' "$log" \
   >>"$repo/targets/$target/timings.jsonl" || echo "warning: no result line in $log" >&2
+# A build in a linked worktree is also logged in the main checkout, so its cost is never lost with it.
+common="$(git -C "$repo" rev-parse --path-format=absolute --git-common-dir 2>/dev/null || true)"
+own="$(git -C "$repo" rev-parse --path-format=absolute --git-dir 2>/dev/null || true)"
+if [ -n "$common" ] && [ "$common" != "$own" ] && [ -f "$repo/targets/$target/timings.jsonl" ]; then
+  tail -1 "$repo/targets/$target/timings.jsonl" | jq -c --arg w "$repo" '. + {worktree: $w}' \
+    >>"$(dirname "$common")/targets/$target/timings.jsonl" || true
+fi
 
 if [ -n "$copy_back" ]; then
-  rsync -a --delete "$sandbox/$copy_back/" "$repo/$copy_back/"
+  # Only regular files come back: a symlink left in the sandbox could point at the real holdout once
+  # it lands in the repository, so links are dropped and named.
+  links="$(find "$sandbox/$copy_back" -type l 2>/dev/null || true)"
+  [ -z "$links" ] || { echo "dropped symlinks (never copied back):" >&2; echo "$links" >&2; }
+  rsync -a --no-links --delete "$sandbox/$copy_back/" "$repo/$copy_back/"
   echo "copied back $copy_back; score it in the repository with: npm run verify $target"
 fi
 exit "$status"

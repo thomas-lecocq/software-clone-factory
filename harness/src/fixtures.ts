@@ -130,9 +130,11 @@ function codeHashes(target: string): Record<string, string> {
     ...readdirSync(harness)
       .filter((n) => n.endsWith(".sh"))
       .map((n): [string, string] => [`harness/${n}`, join(harness, n)]),
-    ...(existsSync(join(targetDir(target), "rules.json"))
-      ? [["target/rules.json", join(targetDir(target), "rules.json")] as [string, string]]
-      : []),
+    // The target's data files shape probes and rule tags too (rules, breaker rounds, batch seeds);
+    // only the lock itself and the policy, hashed apart, are left out.
+    ...readdirSync(targetDir(target))
+      .filter((n) => n.endsWith(".json") && n !== "fixtures.lock" && n !== "policy.json")
+      .map((n): [string, string] => [`target/${n}`, join(targetDir(target), n)]),
     ...["package.json", "package-lock.json"]
       .map((n): [string, string] => [n, join(harness, "..", n)])
       .filter(([, p]) => existsSync(p)),
@@ -157,14 +159,17 @@ export function checkLock(target: string): string[] {
   const problems: string[] = [];
   if (locked.policy !== now.policy) problems.push("policy.json changed");
   if (locked.code === undefined) problems.push("lock has no code hashes (run relock)");
+  // A builder sandbox has no holdout, no batch seed and no fixtures/holdout folder, by design; only
+  // there may they be missing. On the host a missing holdout is a broken evaluator.
+  const sandbox = process.env.RH_SANDBOX === "1";
   for (const [f, h] of Object.entries(locked.code ?? {})) {
+    if (sandbox && f.includes("holdout") && now.code?.[f] === undefined) continue;
     if (now.code?.[f] !== h) problems.push(`${f} changed`);
   }
   for (const f of Object.keys(now.code ?? {})) {
     if (locked.code?.[f] === undefined) problems.push(`${f} not in lock`);
   }
-  // In a builder sandbox the holdout folder does not exist at all; that is the point of it.
-  const holdoutAbsent = !existsSync(fixturesDir(target, "holdout"));
+  const holdoutAbsent = sandbox && !existsSync(fixturesDir(target, "holdout"));
   for (const [f, h] of Object.entries(locked.fixtures)) {
     if (holdoutAbsent && f.startsWith("holdout/")) continue;
     if (now.fixtures[f] === undefined) problems.push(`${f} missing`);

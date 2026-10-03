@@ -22,8 +22,8 @@ Prettier, Vitest, zod at every boundary, Playwright. `npm run check` clean befor
 4. Recording refuses any Stripe key that is not a test key.
 5. Clone state lives in memory only. `POST /__reset` restores the seed; the same probe run twice
    after reset gives identical output.
-6. Clone code never reads `fixtures/` at runtime, and runs in its own process: the verifier
-   talks to it over HTTP only.
+6. The clone runs in its own process under Node's permission model: it reads only its folder, the
+   harness and its dependencies (never `fixtures/`), and the verifier talks to it over HTTP.
 7. `harness/` and `.claude/` never name a target.
 8. Committed fixtures contain no secret (API keys, session secrets, auth headers, emails).
 9. IDs decide the split: `hold-` is always holdout, `dev-` always dev, the rest by hash.

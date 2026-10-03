@@ -14,13 +14,20 @@ import {
   readFileSync,
   writeFileSync,
 } from "node:fs";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 import { z } from "zod";
 import { startCloneProcess } from "./clone-process.ts";
 import { loadAdapter, type TargetAdapter } from "./adapter.ts";
 import { checkLock, loadFixtures, sha256, targetDir, type Split } from "./fixtures.ts";
 import type { Json } from "./json.ts";
-import { batchOf, breakerLogs, fidelityReport, looksPerSet, type Tally } from "./fidelity.ts";
+import {
+  batchOf,
+  breakerRounds,
+  fidelityReport,
+  looksPerSet,
+  type BatchPlan,
+  type Tally,
+} from "./fidelity.ts";
 import { loadLedger, ruleStatuses, type RuleResult } from "./ledger.ts";
 import { logTiming, secondsSince } from "./timings.ts";
 import {
@@ -187,6 +194,14 @@ export async function verify(target: string, splits: Split[], port = 4599): Prom
     sets: heldSets,
   };
   appendFileSync(join(out, "runs.jsonl"), `${JSON.stringify(run)}\n`);
+  // A run in a linked worktree is a look too: it is also logged in the main checkout's run log.
+  const main = mainCheckout();
+  if (main !== null) {
+    const mainOut = join(main, "targets", target, "verify");
+    mkdirSync(mainOut, { recursive: true });
+    const line = { ...run, worktree: join(dir, "..", "..") };
+    appendFileSync(join(mainOut, "runs.jsonl"), `${JSON.stringify(line)}\n`);
+  }
   const tally = (cs: CaseResult[]): Tally => ({
     pass: cs.filter((c) => c.pass).length,
     total: cs.length,
@@ -220,7 +235,7 @@ export async function verify(target: string, splits: Split[], port = 4599): Prom
       looks: looksPerSet(join(out, "runs.jsonl"), heldSets),
       plans: batchPlans(target),
       gaps: existsSync(gapsFile) ? readFileSync(gapsFile, "utf8") : null,
-      breakerLogs: breakerLogs(dir),
+      breakerRounds: breakerRounds(dir),
     }),
   );
 
@@ -315,31 +330,67 @@ function gitState(): { commit: string | null; dirty: boolean | null } {
   }
 }
 
+// The main checkout when this one is a linked git worktree, else null.
+function mainCheckout(): string | null {
+  try {
+    const git = (...args: string[]): string =>
+      execFileSync("git", args, { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim();
+    const common = git("rev-parse", "--path-format=absolute", "--git-common-dir");
+    const own = git("rev-parse", "--path-format=absolute", "--git-dir");
+    return common === own ? null : dirname(common);
+  } catch {
+    return null;
+  }
+}
+
 // Each analysis-plan*.md names its batch by its first probe ID (`hold-b2-001`). For each batch:
-// the plan file and the commits that changed the diff policy after that plan was committed.
-function batchPlans(target: string): Record<string, { file: string; policyChanges: string[] }> {
+// the plan file, whether git shows it committed strictly before the batch's first fixture, and
+// the commits that changed the diff policy since the plan.
+function batchPlans(target: string): Record<string, BatchPlan> {
   const git = (...args: string[]): string =>
     execFileSync("git", args, { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim();
   const dir = targetDir(target);
-  const out: Record<string, { file: string; policyChanges: string[] }> = {};
+  const out: Record<string, BatchPlan> = {};
   for (const file of readdirSync(dir).filter((f) => /^analysis-plan.*\.md$/.test(f))) {
     const prefix = /`(hold[\w-]*?)-001`/.exec(readFileSync(join(dir, file), "utf8"))?.[1];
     if (prefix === undefined) continue;
     try {
-      const added = git("log", "--diff-filter=A", "--format=%H", "--", `targets/${target}/${file}`);
+      const firstAdd = (path: string): string =>
+        git("log", "--diff-filter=A", "--format=%H", "--", path).split("\n").at(-1) ?? "";
+      const plan = firstAdd(`targets/${target}/${file}`);
+      const batch = firstAdd(`targets/${target}/fixtures/holdout/${prefix}-001.json`);
       const policy = `targets/${target}/policy.json`;
+      let preRegistered: BatchPlan["preRegistered"] = "cannot check";
+      if (plan !== "" && batch !== "" && plan !== batch) {
+        try {
+          git("merge-base", "--is-ancestor", plan, batch);
+          preRegistered = "yes";
+        } catch {
+          preRegistered = "no";
+        }
+      }
       const changes =
-        added === "" ? "" : git("log", "--format=%h %s", `${added}..HEAD`, "--", policy);
+        plan === "" || plan === batch
+          ? null
+          : git("log", "--format=%h %s", `${plan}..HEAD`, "--", policy);
       const dirty = git("status", "--porcelain", "--", policy) !== "";
       out[prefix] = {
-        file: added === "" ? `${file} (not committed)` : file,
-        policyChanges: [
-          ...(changes === "" ? [] : changes.split("\n")),
-          ...(dirty ? ["uncommitted changes"] : []),
-        ],
+        file: plan === "" ? `${file} (not committed)` : file,
+        preRegistered,
+        policyChanges:
+          changes === null
+            ? null
+            : [
+                ...(changes === "" ? [] : changes.split("\n")),
+                ...(dirty ? ["uncommitted changes"] : []),
+              ],
       };
     } catch {
-      out[prefix] = { file: `${file} (outside git)`, policyChanges: [] };
+      out[prefix] = {
+        file: `${file} (outside git)`,
+        preRegistered: "cannot check",
+        policyChanges: null,
+      };
     }
   }
   return out;

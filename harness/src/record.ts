@@ -6,7 +6,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { loadAdapter } from "./adapter.ts";
-import { fixturePath, sha256, targetDir, writeFixture, writeLock } from "./fixtures.ts";
+import { checkLock, fixturePath, sha256, targetDir, writeFixture, writeLock } from "./fixtures.ts";
 import { diff, PolicySchema } from "./policy.ts";
 import { loadLiterals, scrub } from "./scrub.ts";
 import { logTiming, secondsSince } from "./timings.ts";
@@ -18,6 +18,14 @@ export interface RecordOptions {
 }
 
 export async function record(target: string, opts: RecordOptions): Promise<void> {
+  // The lock is rewritten after recording, so it must be intact before: otherwise a changed policy,
+  // harness file or hand-written fixture would be absorbed without a reason. One recording at a time.
+  const problems = checkLock(target);
+  if (problems.length > 0) {
+    throw new Error(
+      `refusing to record: the evaluator differs from the lock (relock deliberately first):\n  ${problems.join("\n  ")}`,
+    );
+  }
   const adapter = await loadAdapter(target);
   const policy = PolicySchema.parse(
     JSON.parse(readFileSync(join(targetDir(target), "policy.json"), "utf8")),

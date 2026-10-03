@@ -7,13 +7,20 @@
  * results appear as totals only, so the report is safe to show an implementer.
  */
 import { existsSync, readdirSync, readFileSync } from "node:fs";
-import { join } from "node:path";
 import { z } from "zod";
 import type { RuleResult } from "./ledger.ts";
 
 export interface Tally {
   pass: number;
   total: number;
+}
+
+export interface BatchPlan {
+  file: string;
+  // Commits that changed the diff policy after the plan; null when history cannot tell.
+  policyChanges: string[] | null;
+  // Whether git shows the plan committed strictly before the batch's first fixture.
+  preRegistered: "yes" | "no" | "cannot check";
 }
 
 export interface FidelityInput {
@@ -37,9 +44,10 @@ export interface FidelityInput {
   // Scored runs that included each holdout set ("hash" or a batch prefix), this one included.
   looks: Record<string, number>;
   // Per batch prefix: its plan file and the commits that changed the diff policy since it.
-  plans: Record<string, { file: string; policyChanges: string[] }>;
+  plans: Record<string, BatchPlan>;
   gaps: string | null;
-  breakerLogs: string[];
+  // Breaker rounds stored as data (`breaker-round*.json`), so they survive a fresh clone.
+  breakerRounds: string[];
 }
 
 // One-sided exact (Clopper-Pearson) upper bound on the failure rate, given k failures in n.
@@ -77,10 +85,14 @@ function measured(name: string, t: Tally, status: string): string {
 
 // Only a pre-registered batch on its single look carries a claim; every other set is reported
 // with the reason it cannot.
-function batchStatus(looks: number, plan: string | undefined): string {
+function batchStatus(looks: number, plan: BatchPlan | undefined): string {
   if (plan === undefined) return `no plan found; ${String(looks)} look(s), no claim`;
-  if (looks <= 1) return `first and only look; plan \`${plan}\``;
-  return `spent: ${String(looks)} looks; its claim rests on the first (\`measurements.md\`)`;
+  if (plan.preRegistered === "no")
+    return `plan \`${plan.file}\` committed after the batch: no claim`;
+  const order =
+    plan.preRegistered === "yes" ? "plan committed first" : "plan order cannot be checked here";
+  if (looks <= 1) return `first and only look; \`${plan.file}\`, ${order}`;
+  return `spent: ${String(looks)} looks; its claim rests on the first (\`measurements.md\`); ${order}`;
 }
 
 // A `## <title>` section of GAPS.md, without its heading.
@@ -126,7 +138,7 @@ export function fidelityReport(f: FidelityInput): string {
         measured(
           `Pre-registered batch \`${prefix}-\``,
           t,
-          batchStatus(f.looks[prefix] ?? 1, f.plans[prefix]?.file),
+          batchStatus(f.looks[prefix] ?? 1, f.plans[prefix]),
         ),
       ),
     measured(
@@ -147,9 +159,11 @@ export function fidelityReport(f: FidelityInput): string {
     ...Object.entries(f.plans)
       .sort(([a], [b]) => a.localeCompare(b))
       .map(([prefix, p]) =>
-        p.policyChanges.length === 0
-          ? `- Batch \`${prefix}-\`: diff policy unchanged since \`${p.file}\` was committed.`
-          : `- Batch \`${prefix}-\`: diff policy changed since \`${p.file}\` was committed: ${p.policyChanges.join("; ")}.`,
+        p.policyChanges === null
+          ? `- Batch \`${prefix}-\`: whether the diff policy changed since \`${p.file}\` cannot be checked from this history.`
+          : p.policyChanges.length === 0
+            ? `- Batch \`${prefix}-\`: diff policy unchanged since \`${p.file}\` was committed.`
+            : `- Batch \`${prefix}-\`: diff policy changed since \`${p.file}\` was committed: ${p.policyChanges.join("; ")}.`,
       ),
     "",
     "## 4. Coverage",
@@ -173,9 +187,9 @@ export function fidelityReport(f: FidelityInput): string {
     "",
     "## 7. Saturation",
     "",
-    f.breakerLogs.length === 0
-      ? "No breaker round logged: nobody has tried to find inputs where the clone diverges."
-      : `${String(f.breakerLogs.length)} breaker round(s) logged: ${f.breakerLogs.join(", ")}.`,
+    f.breakerRounds.length === 0
+      ? "No breaker round stored: nobody has tried to find inputs where the clone diverges."
+      : `${String(f.breakerRounds.length)} breaker round(s) stored (${f.breakerRounds.join(", ")}); their probes are dev cases, scored with the rest. A round that finds nothing new would mark saturation.`,
     "",
     "## 8. Task validation",
     "",
@@ -214,10 +228,8 @@ export function looksPerSet(runsFile: string, sets: string[]): Record<string, nu
   return looks;
 }
 
-export function breakerLogs(dir: string): string[] {
-  const logs = join(dir, "logs");
-  if (!existsSync(logs)) return [];
-  return readdirSync(logs)
-    .filter((f) => f.startsWith("breaker-"))
+export function breakerRounds(dir: string): string[] {
+  return readdirSync(dir)
+    .filter((f) => /^breaker-round.*\.json$/.test(f))
     .sort();
 }

@@ -45,3 +45,7 @@ spent: it may be analysed, but no later claim rests on it.
   It never saw batch 2 either; the result says what the pass driven by batch 1's analysis added.
 - **Builder variance:** two more clones built from scratch (`variance.md`), each scored once on
   batch 2 in its own worktree: 472 of 473 each, failing different cases.
+- **Looks outside the run log.** These three worktree runs (the ablation and builds B and C) were
+  logged in their worktrees, which were not kept, so `verify/runs.jsonl` misses them: batch 2 had
+  at least three more looks than the fidelity report counts. Worktree runs are now also logged in
+  the main checkout.

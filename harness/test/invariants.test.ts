@@ -127,6 +127,11 @@ describe("diff policy", () => {
     expect(diff(policy, a, b)).toEqual([]);
     expect(diff(policy, a, c).map((d) => d.path)).toEqual(["lines[0].invoice"]);
     expect(canonicalIds("see in_AAAAAAAAAA")).toBe("see in#1");
+    expect(canonicalIds({ b: "create_prorations", c: "charge_automatically" })).toEqual({
+      b: "create_prorations",
+      c: "charge_automatically",
+    });
+    expect(canonicalIds("price_1ULchEAcmeAcct00x")).toBe("price#1");
   });
 
   it("honours ignore and type modes", () => {
@@ -702,6 +707,12 @@ describe("invariant 3: implementers see only a stripped sandbox", () => {
     expect(r.status).toBe(2);
   });
 
+  it("never copies a symlink back from the sandbox", () => {
+    const script = readFileSync(join(root, "harness", "sandbox.sh"), "utf8");
+    const back = script.slice(script.indexOf('if [ -n "$copy_back" ]'));
+    expect(back).toMatch(/rsync -a --no-links --delete "\$sandbox\/\$copy_back\/"/);
+  });
+
   it("mounts the sandbox alone into the agent container", () => {
     const script = readFileSync(join(root, "harness", "sandbox.sh"), "utf8");
     const run = script.slice(script.indexOf("docker run"), script.indexOf("| tee"));
@@ -737,6 +748,32 @@ describe("invariant 2: the clone never runs inside the verifier", () => {
       expect(body.pid).not.toBe(process.pid);
       expect("patchedByClone" in globalThis).toBe(false);
       expect((await fetch(`${clone.url}/__reset`, { method: "POST" })).ok).toBe(true);
+    } finally {
+      await clone.close();
+    }
+  });
+
+  it("cannot read recorded fixtures: the runtime denies it, not a pattern", async () => {
+    mkdirSync(join(dir, "clone"), { recursive: true });
+    const fixtures = join(root, "targets", targets[0] ?? "", "fixtures");
+    writeFileSync(
+      join(dir, "clone", "reader.ts"),
+      [
+        'import { readdirSync } from "node:fs";',
+        'import { startCloneServer } from "../../../harness/src/clone-kit.ts";',
+        "const tryRead = () => {",
+        `  try { return { read: readdirSync(${JSON.stringify(fixtures)}).length }; }`,
+        '  catch (e) { return { denied: e instanceof Error && "code" in e ? String(e.code) : "?" }; }',
+        "};",
+        "export const startClone = (port: number) =>",
+        "  startCloneServer({ seed: () => ({}), handle: () => ({ status: 200, body: tryRead() }) }, port);",
+        "",
+      ].join("\n"),
+    );
+    const clone = await startCloneProcess(t, "clone/reader.ts", 4634);
+    try {
+      const body: unknown = await (await fetch(`${clone.url}/x`)).json();
+      expect(body).toEqual({ denied: "ERR_ACCESS_DENIED" });
     } finally {
       await clone.close();
     }

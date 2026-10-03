@@ -31,7 +31,11 @@ describe("fidelity report", () => {
       target: "t",
       at: "now",
       dev: { pass: 10, total: 10 },
-      batches: { hold: { pass: 448, total: 473 }, "hold-b2": { pass: 473, total: 473 } },
+      batches: {
+        hold: { pass: 448, total: 473 },
+        "hold-b2": { pass: 473, total: 473 },
+        "hold-b3": { pass: 10, total: 10 },
+      },
       hashHoldout: { pass: 3, total: 4 },
       pixelsReported: 2,
       statuses: [],
@@ -46,11 +50,16 @@ describe("fidelity report", () => {
       },
       looks: { hash: 3, hold: 2, "hold-b2": 1 },
       plans: {
-        hold: { file: "analysis-plan.md", policyChanges: ["abc123 Mask recording-date text"] },
-        "hold-b2": { file: "analysis-plan-b2.md", policyChanges: [] },
+        hold: {
+          file: "analysis-plan.md",
+          policyChanges: ["abc123 Mask recording-date text"],
+          preRegistered: "yes",
+        },
+        "hold-b2": { file: "analysis-plan-b2.md", policyChanges: [], preRegistered: "yes" },
+        "hold-b3": { file: "analysis-plan-b3.md", policyChanges: null, preRegistered: "no" },
       },
       gaps: null,
-      breakerLogs: [],
+      breakerRounds: ["breaker-round1.json"],
     });
     const headings = md.split("\n").filter((l) => /^## \d\. /.test(l));
     expect(headings).toHaveLength(9);
@@ -62,10 +71,13 @@ describe("fidelity report", () => {
     );
     expect(md).toMatch(/\| Hash-split holdout \| 3 of 4 \| 1 \|.*looked at 3 time\(s\).*no claim/);
     expect(md).not.toMatch(/hold-\d/);
+    expect(md).toMatch(/batch `hold-b3-` \| 10 of 10 .*committed after the batch: no claim/);
     expect(md).toContain(
       "Batch `hold-`: diff policy changed since `analysis-plan.md` was committed: abc123",
     );
     expect(md).toContain("Batch `hold-b2-`: diff policy unchanged");
+    expect(md).toContain("Batch `hold-b3-`: whether the diff policy changed");
+    expect(md).toContain("1 breaker round(s) stored (breaker-round1.json)");
   });
 
   it("counts looks per set across locks, legacy runs counting for every set", () => {

@@ -52,7 +52,9 @@ export function pathMatches(pattern: string, path: string): boolean {
   return new RegExp(`^${re}${subtree ? String.raw`(?:[.[].*)?` : ""}$`).test(path);
 }
 
-const GENERATED_ID = /^([a-z]+(?:_[a-z]+)*)_([A-Za-z0-9]{8,})$/;
+// A generated ID's random part holds a digit or a capital letter: that keeps enum values such as
+// `create_prorations` or `charge_automatically` out of the renaming.
+const GENERATED_ID = /^([a-z]+(?:_[a-z]+)*)_((?=[A-Za-z0-9]*[0-9A-Z])[A-Za-z0-9]{8,})$/;
 
 // Replaces every generated ID with `<prefix>#<n>`, n being the order of first appearance in a
 // key-sorted traversal. Equal IDs stay equal, so references between objects are still checked.
@@ -72,7 +74,9 @@ export function canonicalIds(value: Json): Json {
   };
   const walk = (v: Json): Json => {
     if (typeof v === "string") {
-      return v.replace(/[a-z]+(?:_[a-z]+)*_[A-Za-z0-9]{8,}/g, (id) => rename(id));
+      return v.replace(/[a-z]+(?:_[a-z]+)*_(?=[A-Za-z0-9]*[0-9A-Z])[A-Za-z0-9]{8,}/g, (id) =>
+        rename(id),
+      );
     }
     if (Array.isArray(v)) return v.map(walk);
     if (v !== null && typeof v === "object") {
