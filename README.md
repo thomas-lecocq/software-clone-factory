@@ -13,6 +13,11 @@ Agents build, code judges:
 - **A script scores it.** It replays every fixture against a freshly reset clone and compares field
   by field. It reports the clean holdout apart from the rest, with a confidence bound.
 
+The method is written down as a skill (`.claude/skills/replicate-slice/`) that a session follows
+step by step, delegating to the agents and stopping at human checkpoints (target choice, terms of
+service, keys, spending, publication). It automates most of the work; an end-to-end autonomous
+run on a new target has not been demonstrated yet ([roadmap](docs/roadmap.md)).
+
 The factory knows nothing about any product: a target plugs in through one adapter (its probes, a
 way to run a probe on either side, a way to start its clone).
 

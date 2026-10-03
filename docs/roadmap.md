@@ -5,11 +5,10 @@ item says why it matters and roughly what it costs.
 
 ## Make the factory run end to end
 
-- **An orchestrator agent.** Today the main session made the method's decisions by judgement
-  (target, slice, distribution, holdout size, analysis plans). An orchestrator would run
-  `replicate-slice` step by step and stop at human checkpoints: choosing the target and slice,
-  the terms-of-service check, accounts and test keys, spending, and recording mode d. "Automated
-  with human checkpoints" becomes a claim only after a full run on a new target.
+- **Demonstrate the orchestration end to end.** The skill now describes the whole workflow as it
+  ran, with its human checkpoints, and a session following it is the orchestrator. "Automated
+  with human checkpoints" becomes a claim only after a fresh session, given the skill and a new
+  target, produces a measured clone with no other intervention.
 - **A probe designer agent** with a breaker phase on the specification (documentation, recon),
   before any clone exists: it widens the distribution's support (dimensions, ranges) so that the
   first build already faces what a later breaker round would find. Reads `docs/lessons.md` and

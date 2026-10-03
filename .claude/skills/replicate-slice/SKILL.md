@@ -11,37 +11,86 @@ and justified in its commit.
 
 Read first: `docs/verification.md` (the standard), `docs/target-triage.md`, `docs/lessons.md`.
 
-0. **Triage** (main session). Classify the target's recording mode (`docs/target-triage.md`), which
-   sets the cost and the fidelity that can be promised. `npm run new-slice <t>` scaffolds a new
-   target.
+The session that follows this skill is the orchestrator. It runs the steps in order, delegates the
+roles below, and stops at the human checkpoints. The method automates most of the work; a full
+run on a new target with no other intervention has not been demonstrated yet.
+
+## Roles
+
+| Role         | Who                                        | Writes                                 |
+| ------------ | ------------------------------------------ | -------------------------------------- |
+| Orchestrator | the session following this skill           | recon, adapter, policy, plans, reports |
+| Recorder     | `recorder` agent, and `npm run record`     | `rules.json`, `probes.ts`, fixtures    |
+| Builder      | `builder` agent, in the agent container    | `clone/` only                          |
+| Breaker      | `breaker` agent, read-only                 | nothing: it returns proposed probes    |
+| Analyst      | `analyst` agent, on one spent batch        | `analysis/<batch>-failures.md` only    |
+| Auditor      | `audit/auditor.md`, run by `audit/meta.ts` | its findings file, in a copy           |
+| Scorer       | `npm run verify` (code, never an agent)    | `verify/*`, `GAPS.generated.md`        |
+
+## Human checkpoints
+
+Ask, then wait, before: choosing the target and the slice; the terms-of-service check (automated
+access, replication clauses); creating accounts and keys; any spending beyond the stated budget
+(builds, audits); recording in mode d (a human performs the actions); re-recording an existing
+fixture; editing `docs/verification.md` or `docs/target-triage.md`; publishing anything.
 
 ## Steps
 
-1. **Recon** (main session). Use the product once with capture on; for an API, script a minimal
-   world. Write `targets/<t>/RECON.md`: where computed values appear, noise seen, error messages,
-   anything surprising. Check the terms for automated access and replication clauses.
-2. **Ledger** (recorder). `targets/<t>/rules.json`: 8 to 20 rules, each with provenance
-   `observed | documented | inferred | mined` and a reference. Documentation seeds rules; it never
-   confirms them. No status field: status is computed.
-3. **Probes** (recorder). `targets/<t>/probes.ts`: per rule, a case that triggers it and a boundary
-   or non-trigger case; interacting rules combined; a seeded random batch with its distribution
-   written down. Each probe is self-contained (it creates its own starting state).
-4. **Adapter** (main session). `targets/<t>/adapter.ts` implements `TargetAdapter`: `probes()`,
-   `run(probe, side)` with the same code for target and clone, `startClone(port)`.
-5. **Policy** (main session, before any clone code). `targets/<t>/policy.json`: generated IDs are
-   canonicalised; any ignored field has a one-line reason. Decided from the target's own noise
-   and semantics, never to make the clone pass.
-6. **Record** (`npm run record <t>`). Runs every probe twice on the target, stores the noise,
-   scrubs, splits dev/holdout, writes `fixtures.lock`. Commit fixtures and lock alone.
-7. **Build** (builder agent, `.claude/agents/builder.md`). Implements `targets/<t>/clone/` from
-   the rules and dev fixtures, one rule group at a time, running `npm run verify <t>` after each.
-8. **Break** (breaker agent). Looks for behaviour the fixtures do not pin; proposes new probes in
-   `targets/<t>/probes.proposed.md`. The recorder adds the good ones; go back to 6.
-9. **Measure** (main session). Commit `targets/<t>/analysis-plan.md` (distribution, holdout size,
-   threshold, stopping rule) before recording the holdout batch; then `npm run verify <t> -- --split
-all` once. The report, `GAPS.generated.md` and a hand-written `GAPS.md` are the result.
-10. **Lessons**. Append to `docs/lessons.md` what cost time and the rule of thumb that would have
-    saved it.
+0. **Triage.** Classify the recording mode (`docs/target-triage.md`): it sets the cost and the
+   fidelity that can be promised. `npm run new-slice <t>` scaffolds a new target.
+1. **Recon.** Use the product once with capture on; for an API, script a minimal world. Write
+   `targets/<t>/RECON.md`: where computed values appear, noise, error messages, surprises.
+2. **Ledger** (recorder). `rules.json`: rules with provenance `observed | documented | inferred |
+mined` and a reference. Documentation seeds rules; only a fixture confirms them. No status.
+3. **Probe design** (recorder, then breaker in spec mode). In `probes.ts`:
+   - designed probes: per rule, a case that triggers it and a boundary case; interacting rules
+     combined; each probe creates its own starting state;
+   - **the distribution D** the claim will speak about, as a seeded generator with its support
+     written down in plain words (dimensions, ranges, frequencies), and dev probes drawn from it;
+   - for screens: walkthroughs with full capture and breadth-first explorations;
+   - then the breaker reads RECON, rules and documentation (no clone yet) and proposes inputs
+     the generators never draw; widen D's support with what it finds before going on.
+4. **Adapter.** `adapter.ts` implements `TargetAdapter`: `probes()`, `run(probe, side)` with the
+   same code on both sides, `cloneEntry` (the clone's module; the harness runs it in its own
+   process) and `recordedWith()` (the target's API and SDK versions).
+5. **Policy**, before any clone code. `policy.json`: generated IDs canonicalised; every weakening
+   (ignore, type, tolerance, perceptual, mask) carries its reason, decided from the target's own
+   noise and semantics, never to make a clone pass.
+6. **Record dev** (`npm run record <t>`): every probe twice, noise kept, scrubbed, locked. Commit
+   fixtures and lock alone.
+7. **Pre-register a holdout batch.** Size it from the claim: with no failure, 299 cases bound the
+   failure rate below 1 % at 95 %; 473 still do so with one failure, and bound it below 1 % at
+   99 % with none. Write `analysis-plan*.md` (batch IDs `hold-<name>-001…`, D, size, decision
+   rule), draw the seed into `holdout-seed.json`, **commit both**, then record the batch.
+8. **Build** (`harness/run-builder.sh <t>`). The builder works in the agent container on a copy
+   with no holdout, no seed and no git history; only `clone/` comes back.
+9. **Break** (`harness/run-agent.sh breaker <t> …`). The breaker reads the clone and proposes
+   inputs to make it fail. Store them as `dev-brk-` probes (adversarial, never holdout), record,
+   verify, and go back to 8 until a round finds nothing or the budget is spent. Their failure
+   share is reported, never used as an estimate.
+10. **Measure once.** Freeze the clone in a commit, run `npm run verify <t> -- --split holdout`
+    once, apply the plan's decision rule and write the entry in `measurements.md`.
+11. **If the claim is rejected,** the batch is spent. Run `harness/run-analyst.sh <t> <batch>`
+    right after the look; turn its findings into rules and `dev-` probes (designed after seeing
+    failures, so they never certify); one more build pass; then a **new batch with a new seed
+    and a new plan**, and back to 10. Never fix the failures and rescore the same batch.
+12. **Variance**, when the budget allows: more builds from an empty server, each in its own
+    worktree, each scored once on the claim's batch; write `variance.md`. Three builds show
+    reproducibility; about 29 are needed to bound how often a build misses the bar below 10 %.
+13. **Audit.** `npx tsx audit/meta.ts`: planted defects, recall per run; adjudicate the other
+    findings and fix the real ones.
+14. **Report.** `GAPS.md` with `## Scope` and `## Measured divergences` (the fidelity report quotes
+    them), the claim with its scope in the README, and a test from a fresh clone (`npm ci`,
+    `npm run check`, `verify --split all`).
+15. **Lessons.** Append to `docs/lessons.md` what cost time and the rule that would have saved it.
+
+## Rules that hold across steps
+
+- **Learn only from spent sets.** Rules, probes and prompts may change after a batch's look;
+  every new claim then needs a fresh batch. Every look is logged and counted per set.
+- **Prefixes decide the split:** `hold-` is always holdout, `dev-` always dev, anything else by
+  hash (a quarter to holdout, which carries no claim once looked at under several clone versions).
+- **Costs are logged** in `timings.jsonl` (recording, verify, every agent run); quote them.
 
 ## Re-recording
 
@@ -52,5 +101,6 @@ carries the reason and the old and new hashes the command prints.
 
 ## Claims
 
-Fidelity is stated only as "N of M fixtures pass" with the report. Anything without a fixture is
-written: "Not covered by a fixture; behaviour inferred from <source>; unverified."
+Fidelity is stated as "N of M" with its bound, the set's status and the distribution it holds for.
+Anything without a fixture is written: "Not covered by a fixture; behaviour inferred from
+<source>; unverified."
