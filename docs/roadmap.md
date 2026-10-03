@@ -14,8 +14,6 @@ item says why it matters and roughly what it costs.
   before any clone exists: it widens the distribution's support (dimensions, ranges) so that the
   first build already faces what a later breaker round would find. Reads `docs/lessons.md` and
   per-domain playbooks.
-- **A committed failure analyst.** Batch 1's failures were analysed by a sub-agent whose prompt
-  was written for the occasion; it belongs in `.claude/agents/analyst.md` so the step can be rerun.
 - **Learning across builds and targets.** Today learning lives in the data (fixtures, rules,
   analyses, lessons). Builder and designer prompts, and per-domain playbooks (billing, booking…),
   could learn from spent batches too; every claim then still needs a fresh batch.

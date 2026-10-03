@@ -227,6 +227,18 @@ describe("invariant 3: the guard hook keeps agents away from the evaluator", () 
     expect(run({ ...write, agent_type: "recorder" }, { RH_SANDBOX: "1" })).toBe(2);
   });
 
+  it("lets the analyst write its report and nothing else", () => {
+    const write = (file_path: string) => ({
+      agent_type: "analyst",
+      tool_name: "Write",
+      tool_input: { file_path },
+    });
+    expect(run(write("targets/t/analysis/hold-failures.md"))).toBe(0);
+    expect(run(write("targets/t/clone/server.ts"))).toBe(2);
+    expect(run(write("targets/t/rules.json"))).toBe(2);
+    expect(run(write("targets/t/fixtures/dev/a.json"))).toBe(2);
+  });
+
   it("is attached to every tool it has rules for, web tools included", () => {
     const settings = readFileSync(join(root, ".claude", "settings.json"), "utf8");
     for (const tool of ["Read", "Write", "Edit", "Bash", "Grep", "Glob", "WebFetch", "WebSearch"])

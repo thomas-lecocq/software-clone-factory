@@ -98,14 +98,15 @@ npm run demo                                   # start the clone and print a por
 only when every fixture passes. To record new fixtures, copy `.env.example` to `.env` and set a
 Stripe **test-mode** key; recording refuses any other kind of key.
 
-| Command                                 | What it does                                                                                                   |
-| --------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| `npm run record stripe-billing`         | record the probes that have no fixture yet                                                                     |
-| `npm run clone stripe-billing`          | serve the clone on `http://127.0.0.1:4599`; `POST /__reset` restores the seed                                  |
-| `npm run check`                         | types, lint, format, tests                                                                                     |
-| `harness/run-builder.sh stripe-billing` | run the builder agent in the agent container, on a sandbox without the holdout (needs Docker and `.agent.env`) |
-| `npm run new-slice <name>`              | scaffold a new target                                                                                          |
-| `git config core.hooksPath .githooks`   | pre-commit check (check plus evaluator lock)                                                                   |
+| Command                                      | What it does                                                                                                   |
+| -------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `npm run record stripe-billing`              | record the probes that have no fixture yet                                                                     |
+| `npm run clone stripe-billing`               | serve the clone on `http://127.0.0.1:4599`; `POST /__reset` restores the seed                                  |
+| `npm run check`                              | types, lint, format, tests                                                                                     |
+| `harness/run-builder.sh stripe-billing`      | run the builder agent in the agent container, on a sandbox without the holdout (needs Docker and `.agent.env`) |
+| `harness/run-analyst.sh stripe-billing hold` | analyse a spent batch's failures in the agent container; only that batch goes in                               |
+| `npm run new-slice <name>`                   | scaffold a new target                                                                                          |
+| `git config core.hooksPath .githooks`        | pre-commit check (check plus evaluator lock)                                                                   |
 
 ## Layout
 

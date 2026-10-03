@@ -87,6 +87,13 @@ if [[ "$tool" =~ $writes ]] && [[ "$target" =~ $oracle ]]; then
   block "$role cannot modify the evaluator ($target)"
 fi
 # Inside a target, implementers write only the clone: the adapter and probes drive the evaluation.
+# The analyst writes only its report.
+if [[ "$role" == "analyst" && "$tool" =~ $writes ]] && [[ "$target" != */analysis/* ]]; then
+  block "the analyst writes only under targets/<t>/analysis/ ($target)"
+fi
+if [[ "$role" == "analyst" && "$tool" =~ $writes ]]; then
+  exit 0
+fi
 if [[ "$tool" =~ $writes ]] && [[ "$target" == *targets/* ]] && [[ "$target" != */clone/* ]]; then
   block "$role can only write under targets/<t>/clone/ ($target)"
 fi

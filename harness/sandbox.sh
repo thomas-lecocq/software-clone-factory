@@ -24,6 +24,19 @@ sandbox="$(mktemp -d "${TMPDIR:-/tmp}/scf-sandbox-$agent-XXXX")"
 trap 'rm -rf "$sandbox"' EXIT
 "$repo/harness/make-sandbox.sh" "$repo" "$sandbox"
 
+# An analyst may see one spent batch, and only one recorded as spent in measurements.md (its single
+# look already taken). It goes under spent/<batch>/, out of every holdout path and pattern.
+if [ -n "${SPENT_BATCH:-}" ]; then
+  [[ "$SPENT_BATCH" =~ ^hold[a-z0-9-]*$ ]] || { echo "refusing: bad batch name $SPENT_BATCH" >&2; exit 2; }
+  grep -q "\`${SPENT_BATCH}-001\`" "$repo/targets/$target/measurements.md" 2>/dev/null \
+    || { echo "refusing: batch $SPENT_BATCH has no recorded look in measurements.md" >&2; exit 2; }
+  spent="$sandbox/targets/$target/spent/$SPENT_BATCH"
+  mkdir -p "$spent"
+  find "$repo/targets/$target/fixtures/holdout" -name "${SPENT_BATCH}-[0-9]*.json" -exec cp {} "$spent/" \;
+  jq --arg b "$SPENT_BATCH" '[.cases[] | select(.pass | not) | .id | select(test("^" + $b + "-[0-9]+$"))]' \
+    "$repo/targets/$target/verify/holdout-verdict.json" >"$spent/failures.json"
+fi
+
 mkdir -p "$repo/targets/$target/logs"
 # Hours of agent work must not vanish with the sandbox: the clone is copied back even when the run
 # fails, and the run's status is returned at the end.
