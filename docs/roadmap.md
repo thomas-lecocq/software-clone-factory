@@ -32,6 +32,11 @@ item says why it matters and roughly what it costs.
   customer's plan with a 20 % coupon"), run it against the clone and against the target's test
   mode, and compare success and the actions taken: does an agent behave the same in the clone?
 - **Live mode check** on a small, cheap sample, since test mode is assumed equal to live.
+- **The two last layers of screen verification.** Layer 4: an LLM triages the flagged pixel and
+  layout differences (never scores them); layer 5: a human reviews a sample to calibrate the
+  tolerances and the triage. Only layers 1 to 3 exist today.
+- **Account fingerprint in IDs.** Recorded object IDs carry an account-specific fragment. Not a
+  secret, but the scrubber could replace it to make fixtures fully anonymous.
 - **Ensembles.** The three clones fail different cases; a majority vote passes all 473 of batch 2.
   Worth testing as a way to buy reliability with compute.
 

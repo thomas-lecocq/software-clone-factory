@@ -33,5 +33,23 @@ One line per lesson, read at step 1 of the `replicate-slice` skill: where, sympt
 - **Hooks fail open by default.** A guard that could not write its log exited with code 1, which
   Claude Code treats as "allow": every block was silently lifted in a fresh repository. A blocking
   hook must exit 2 on any error, and be live-tested in the environment the agent actually runs in.
+- **Pre-registration.** A first measurement on a fresh, pre-registered batch rejected the claim
+  (448 of 473). Plan for a second batch from the start: fixing the failures and rescoring the same
+  batch would have shown 100 % by construction.
+- **Easy cases.** A quarter of a generated batch was trivial (errors, changes that change
+  nothing). Report the substantive share apart, and design generators that rarely draw it.
+- **Layout keys.** Keys cut to a fixed length before scrubbing depended on the account name's
+  length, and a builder fitted the artefact. Scrub before any truncation, or never truncate keys.
+- **Policy modes.** A mask on every path was picked as the field's mode and silently turned
+  tolerances into exact comparisons. A rewriting rule must never choose how a field is compared.
+- **Pathspecs.** `:!dir` in `git status` excluded nothing, so every run was logged dirty. Use
+  `:(exclude,glob)dir/**`, and test the dirty check against a tree with only outputs changed.
+- **In-process clones.** A clone imported by the verifier can patch the verifier's globals. Run
+  it in a child process and talk HTTP.
+- **Host sleep.** A laptop on battery slept through a two-hour build and the agent's request
+  died. Keep the host awake and on power (`caffeinate` is not enough on battery), and copy the
+  work back even when a run fails.
+- **Recording-day text.** A test card's expiry follows the recording month, so fixtures recorded
+  on different days disagreed for identical inputs. Mask such text in the policy, with its reason.
 - **Fresh copies.** A lock that hashed macOS hidden files broke `verify` on every fresh checkout.
   Run the deliverable from a fresh clone before calling it done.

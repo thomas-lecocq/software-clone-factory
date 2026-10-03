@@ -17,14 +17,16 @@ Prettier, Vitest, zod at every boundary, Playwright. `npm run check` clean befor
 3. Implementer agents run in the agent container (`harness/sandbox.sh`, image
    `harness/docker/Dockerfile`), which mounts only a sandbox copy with no holdout (hash-split, or
    a `hold-` batch with its seed), no audit material, no env or scrub files and no git history;
-   only the requested folder (the clone) is copied back. Inside it, `harness/hooks/guard-oracle.sh` is a guardrail that blocks evaluator
-   writes and holdout or audit reads, and logs blocked attempts.
+   only the requested folder (the clone) is copied back. Inside it, `harness/hooks/guard-oracle.sh`
+   is a guardrail that blocks evaluator writes and holdout or audit reads, and logs blocked attempts.
 4. Recording refuses any Stripe key that is not a test key.
 5. Clone state lives in memory only. `POST /__reset` restores the seed; the same probe run twice
    after reset gives identical output.
-6. Clone code never reads `fixtures/` at runtime.
+6. Clone code never reads `fixtures/` at runtime, and runs in its own process: the verifier
+   talks to it over HTTP only.
 7. `harness/` and `.claude/` never name a target.
 8. Committed fixtures contain no secret (API keys, session secrets, auth headers, emails).
+9. IDs decide the split: `hold-` is always holdout, `dev-` always dev, the rest by hash.
 
 Language: English for every file in the repository.
 
