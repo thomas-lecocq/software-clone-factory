@@ -115,6 +115,7 @@ Stripe **test-mode** key; recording refuses any other kind of key.
 | [`docs/design.md`](docs/design.md)                   | why the factory is built this way, and what was rejected                                           |
 | [`docs/target-triage.md`](docs/target-triage.md)     | how a target is classified by recording mode before any work                                       |
 | [`docs/lessons.md`](docs/lessons.md)                 | what went wrong so far, and the rule it gave                                                       |
+| [`docs/roadmap.md`](docs/roadmap.md)                 | what could come next, with why and roughly what it costs                                           |
 | [`audit/`](audit/)                                   | the auditor prompt, the planted-defect library and the script that measures auditors               |
 | [`.claude/`](.claude/)                               | the method as a skill (`replicate-slice`), the agents (recorder, builder, breaker), the guard hook |
 | [`harness/`](harness/)                               | recorder, verifier, evaluator lock, diff policy, clone kit, sandbox runners                        |
