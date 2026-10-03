@@ -17,15 +17,18 @@ run on a new target with no other intervention has not been demonstrated yet.
 
 ## Roles
 
-| Role         | Who                                        | Writes                                 |
-| ------------ | ------------------------------------------ | -------------------------------------- |
-| Orchestrator | the session following this skill           | recon, adapter, policy, plans, reports |
-| Recorder     | `recorder` agent, and `npm run record`     | `rules.json`, `probes.ts`, fixtures    |
-| Builder      | `builder` agent, in the agent container    | `clone/` only                          |
-| Breaker      | `breaker` agent, read-only                 | nothing: it returns proposed probes    |
-| Analyst      | `analyst` agent, on one spent batch        | `analysis/<batch>-failures.md` only    |
-| Auditor      | `audit/auditor.md`, run by `audit/meta.ts` | its findings file, in a copy           |
-| Scorer       | `npm run verify` (code, never an agent)    | `verify/*`, `GAPS.generated.md`        |
+Permissions are enforced by structure wherever a role can run in a copy; prose and the guard hook
+only add a guardrail. The table says which.
+
+| Role         | Who                                        | Enforced by                                                   |
+| ------------ | ------------------------------------------ | ------------------------------------------------------------- |
+| Builder      | `builder` agent                            | container on a copy without holdout; only `clone/` comes back |
+| Breaker      | `breaker` agent                            | container on a copy; nothing comes back                       |
+| Analyst      | `analyst` agent                            | copy with one spent batch only; only `analysis/` comes back   |
+| Auditor      | `audit/auditor.md`, run by `audit/meta.ts` | container on a planted copy; only its findings are read       |
+| Scorer       | `npm run verify` (code, never an agent)    | deterministic code; the clone runs in a separate process      |
+| Recorder     | `recorder` agent, and `npm run record`     | prose and the guard (it needs the target's key, so no copy)   |
+| Orchestrator | the session following this skill           | prose and the human checkpoints below                         |
 
 ## Human checkpoints
 
