@@ -3,9 +3,19 @@
  * to the clone over HTTP: clone code is never imported into the process that scores it.
  */
 import { spawn } from "node:child_process";
-import { dirname, join } from "node:path";
+import { dirname, join, sep } from "node:path";
+import { fileURLToPath } from "node:url";
 import type { RunningClone } from "./adapter.ts";
 import { targetDir } from "./fixtures.ts";
+
+// Where packages actually resolve from: the repository's node_modules on a host, /node_modules in
+// the agent image.
+function dependencies(): string {
+  const zod = fileURLToPath(import.meta.resolve("zod"));
+  const at = zod.lastIndexOf(`${sep}node_modules${sep}`);
+  if (at < 0) throw new Error(`cannot locate node_modules from ${zod}`);
+  return zod.slice(0, at + `${sep}node_modules`.length);
+}
 
 function packageJsons(from: string, repo: string): string[] {
   const out: string[] = [];
@@ -26,7 +36,7 @@ export function startCloneProcess(
   const reads = [
     dirname(entryPath),
     join(repo, "harness", "src"),
-    join(repo, "node_modules"),
+    dependencies(),
     // Package-scope lookups walk up from each module: those files only, never their folders.
     ...packageJsons(dirname(entryPath), repo),
     join(repo, "harness", "package.json"),
@@ -37,7 +47,9 @@ export function startCloneProcess(
       "--permission",
       ...reads.map((r) => `--allow-fs-read=${r}`),
       // The clone serves HTTP on its port; it gets no file writes, child processes or workers.
-      "--allow-net",
+      // Node 25 added network permissions; on Node 24 the network is not restricted and the flag
+      // does not exist.
+      ...(process.allowedNodeEnvironmentFlags.has("--allow-net") ? ["--allow-net"] : []),
       "--disable-warning=ExperimentalWarning",
       // Node runs TypeScript natively: no loader, so no reason to let it read the repository root.
       runner,

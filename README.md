@@ -91,7 +91,7 @@ mode; it contains no Stripe code, and no documentation text beyond short quotes.
 
 ## Run it
 
-Node 22 or later.
+Node 24 or later (native TypeScript and the permission model run the clone; tested on 24 and 26).
 
 ```bash
 npm install && npx playwright install chromium
