@@ -8,7 +8,7 @@ src="$1"
 dest="$2"
 rsync -a \
   --exclude .git --exclude node_modules --exclude 'fixtures/holdout' --exclude 'holdout-*' \
-  --exclude audit --exclude 'recon/out' --exclude 'targets/*/logs' --exclude '*.env' \
+  --exclude audit --exclude 'recon/out' --exclude 'targets/*/logs' --exclude '/logs' --exclude '*.env' \
   --exclude '.env*' --exclude '.scrub*' \
   "$src/" "$dest/"
 if find "$dest" \( -iname '*holdout*' -o -name '*.env' -o -name '.env*' -o -name '.scrub*' -o -name audit -o -name .git \) -print | grep -q .; then

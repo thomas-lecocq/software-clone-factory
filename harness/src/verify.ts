@@ -143,7 +143,17 @@ export async function verify(target: string, splits: Split[], port = 4599): Prom
   writeFileSync(join(out, "failures.json"), `${JSON.stringify(builderFailures(cases), null, 2)}\n`);
   writeFileSync(
     join(out, "report.md"),
-    report(target, splits, dev, held, ruleStatuses(rules, dev), policy, fixtures, "dev"),
+    report(
+      target,
+      splits,
+      dev,
+      held,
+      ruleStatuses(rules, dev),
+      policy,
+      // A builder can read report.md: it lists dev fixtures' noise only, never a holdout ID.
+      fixtures.filter((f) => f.split === "dev"),
+      "dev",
+    ),
   );
   const statuses = ruleStatuses(rules, cases);
   if (held.length > 0) {

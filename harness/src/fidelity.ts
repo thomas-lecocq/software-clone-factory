@@ -212,6 +212,7 @@ export function fidelityReport(f: FidelityInput): string {
 
 const RunLine = z.object({
   holdout: z.object({ total: z.number() }),
+  by: z.string().optional(),
   sets: z.array(z.string()).optional(),
 });
 

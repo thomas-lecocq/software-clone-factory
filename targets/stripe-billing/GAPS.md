@@ -66,7 +66,9 @@ dialog, **live mode** (assumed equal to test mode).
 - **Lifecycle snapshots and the post-flow account state are projections** (`lifecycle.ts`,
   `ui.ts`): fields outside them are not compared. Previews are compared field by field.
 - **Screens:** link targets are dropped (they carry session secrets); element boxes are compared
-  within 16 px; the thumbnail is reported, never scored; the test card's expiry text is masked
+  within 16 px (one trial on 2026-10-01, not kept, rendered the same Stripe page up to 12 px
+  apart between macOS and the Linux image; the other 4 px are margin, and a builder can tune to
+  the tolerance); the thumbnail is reported, never scored; the test card's expiry text is masked
   (`policy.json`), since it depends on the recording day.
 - **Time bombs.** The card expiry follows the real date; the portal prints a year on dates that
   are not in the current real year, so screens recorded in 2026 will differ from Stripe's in 2027.

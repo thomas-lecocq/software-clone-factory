@@ -37,7 +37,7 @@ fi
 oracle='(fixtures/|fixtures\.lock|policy\.json|rules\.json|(^|[ /])harness/|/verify/|docs/verification\.md|npm run record|cli\.ts (record|relock|explain))'
 
 # Shell escapes that no pattern list can follow: nested sessions, eval, git history, links.
-if [[ "$tool" == "Bash" ]] && [[ "$target" =~ (^|[^a-z])(claude|eval|base64|ln)[[:space:]] || "$target" =~ git[[:space:]]+(show|log|grep|diff|cat-file|checkout|restore|stash) ]]; then
+if [[ "$tool" == "Bash" ]] && [[ "$target" =~ (^|[^a-z])(claude|eval|base64|ln)[[:space:]] || "$target" =~ git([[:space:]]+-[^[:space:]]+([[:space:]]+[^-[:space:]][^[:space:]]*)?)*[[:space:]]+(show|log|grep|diff|cat-file|checkout|restore|stash|blame|reflog) ]]; then
   block "$role cannot run nested sessions, eval, links or read git history"
 fi
 # The harness configuration and dependencies shape the evaluation too, by any route.
@@ -100,7 +100,7 @@ fi
 # Shell writes: a redirect whose target is an evaluator path, or a writing command naming one.
 # Plain reads (cat, jq, grep, `2>/dev/null`, `=>` in inline code) stay allowed.
 redirect='>>?[[:space:]]*[^[:space:]]*(fixtures/|fixtures\.lock|policy\.json|rules\.json|harness/|/verify/)'
-if [[ "$tool" == "Bash" ]] && { [[ "$target" =~ $redirect ]] || { [[ "$target" =~ $oracle ]] && [[ "$target" =~ (sed -i|tee |mv |cp |rm |perl -i|record|git checkout|git restore|writeFile|open\(|python|ruby|perl ) ]]; }; }; then
+if [[ "$tool" == "Bash" ]] && { [[ "$target" =~ $redirect ]] || { [[ "$target" =~ $oracle ]] && [[ "$target" =~ (sed -i|tee |mv |cp |rm |perl -i|record|git checkout|git restore|writeFile|open\(|python|ruby|perl |truncate |chmod |dd |install ) ]]; }; }; then
   block "$role cannot modify the evaluator through the shell"
 fi
 if [[ "$target" == *fixtures/holdout* ]]; then

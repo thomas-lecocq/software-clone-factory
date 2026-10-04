@@ -62,13 +62,13 @@ committed before it was recorded, scored once.
 
 **How it got there, failures included.**
 
-| Step                                                   | Result                         |
-| ------------------------------------------------------ | ------------------------------ |
-| Builder agent, from an empty server, in the container  | 382 of 387 dev, 1 h, about $16 |
-| Pre-registered batch 1, single look                    | **448 of 473: claim rejected** |
-| Analysis of the 25 failures by a separate session      | six root causes, all discounts |
-| 379 new dev probes, one more builder pass (32 min, $7) | 696 of 696 dev                 |
-| Pre-registered batch 2 (new seed), single look         | **473 of 473: claim holds**    |
+| Step                                                   | Result                                              |
+| ------------------------------------------------------ | --------------------------------------------------- |
+| Builder agent, from an empty server, in the container  | 379 of 387 dev (logged on the host), 1 h, about $16 |
+| Pre-registered batch 1, single look                    | **448 of 473: claim rejected**                      |
+| Analysis of the 25 failures by a separate session      | six root causes, mostly discounts                   |
+| 379 new dev probes, one more builder pass (32 min, $7) | 696 of 696 dev                                      |
+| Pre-registered batch 2 (new seed), single look         | **473 of 473: claim holds**                         |
 
 **What the claim does not say.**
 

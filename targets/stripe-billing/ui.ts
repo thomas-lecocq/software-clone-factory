@@ -180,33 +180,59 @@ export function watchPortalCalls(page: Page, full: boolean): Recorder {
 const LAYOUT_ROLES =
   "a,button,h1,h2,h3,h4,input,select,textarea,[role=button],[role=link],[role=tooltip]";
 
-// Visible landmarks of the page with their boxes ([x, y, width, height]), in document order. Text blocks count when they
-// hold their own text, so that a moved price or label shows up even if no control moved.
+// Runs in an isolated JavaScript world: it shares the page's DOM but not its globals or prototypes,
+// so page code (the clone serves its own) cannot patch getBoundingClientRect or innerText to fake
+// what is measured. Plain JavaScript source, evaluated through the Chrome DevTools Protocol.
+const MEASURE = `(selector) => {
+  const candidates = [...document.querySelectorAll(selector)];
+  const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+  for (let n = walker.nextNode(); n; n = walker.nextNode()) {
+    const parent = n.parentElement;
+    if (parent && (n.textContent || "").trim() !== "" && !parent.closest(selector)) candidates.push(parent);
+  }
+  const ordered = [...new Set(candidates)].sort((x, y) =>
+    x.compareDocumentPosition(y) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1);
+  const out = [];
+  for (const el of ordered) {
+    const r = el.getBoundingClientRect();
+    if (r.width === 0 || r.height === 0) continue;
+    const text = (el instanceof HTMLElement ? el.innerText : el.textContent || "").replace(/\\s+/g, " ").trim();
+    const tag = el.getAttribute("role") || el.tagName.toLowerCase();
+    out.push({ tag, text, box: [r.x, r.y, r.width, r.height].map(Math.round) });
+  }
+  return out;
+}`;
+
+const Boxes = z.array(z.object({ tag: z.string(), text: z.string(), box: z.array(z.number()) }));
+const FrameTree = z.object({ frameTree: z.object({ frame: z.object({ id: z.string() }) }) });
+const IsolatedWorld = z.object({ executionContextId: z.number() });
+const Evaluated = z.object({ result: z.object({ value: z.unknown() }) });
+
+// Visible landmarks of the page with their boxes ([x, y, width, height]), in document order. Text
+// blocks count when they hold their own text, so that a moved price or label shows up even if no
+// control moved.
 async function layout(page: Page): Promise<Json> {
-  // No named helpers inside: tsx would wrap them in a helper the browser does not have.
-  const boxes = await page.evaluate((selector) => {
-    const candidates = [...document.querySelectorAll(selector)];
-    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
-    for (let n = walker.nextNode(); n; n = walker.nextNode()) {
-      const parent = n.parentElement;
-      if (parent && (n.textContent ?? "").trim() !== "" && !parent.closest(selector))
-        candidates.push(parent);
-    }
-    const ordered = [...new Set(candidates)].sort((x, y) =>
-      x.compareDocumentPosition(y) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1,
+  const cdp = await page.context().newCDPSession(page);
+  let boxes: z.infer<typeof Boxes>;
+  try {
+    const { frameTree } = FrameTree.parse(await cdp.send("Page.getFrameTree"));
+    const { executionContextId } = IsolatedWorld.parse(
+      await cdp.send("Page.createIsolatedWorld", {
+        frameId: frameTree.frame.id,
+        worldName: "measure",
+      }),
     );
-    const out: { tag: string; text: string; box: number[] }[] = [];
-    for (const el of ordered) {
-      const r = el.getBoundingClientRect();
-      if (r.width === 0 || r.height === 0) continue;
-      const text = (el instanceof HTMLElement ? el.innerText : el.textContent)
-        .replace(/\s+/g, " ")
-        .trim();
-      const tag = el.getAttribute("role") ?? el.tagName.toLowerCase();
-      out.push({ tag, text, box: [r.x, r.y, r.width, r.height].map(Math.round) });
-    }
-    return out;
-  }, LAYOUT_ROLES);
+    const evaluated = Evaluated.parse(
+      await cdp.send("Runtime.evaluate", {
+        expression: `(${MEASURE})(${JSON.stringify(LAYOUT_ROLES)})`,
+        contextId: executionContextId,
+        returnByValue: true,
+      }),
+    );
+    boxes = Boxes.parse(evaluated.result.value);
+  } finally {
+    await cdp.detach();
+  }
   // Keyed by element, not by index, so that one missing element does not shift all the others.
   const keyed: Record<string, Json> = {};
   const seen = new Map<string, number>();

@@ -15,8 +15,8 @@ spent: it may be analysed, but no later claim rests on it.
   rate: 7.30 % at 95 %, 8.18 % at 99 %.
 - **Decision (per the plan):** k ≥ 2, so the claim "below 1 %" is **not supported**. What the batch
   supports: below 7.3 % at 95 % on `WIDE_DISTRIBUTION`.
-- **Where:** every failure involves discounts (amount-off, two coupons, `once` coupons) on
-  previews, most with several items; the builder had about 110 dev cases of this distribution.
+- **Where:** five of the six root causes involve discounts (amount-off, two coupons, `once`
+  coupons), most with several items; one is an interval change at the period end; the builder had about 110 dev cases of this distribution.
 - **Diff policy** changed between plan and look: a mask for the test card's expiry text (screens
   only, no effect on this logic batch), listed in the fidelity report.
 

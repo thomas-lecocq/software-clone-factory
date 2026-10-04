@@ -79,7 +79,11 @@ if (command === "record") {
   console.log(`relocked ${target}: ${values.reason ?? ""}\n  ${problems.join("\n  ")}`);
 } else if (command === "explain") {
   const splits: Split[] =
-    values.split === "dev" ? ["dev"] : values.split === "all" ? ["dev", "holdout"] : ["holdout"];
+    values.split === "holdout"
+      ? ["holdout"]
+      : values.split === "all"
+        ? ["dev", "holdout"]
+        : ["dev"];
   await explain(target, splits, port);
 } else if (command === "serve") {
   const clone = await startCloneProcess(target, (await loadAdapter(target)).cloneEntry, port);

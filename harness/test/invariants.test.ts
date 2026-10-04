@@ -315,6 +315,34 @@ describe("invariant 3: the guard hook keeps agents away from the evaluator", () 
       2,
     ],
     [
+      "builder reads git history with an option first",
+      { agent_type: "builder", tool_name: "Bash", tool_input: { command: "git -C . log -p" } },
+      2,
+    ],
+    [
+      "builder reads git history without a pager",
+      {
+        agent_type: "builder",
+        tool_name: "Bash",
+        tool_input: { command: "git --no-pager show HEAD" },
+      },
+      2,
+    ],
+    [
+      "builder empties the lock with truncate",
+      {
+        agent_type: "builder",
+        tool_name: "Bash",
+        tool_input: { command: "truncate -s 0 targets/t/fixtures.lock" },
+      },
+      2,
+    ],
+    [
+      "builder checks git status in its clone",
+      { agent_type: "builder", tool_name: "Bash", tool_input: { command: "git status" } },
+      0,
+    ],
+    [
       "builder reads public API documentation",
       {
         agent_type: "builder",
@@ -683,6 +711,7 @@ describe("invariant 3: implementers see only a stripped sandbox", () => {
     const kept = ["targets/t/clone/server.ts", "targets/t/fixtures/dev/a.json", "harness/x.ts"];
     const dropped = [
       "targets/t/holdout-seed.json",
+      "logs/guard.log",
       ".git/config",
       ".env",
       ".agent.env",
