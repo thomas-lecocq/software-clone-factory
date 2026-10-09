@@ -13,13 +13,45 @@ Agents build, code judges:
 - **A script scores it.** It replays every fixture against a freshly reset clone and compares field
   by field. It reports the clean holdout apart from the rest, with a confidence bound.
 
-The method is written down as a skill (`.claude/skills/replicate-slice/`) that a session follows
-step by step, delegating to the agents and stopping at human checkpoints (target choice, terms of
-service, keys, spending, publication). It automates most of the work; an end-to-end autonomous
-run on a new target has not been demonstrated yet ([roadmap](docs/roadmap.md)).
-
 The factory knows nothing about any product: a target plugs in through one adapter (its probes, a
 way to run a probe on either side, a way to start its clone).
+
+## The workflow
+
+The method is a skill, [`replicate-slice`](.claude/skills/replicate-slice/SKILL.md), that one
+session follows step by step: it is the orchestrator. It delegates to agents where a role must stay
+independent or isolated, leaves every score to code, and stops at human checkpoints.
+
+| Step                    | Who does it                                      | Held in place by                                                | Human?                       |
+| ----------------------- | ------------------------------------------------ | --------------------------------------------------------------- | ---------------------------- |
+| 0. Triage               | orchestrator                                     | `docs/target-triage.md`                                         | **chooses target and slice** |
+| 1. Recon                | orchestrator                                     | the target's terms (checked)                                    | **terms of service, keys**   |
+| 2. Rule ledger          | `recorder` agent                                 | provenance on every rule; status is computed, never stored      | no                           |
+| 3. Probe design         | `recorder`, then `breaker` (spec mode)           | the distribution written down; the breaker widens its support   | no                           |
+| 4. Adapter and policy   | orchestrator                                     | every weakening of the comparison carries its reason            | no                           |
+| 5. Record               | code (`npm run record`)                          | test keys only; each probe twice; hash lock                     | no                           |
+| 6. Pre-register a batch | orchestrator                                     | plan and seed committed before recording (the report checks it) | no                           |
+| 7. Build                | `builder` agent                                  | container on a copy without holdout; only the clone comes back  | no (budget)                  |
+| 8. Break                | `breaker` agent                                  | container on a copy, read-only; its probes stay dev             | no (budget)                  |
+| 9. Measure once         | code (`npm run verify`)                          | clone in its own process; every look logged                     | no                           |
+| 10. Analyse a rejection | `analyst` agent                                  | a copy holding only the spent batch; only its report comes back | no                           |
+| 11. Variance            | `builder`, more builds from scratch              | one worktree each, scored once                                  | **spending**                 |
+| 12. Audit               | auditor prompt, measured by planted defects      | a planted copy in the container; only its findings are read     | **adjudicates findings**     |
+| 13. Report              | code (fidelity report), orchestrator (`GAPS.md`) | generated sections from the run; declared ones by hand          | **publication**              |
+
+**How autonomous it is.** In this repository's run, the agents and the code did steps 5 and 7 to
+13 on their own; the maintainer only made the decisions marked human. Two departures from the
+table: the rules and probes (steps 2 and 3) were written by the orchestrator directly, not by the
+`recorder` agent, and the breaker's spec mode was added to the method after the run, so it has not
+run yet. The orchestrator was a Claude Code session working with the maintainer, and several of its
+decisions (the distribution, batch sizes, when to call the analyst) were made by judgement before
+being written into the skill. So the claim is "a method that automates most of the work, written
+down"; a fresh session running it end to end on a new target is the
+[roadmap](docs/roadmap.md)'s first item.
+
+**What each run costs** is logged in each target's `timings.jsonl`: here a build from scratch took
+1 to 1.7 hours and $16 to $23 (API-equivalent, Opus 5.5), a breaker round $2, an audit $3 to $5,
+recording a 473-case batch about 1.5 hours and nothing (test mode), and `verify` about 7 minutes.
 
 ## How a clone is checked
 
@@ -82,9 +114,12 @@ committed before it was recorded, scored once.
   result is the best build's, not every build's.
 - It is test mode only, USD only, and none of the factory's components was ablated.
 
-**The auditors were measured.** On copies of the repository with 12 planted defects, the committed
-auditor prompt found 12 of 12 (recall at least 77.9 % at 95 %), and its other findings led to real
-fixes, such as running the clone in a separate process so that it cannot patch the scorer.
+**The auditors were measured, then used.** On copies of the repository with 12 planted defects,
+the committed auditor prompt found 12 of 12 (recall at least 77.9 % at 95 %). Two more runs on the
+clean repository found 20 real problems, all fixed, among them: the clone ran inside the scorer's
+process, could read the recorded fixtures, and could fake its layout from its own page code. Today
+it runs in its own process under Node's permission model, and layout is measured in an isolated
+world.
 
 Not affiliated with Stripe. The clone reimplements observed behaviour of the public API in test
 mode; it contains no Stripe code, and no documentation text beyond short quotes.
@@ -103,29 +138,31 @@ npm run demo                                   # start the clone and print a por
 only when every fixture passes. To record new fixtures, copy `.env.example` to `.env` and set a
 Stripe **test-mode** key; recording refuses any other kind of key.
 
-| Command                                      | What it does                                                                                                   |
-| -------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| `npm run record stripe-billing`              | record the probes that have no fixture yet                                                                     |
-| `npm run clone stripe-billing`               | serve the clone on `http://127.0.0.1:4599`; `POST /__reset` restores the seed                                  |
-| `npm run check`                              | types, lint, format, tests                                                                                     |
-| `harness/run-builder.sh stripe-billing`      | run the builder agent in the agent container, on a sandbox without the holdout (needs Docker and `.agent.env`) |
-| `harness/run-analyst.sh stripe-billing hold` | analyse a spent batch's failures in the agent container; only that batch goes in                               |
-| `npm run new-slice <name>`                   | scaffold a new target                                                                                          |
-| `git config core.hooksPath .githooks`        | pre-commit check (check plus evaluator lock)                                                                   |
+| Command                                           | What it does                                                                                                   |
+| ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `npm run record stripe-billing`                   | record the probes that have no fixture yet                                                                     |
+| `npm run clone stripe-billing`                    | serve the clone on `http://127.0.0.1:4599`; `POST /__reset` restores the seed                                  |
+| `npm run check`                                   | types, lint, format, tests                                                                                     |
+| `harness/run-builder.sh stripe-billing`           | run the builder agent in the agent container, on a sandbox without the holdout (needs Docker and `.agent.env`) |
+| `harness/run-agent.sh breaker stripe-billing "…"` | run a breaker round in the agent container; its answer is the proposed probes                                  |
+| `npx tsx audit/meta.ts`                           | measure the auditor: plant defects in copies, run it, report recall                                            |
+| `harness/run-analyst.sh stripe-billing hold`      | analyse a spent batch's failures in the agent container; only that batch goes in                               |
+| `npm run new-slice <name>`                        | scaffold a new target                                                                                          |
+| `git config core.hooksPath .githooks`             | pre-commit check (check plus evaluator lock)                                                                   |
 
 ## Layout
 
-| Where                                                | What                                                                                               |
-| ---------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
-| [`docs/verification.md`](docs/verification.md)       | what "verified" means: the five rules, measurement, process                                        |
-| [`docs/design.md`](docs/design.md)                   | why the factory is built this way, and what was rejected                                           |
-| [`docs/target-triage.md`](docs/target-triage.md)     | how a target is classified by recording mode before any work                                       |
-| [`docs/lessons.md`](docs/lessons.md)                 | what went wrong so far, and the rule it gave                                                       |
-| [`docs/roadmap.md`](docs/roadmap.md)                 | what could come next, with why and roughly what it costs                                           |
-| [`audit/`](audit/)                                   | the auditor prompt, the planted-defect library and the script that measures auditors               |
-| [`.claude/`](.claude/)                               | the method as a skill (`replicate-slice`), the agents (recorder, builder, breaker), the guard hook |
-| [`harness/`](harness/)                               | recorder, verifier, evaluator lock, diff policy, clone kit, sandbox runners                        |
-| [`targets/stripe-billing/`](targets/stripe-billing/) | recon, rule ledger, probes, recorded fixtures, the clone, gaps                                     |
+| Where                                                | What                                                                                                        |
+| ---------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| [`docs/verification.md`](docs/verification.md)       | what "verified" means: the five rules, measurement, process                                                 |
+| [`docs/design.md`](docs/design.md)                   | why the factory is built this way, and what was rejected                                                    |
+| [`docs/target-triage.md`](docs/target-triage.md)     | how a target is classified by recording mode before any work                                                |
+| [`docs/lessons.md`](docs/lessons.md)                 | what went wrong so far, and the rule it gave                                                                |
+| [`docs/roadmap.md`](docs/roadmap.md)                 | what could come next, with why and roughly what it costs                                                    |
+| [`audit/`](audit/)                                   | the auditor prompt, the planted-defect library and the script that measures auditors                        |
+| [`.claude/`](.claude/)                               | the method as a skill (`replicate-slice`), the agents (recorder, builder, breaker, analyst), the guard hook |
+| [`harness/`](harness/)                               | recorder, verifier, evaluator lock, diff policy, clone kit, sandbox runners                                 |
+| [`targets/stripe-billing/`](targets/stripe-billing/) | recon, rule ledger, probes, recorded fixtures, the clone, gaps                                              |
 
 ## License
 
