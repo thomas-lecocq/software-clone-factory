@@ -162,6 +162,7 @@ Stripe **test-mode** key; recording refuses any other kind of key.
 | `harness/run-builder.sh stripe-billing`           | run the builder agent in the agent container, on a sandbox without the holdout (needs Docker and `.agent.env`) |
 | `harness/run-agent.sh breaker stripe-billing "…"` | run a breaker round in the agent container; its answer is the proposed probes                                  |
 | `npx tsx audit/meta.ts`                           | measure the auditor: plant defects in copies, run it, report recall                                            |
+| `npx tsx audit/mutate.ts stripe-billing`          | plant one-line bugs in the clone and count how many the fixtures catch                                         |
 | `harness/run-analyst.sh stripe-billing hold`      | analyse a spent batch's failures in the agent container; only that batch goes in                               |
 | `npm run new-slice <name>`                        | scaffold a new target                                                                                          |
 | `git config core.hooksPath .githooks`             | pre-commit check (check plus evaluator lock)                                                                   |
