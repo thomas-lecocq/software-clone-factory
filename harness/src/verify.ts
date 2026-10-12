@@ -64,7 +64,18 @@ const withNoise = (policy: Policy, noise: string[]): Policy => ({
 
 const show = (v: Json | undefined): string => (v === undefined ? "absent" : JSON.stringify(v));
 
-export async function verify(target: string, splits: Split[], port = 4599): Promise<number> {
+// Known, declared divergences: a list of fixture IDs with the reason each still fails. With it,
+// a run passes only when exactly those fail, so a regression and an unrecorded fix both show.
+const ExpectedFailures = z.object({
+  failures: z.array(z.object({ id: z.string(), why: z.string().min(5) })),
+});
+
+export async function verify(
+  target: string,
+  splits: Split[],
+  port = 4599,
+  expectedFile?: string,
+): Promise<number> {
   const started = performance.now();
   const dir = targetDir(target);
   const problems = [...checkLock(target), ...committedLockProblems(target)];
@@ -257,7 +268,20 @@ export async function verify(target: string, splits: Split[], port = 4599): Prom
   });
   const failed = cases.filter((c) => !c.pass).length;
   console.log(`${cases.length - failed} of ${cases.length} fixtures pass (${splits.join(" + ")})`);
-  return failed === 0 ? 0 : 1;
+  if (expectedFile === undefined) return failed === 0 ? 0 : 1;
+  const expected = new Set(
+    ExpectedFailures.parse(JSON.parse(readFileSync(expectedFile, "utf8"))).failures.map(
+      (f) => f.id,
+    ),
+  );
+  const actual = new Set(cases.filter((c) => !c.pass).map((c) => c.id));
+  const unexpected = [...actual].filter((id) => !expected.has(id)).sort();
+  // Only cases this run scored can be said to pass now.
+  const scored = new Set(cases.map((c) => c.id));
+  const fixed = [...expected].filter((id) => scored.has(id) && !actual.has(id)).sort();
+  for (const id of unexpected) console.error(`unexpected failure: ${id}`);
+  for (const id of fixed) console.error(`passes but is listed as a known failure: ${id}`);
+  return unexpected.length === 0 && fixed.length === 0 ? 0 : 1;
 }
 
 // Ten dev fixtures spread over the sorted list, so that every kind of probe tends to be sampled.

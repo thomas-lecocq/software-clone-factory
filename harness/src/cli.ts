@@ -19,6 +19,7 @@ const { positionals, values } = parseArgs({
     rerecord: { type: "string" },
     reason: { type: "string" },
     port: { type: "string", default: "4599" },
+    expected: { type: "string" },
   },
 });
 const [command, target] = positionals;
@@ -50,7 +51,7 @@ if (command === "record") {
       : values.split === "holdout"
         ? ["holdout"]
         : ["dev"];
-  process.exit(await verify(target, splits, port));
+  process.exit(await verify(target, splits, port, values.expected));
 } else if (command === "new-slice") {
   for (const f of newSlice(target)) console.log(`created ${f}`);
 } else if (command === "relock") {
