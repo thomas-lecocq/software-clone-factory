@@ -58,8 +58,15 @@ claims tied to evidence. Several of its contracts would strengthen this factory:
   order; a target with parallel requests would show false divergences.
 - **Mutation testing of the verifier.** Plant deliberate bugs in a copy of the clone and check
   that `verify` catches each one, as the auditors are measured on planted defects today.
-- **REA as a recon tool.** Its browser and JavaScript analysis could map a hosted UI's bundle
-  (routes, calls) during recon, and it covers recording mode a (local software) directly.
+- **REA as a recon tool**, to try on the next slice or target before it enters the skill. The
+  orchestrator session registers REA's MCP server on its side (no dependency of this repository).
+  At step 1 it maps what the target exposes: the hosted UI's routes, calls and scripts
+  (`inspect_web_page`, module traces), every request and response of a HAR captured during the
+  walkthroughs (`inspect_web_network_capture`), and, for a local target (recording mode a), the
+  code itself. Its findings seed `rules.json` as `mined` rules citing the REA Evidence ID; only a
+  recorded fixture confirms them, as REA's own authority rules would require. REA serves
+  understanding only: no target code, style sheet or asset is copied into a clone, and REA stays
+  outside the builder's container. Its Evidence bundles stay in the git-ignored `recon/out/`.
 
 ## Spend fewer holdout cases
 
