@@ -40,6 +40,27 @@ item says why it matters and roughly what it costs.
 - **Ensembles.** The three clones fail different cases; a majority vote passes all 473 of batch 2.
   Worth testing as a way to buy reliability with compute.
 
+## Ideas from REA (Reverse Engineer Anything)
+
+[REA](https://github.com/morluto/rea) gives agents white-box reverse-engineering tools and keeps
+claims tied to evidence. Several of its contracts would strengthen this factory:
+
+- **Required case kinds per rule.** REA's reconstruction obligations demand positive, negative,
+  malformed and cancellation cases before a claim can close; our rules ask for a triggering and
+  a boundary case. Adding a malformed-input or error case per rule makes coverage systematic.
+- **Authority.** A claim closes only with a verifier of comparable authority to the original
+  observation (a static fact never proves runtime behaviour). The factory follows this
+  implicitly, since only recorded runtime output counts; `verification.md` should say so.
+- **Contradictions kept, not masked.** Two different outputs for the same input (the test card's
+  expiry) would be recorded as a contradiction that blocks the affected comparison, where we
+  masked the text. A contradiction record would keep the evidence visible.
+- **Partial-order comparison** for concurrent behaviour. Portal calls are compared in total
+  order; a target with parallel requests would show false divergences.
+- **Mutation testing of the verifier.** Plant deliberate bugs in a copy of the clone and check
+  that `verify` catches each one, as the auditors are measured on planted defects today.
+- **REA as a recon tool.** Its browser and JavaScript analysis could map a hosted UI's bundle
+  (routes, calls) during recon, and it covers recording mode a (local software) directly.
+
 ## Spend fewer holdout cases
 
 A batch that drove a decision is spent, and recording a new one costs time (1.5 hours here,

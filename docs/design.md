@@ -67,3 +67,12 @@ was found. The defect library never enters a copy an auditor or a builder sees.
 The fidelity report puts the same nine sections in front of every clone: scope, clean
 measurement, bound, coverage, determinism, divergences, saturation, task validation and integrity.
 A section that does not apply says so, rather than disappearing.
+
+## Related work
+
+[REA](https://github.com/morluto/rea) gives an agent reverse-engineering tools for local
+artefacts and websites, and returns evidence with its limits; the agent then writes its own
+reconstruction. The aims differ: REA helps understand a program from the inside, down to its
+binary; this factory builds a clone of a product's behaviour from the outside and measures it
+against the original, with a holdout the builder never sees. The two compose: REA could serve
+recon, and a clone of a local program could be measured here.

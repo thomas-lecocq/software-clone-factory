@@ -1,5 +1,7 @@
 # software-clone-factory
 
+[![ci](https://github.com/thomas-lecocq/software-clone-factory/actions/workflows/ci.yml/badge.svg)](https://github.com/thomas-lecocq/software-clone-factory/actions/workflows/ci.yml)
+
 A factory for **verified clones of closed-source software**: resettable, deterministic copies of a
 product's behaviour that agents can be trained and evaluated in, with the fidelity of every clone
 **measured against the original** rather than asserted.
@@ -17,6 +19,20 @@ The factory knows nothing about any product: a target plugs in through one adapt
 way to run a probe on either side, a way to start its clone).
 
 ## The workflow
+
+```mermaid
+flowchart LR
+  T[Real product<br/>test mode] -- probes, twice --> F[(Fixtures<br/>hash-locked)]
+  F -- dev only --> B[Builder agent<br/>in a container]
+  B --> C[Clone]
+  F -- every fixture --> V{{verify<br/>code, not an agent}}
+  C -- HTTP, own process --> V
+  V --> R[Fidelity report<br/>bounds, looks, gaps]
+  P[Plan committed first] --> H[(Holdout batch)]
+  H -- scored once --> V
+  K[Breaker agent] -- adversarial probes --> F
+  R -- rejected claim --> A[Analyst agent<br/>on the spent batch] --> F
+```
 
 The method is a skill, [`replicate-slice`](.claude/skills/replicate-slice/SKILL.md), that one
 session follows step by step: it is the orchestrator. It delegates to agents where a role must stay

@@ -25,7 +25,7 @@ spent: it may be analysed, but no later claim rests on it.
 - **Plan:** `analysis-plan-b2.md`, committed in `ad71862` before any `hold-b2-` fixture existed.
 - **Clone:** the batch 1 clone after one builder pass in the agent container (32 min,
   `timings.jsonl`) that used the spent batch 1's analysis and 379 new dev probes, and never saw
-  batch 2; frozen at `6e78b92` (696 of 696 dev).
+  batch 2; frozen at `6e78b92` (696 of 696 dev), tagged `claim-batch-2`.
 - **Look:** `npm run verify stripe-billing -- --split holdout`, 2026-10-01 15:18 UTC, the only run
   of this batch. `dirty: true` has the same cause as above; `git diff 6e78b92` on the harness,
   the target's code, fixtures and policy is empty.
