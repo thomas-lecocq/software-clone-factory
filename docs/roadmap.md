@@ -56,8 +56,9 @@ claims tied to evidence. Several of its contracts would strengthen this factory:
   masked the text. A contradiction record would keep the evidence visible.
 - **Partial-order comparison** for concurrent behaviour. Portal calls are compared in total
   order; a target with parallel requests would show false divergences.
-- **Mutation testing of the verifier.** Plant deliberate bugs in a copy of the clone and check
-  that `verify` catches each one, as the auditors are measured on planted defects today.
+- **Mutation testing, further.** `audit/mutate.ts` exists for the clone's logic: 30 of 40 planted
+  bugs caught, 6 of the survivors pointing at behaviour no fixture pins (`GAPS.md`). Next: probes
+  for those six, then mutants in the screens, replayed against the UI fixtures.
 - **REA as a recon tool**, to try on the next slice or target before it enters the skill. The
   orchestrator session registers REA's MCP server on its side (no dependency of this repository).
   At step 1 it maps what the target exposes: the hosted UI's routes, calls and scripts

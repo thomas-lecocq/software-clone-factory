@@ -52,6 +52,20 @@ The analysis of batch 1 is `analysis/batch1-failures.md`. The clone measured bef
 - **PRO-04 (rounding at exactly .5)** and **MOD-01 (classic vs flexible)**: few separating cases.
 - **LIF-03 and LIF-04** have no dev fixture: coded from their statements only, unverified.
 
+## Holes found by mutation testing
+
+`audit/mutate.ts` planted 40 one-line bugs in the clone's logic and replayed the 715 dev logic
+fixtures the unchanged clone passes: 30 were caught. Of the 10 that survived, 4 change nothing by
+construction (a loop's safety bound, two constants of the ID minter, whose IDs are compared
+canonicalised, and distributing a zero remainder). The other 6 are behaviour no fixture pins:
+
+- the error returned for an object that does not exist (`api.ts:44`);
+- which of two events at the same instant comes first (`life.ts:206`);
+- a once-only coupon over the subscription lifecycle (`life.ts:83`);
+- listing invoice items when several customers exist; every probe has one (`api.ts:307`);
+- the delay before the first payment retry; only the second is pinned (`life.ts:31`);
+- a routing condition for invoice items (`api.ts:431`).
+
 ## Compared nowhere (outside the probe space)
 
 Not covered by a fixture, unverified: taxes, currencies other than USD, more than three items,

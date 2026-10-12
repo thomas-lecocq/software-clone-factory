@@ -1,0 +1,228 @@
+{
+  "at": "2026-10-12T23:10:46.930Z",
+  "target": "stripe-billing",
+  "fixtures": 715,
+  "excluded_known_failures": [
+    "dev-brk-big-half-charge-classic",
+    "dev-brk-free-once",
+    "dev-brk-interval-multi-first",
+    "dev-brk-interval-multi-second",
+    "dev-brk-inv-56-pct95",
+    "dev-brk-off-huge-half-flex",
+    "dev-brk-pct100-half-flex",
+    "dev-brk-pct20-half-discount",
+    "dev-brk-qty0-item",
+    "dev-brk-stack-full-half-flex",
+    "dev-brk-y2m-at-new-end",
+    "dev-brk-y2m-jan30-at-end",
+    "dev-t2-f-left56",
+    "dev-t2-f-left57",
+    "dev-t2-f-left58"
+  ],
+  "mutants": 40,
+  "valid": 40,
+  "killed": 30,
+  "survived": 10,
+  "results": [
+    {
+      "mutant": "billing.ts:71 floor to ceil (Math.floor()",
+      "outcome": "killed",
+      "killed_by": "dev-brk-off1-zero-share-always"
+    },
+    {
+      "mutant": "api.ts:44 constant plus one (404)",
+      "outcome": "survived",
+      "killed_by": null
+    },
+    {
+      "mutant": "life.ts:169 strict to loose < (<)",
+      "outcome": "survived",
+      "killed_by": null
+    },
+    {
+      "mutant": "time.ts:63 floor to ceil (Math.floor()",
+      "outcome": "killed",
+      "killed_by": "b-pct15-round-half"
+    },
+    {
+      "mutant": "api.ts:366 equal to not equal (===)",
+      "outcome": "killed",
+      "killed_by": "b-classic-pct20-downgrade"
+    },
+    {
+      "mutant": "life.ts:28 constant plus one (86400)",
+      "outcome": "killed",
+      "killed_by": "l-payment-fails-retries"
+    },
+    {
+      "mutant": "api.ts:417 equal to not equal (===)",
+      "outcome": "killed",
+      "killed_by": "l-cancel-at-end-then-now"
+    },
+    {
+      "mutant": "billing.ts:453 equal to not equal (===)",
+      "outcome": "killed",
+      "killed_by": "dev-brk-off1-zero-share-always"
+    },
+    {
+      "mutant": "api.ts:56 and to or (&&)",
+      "outcome": "killed",
+      "killed_by": "l-cancel-at-end-then-now"
+    },
+    {
+      "mutant": "api.ts:423 equal to not equal (===)",
+      "outcome": "killed",
+      "killed_by": "b-clamp-jan31"
+    },
+    {
+      "mutant": "api.ts:344 equal to not equal (===)",
+      "outcome": "killed",
+      "killed_by": "l-cancel-at-end-then-now"
+    },
+    {
+      "mutant": "state.ts:201 constant plus one (7919)",
+      "outcome": "survived",
+      "killed_by": null
+    },
+    {
+      "mutant": "billing.ts:265 equal to not equal (===)",
+      "outcome": "killed",
+      "killed_by": "b-clamp-jan31"
+    },
+    {
+      "mutant": "life.ts:175 equal to not equal (===)",
+      "outcome": "killed",
+      "killed_by": "l-payment-fails-retries"
+    },
+    {
+      "mutant": "billing.ts:455 equal to not equal (===)",
+      "outcome": "killed",
+      "killed_by": "dev-brk-two-carried-one-surviving"
+    },
+    {
+      "mutant": "billing.ts:338 and to or (&&)",
+      "outcome": "killed",
+      "killed_by": "d-classic-off300-sub"
+    },
+    {
+      "mutant": "billing.ts:332 equal to not equal (===)",
+      "outcome": "killed",
+      "killed_by": "t-round-half-2.5"
+    },
+    {
+      "mutant": "api.ts:431 and to or (&&)",
+      "outcome": "survived",
+      "killed_by": null
+    },
+    {
+      "mutant": "billing.ts:78 strict to loose > (>)",
+      "outcome": "survived",
+      "killed_by": null
+    },
+    {
+      "mutant": "api.ts:354 equal to not equal (===)",
+      "outcome": "killed",
+      "killed_by": "b-clamp-jan31"
+    },
+    {
+      "mutant": "api.ts:344 equal to not equal (===)",
+      "outcome": "killed",
+      "killed_by": "l-cancel-at-end-then-now"
+    },
+    {
+      "mutant": "life.ts:206 strict to loose < (<)",
+      "outcome": "survived",
+      "killed_by": null
+    },
+    {
+      "mutant": "api.ts:354 and to or (&&)",
+      "outcome": "killed",
+      "killed_by": "b-clamp-jan31"
+    },
+    {
+      "mutant": "life.ts:166 equal to not equal (===)",
+      "outcome": "killed",
+      "killed_by": "l-payment-fails-retries"
+    },
+    {
+      "mutant": "billing.ts:416 and to or (&&)",
+      "outcome": "killed",
+      "killed_by": "wide-007"
+    },
+    {
+      "mutant": "api.ts:56 and to or (&&)",
+      "outcome": "killed",
+      "killed_by": "l-cancel-at-end-then-now"
+    },
+    {
+      "mutant": "billing.ts:454 equal to not equal (===)",
+      "outcome": "killed",
+      "killed_by": "d-pct20-always"
+    },
+    {
+      "mutant": "life.ts:136 equal to not equal (===)",
+      "outcome": "killed",
+      "killed_by": "l-trial"
+    },
+    {
+      "mutant": "api.ts:349 equal to not equal (===)",
+      "outcome": "killed",
+      "killed_by": "b-clamp-jan31"
+    },
+    {
+      "mutant": "life.ts:83 and to or (&&)",
+      "outcome": "survived",
+      "killed_by": null
+    },
+    {
+      "mutant": "api.ts:425 equal to not equal (===)",
+      "outcome": "killed",
+      "killed_by": "l-cancel-at-end-then-now"
+    },
+    {
+      "mutant": "state.ts:205 constant plus one (31)",
+      "outcome": "survived",
+      "killed_by": null
+    },
+    {
+      "mutant": "time.ts:43 constant plus one (1000)",
+      "outcome": "killed",
+      "killed_by": "b-clamp-jan31"
+    },
+    {
+      "mutant": "life.ts:31 constant plus one (5)",
+      "outcome": "killed",
+      "killed_by": "l-payment-fails-retries"
+    },
+    {
+      "mutant": "life.ts:172 loose to strict <= (<=)",
+      "outcome": "killed",
+      "killed_by": "l-payment-fails-retries"
+    },
+    {
+      "mutant": "billing.ts:332 round to floor (Math.round()",
+      "outcome": "killed",
+      "killed_by": "b-clamp-jan31"
+    },
+    {
+      "mutant": "billing.ts:267 and to or (&&)",
+      "outcome": "killed",
+      "killed_by": "dev-t2-a2-noop"
+    },
+    {
+      "mutant": "api.ts:307 equal to not equal (===)",
+      "outcome": "survived",
+      "killed_by": null
+    },
+    {
+      "mutant": "life.ts:31 constant plus one (3)",
+      "outcome": "survived",
+      "killed_by": null
+    },
+    {
+      "mutant": "api.ts:51 equal to not equal (===)",
+      "outcome": "killed",
+      "killed_by": "b-clamp-jan31"
+    }
+  ]
+}
