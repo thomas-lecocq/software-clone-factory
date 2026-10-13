@@ -1,0 +1,62 @@
+{
+  "id": "hold-b4-s3-132",
+  "rules": [
+    "INT-01",
+    "ITM-01",
+    "MOD-01",
+    "PRO-01",
+    "PRO-02",
+    "PRO-03",
+    "PRO-04",
+    "PRO-05",
+    "PRO-10"
+  ],
+  "input": {
+    "kind": "wide",
+    "start": 1814497736,
+    "billing_mode": "classic",
+    "interval": "month",
+    "items": [
+      {
+        "amount": 222915,
+        "quantity": 8
+      },
+      {
+        "amount": 5303,
+        "quantity": 3
+      }
+    ],
+    "coupons": [],
+    "change": {
+      "item": 0,
+      "amount": 13805582,
+      "interval": "year",
+      "quantity": null,
+      "offset": 894323,
+      "proration_behavior": "create_prorations",
+      "discount": null
+    }
+  },
+  "observed": {
+    "preview": {
+      "error": {
+        "type": "StripeInvalidRequestError",
+        "code": null,
+        "param": null,
+        "message": "All prices on a subscription must have the same `recurring.interval` and `recurring.interval_count` unless flexible billing mode is enabled and you're on the 2025-06-30.basil API version or later. To proceed, update the subscription to flexible billing mode, then retry this update. For information about flexible billing mode, go to https://docs.stripe.com/billing/subscriptions/billing-mode. "
+      }
+    },
+    "first_invoice": {
+      "subtotal": 1799229,
+      "total": 1799229,
+      "amount_due": 1799229,
+      "status": "paid"
+    }
+  },
+  "noise": [],
+  "recorded_at": "2026-10-13T14:33:25.582Z",
+  "recorded_with": {
+    "stripe_api_version": "2026-08-26.dahlia",
+    "stripe_node": "22.6.2"
+  }
+}

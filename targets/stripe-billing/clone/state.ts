@@ -20,6 +20,8 @@ export interface Price {
   unit_amount: number;
   currency: string;
   interval: Interval;
+  // Prices live outside test clocks; the clone uses the latest clock time (recorded as noise).
+  created: number;
 }
 
 export interface Coupon {
@@ -42,6 +44,10 @@ export interface Customer {
   created: number;
   // What the customer owes (positive) or is owed (negative), carried to the next invoice.
   balance: number;
+  // Set by the first subscription.
+  currency: string | null;
+  invoice_prefix: string;
+  preferred_locales: string[];
 }
 
 export interface Discount {
@@ -88,6 +94,8 @@ export interface Subscription {
   ended_at: number | null;
   trial_start: number | null;
   trial_end: number | null;
+  // cancellation_details.reason: "cancellation_requested" once a cancellation is asked for.
+  cancellation_reason: string | null;
 }
 
 export interface DiscountAmount {
@@ -142,6 +150,8 @@ export interface InvoiceItem {
   subscription: string;
   line: Line;
   invoice: string | null;
+  // When the invoice item was created (clock time).
+  date: number;
 }
 
 export interface PortalConfig {

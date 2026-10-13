@@ -45,6 +45,61 @@ export function invoiceTotal(inv: Invoice): number {
   return sub - inv.total_discount_amounts.reduce((a, d) => a + d.amount, 0);
 }
 
+// A proration line waiting for the next invoice, as an invoice item created at `now`.
+export function addPending(
+  state: State,
+  sub: Subscription,
+  line: Omit<Line, "id" | "invoice_item">,
+  now: number,
+): string {
+  const id = mint(state, "ii");
+  state.invoice_items[id] = {
+    id,
+    customer: sub.customer,
+    subscription: sub.id,
+    line: { ...line, id: "", invoice_item: id },
+    invoice: null,
+    date: now,
+  };
+  return id;
+}
+
+// always_invoice: the pending items are invoiced at once and the payment attempted (PRO-07).
+export function invoiceNow(state: State, sub: Subscription, now: number): Invoice {
+  const id = mint(state, "in");
+  const lines = takePending(state, sub, id);
+  const inv: Invoice = {
+    id,
+    customer: sub.customer,
+    subscription: sub.id,
+    lines,
+    discounts: [],
+    total_discount_amounts: [],
+    billing_reason: "subscription_update",
+    status: "draft",
+    created: now,
+    period_start: now,
+    period_end: now,
+    attempt_count: 0,
+    amount_paid: 0,
+    auto_advance: true,
+    next_payment_attempt: now,
+    proration_date: null,
+    retries: [],
+    starting_balance: 0,
+    deferred: 0,
+  };
+  const cus = get(state.customers, sub.customer);
+  if (cus) {
+    inv.starting_balance = cus.balance;
+    cus.balance = Math.min(0, invoiceTotal(inv) + cus.balance);
+  }
+  state.invoices[id] = inv;
+  sub.latest_invoice = id;
+  attempt(state, inv, now);
+  return inv;
+}
+
 // Pending invoice items (prorations) of a subscription, moved onto an invoice.
 export function takePending(state: State, sub: Subscription, invoice: string): Line[] {
   const out: Line[] = [];
@@ -251,21 +306,13 @@ export function cancelNow(
       };
       sub.latest_invoice = id;
     } else {
-      for (const l of credits) {
-        const id = mint(state, "ii");
-        state.invoice_items[id] = {
-          id,
-          customer: sub.customer,
-          subscription: sub.id,
-          line: { ...l, id: "", invoice_item: id },
-          invoice: null,
-        };
-      }
+      for (const l of credits) addPending(state, sub, l, now);
     }
   }
   sub.status = "canceled";
   sub.ended_at = now;
   sub.canceled_at ??= now;
+  sub.cancellation_reason = "cancellation_requested";
   sub.cancel_at_period_end = false;
   sub.cancel_at = null;
 }

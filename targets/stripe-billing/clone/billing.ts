@@ -224,12 +224,12 @@ export function creditLine(
   let credit: number;
   let applied: DiscSpec[];
   if (sub.billing_mode === "classic") {
-    // Classic: the coupons apply to the credited item on its own (an amount-off coupon in full,
-    // not its share of a multi-item invoice), then the net amount is prorated. The label names
-    // every discount of the billed line, zero ones included (pass 5).
+    // Classic (DSC-04, pass 6): every discount of the billed line, in subscription order, applies
+    // to the credited item on its own (an amount-off in full, a percent-off on what is left),
+    // whatever share it got on the billing invoice, 0 included; then the net is prorated.
     const D = allocate(
       [b],
-      carried.map((c) => c.spec),
+      all.map((c) => c.spec),
     ).reduce((a, x) => a + (x[0] ?? 0), 0);
     credit = -roundRatio((b - D) * r, P);
     applied = all.map((c) => c.spec);
@@ -370,9 +370,11 @@ export function planChange(state: State, sub: Subscription, input: PlanInput): P
       const r2 = end - prd;
       const e2 = prd - periodStart;
       if (r2 <= 0) return;
+      const classic = sub.billing_mode === "classic";
+      // PRO-11: classic bills no remaining time for a new item whose amount is 0.
+      if (classic && n === 0) return;
       const D2 = allocate([n], chargeSpecs).map((x) => x[0] ?? 0);
       const factor = 1 - e2 / P2;
-      const classic = sub.billing_mode === "classic";
       const base = classic ? classicProrate(n, r2, P2) : Math.round(n * factor);
       // Flexible discounts the full-period amount, then prorates the discount with the charge's
       // factor (DSC-02); classic prorates first and takes a percent-off on the prorated amount

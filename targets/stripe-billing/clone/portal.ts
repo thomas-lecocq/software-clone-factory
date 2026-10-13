@@ -16,6 +16,7 @@ import {
   type DiscSpec,
   type ItemChange,
 } from "./billing.ts";
+import { addPending } from "./life.ts";
 import { ACCOUNT_NAME, CARD } from "./objects.ts";
 import { portalPage } from "./page.ts";
 import {
@@ -255,16 +256,7 @@ function sessionApi(
       now,
     });
     if (isPlanError(plan)) return fail(400, plan.message, plan.param);
-    for (const l of plan.prorations) {
-      const id = mint(state, "ii");
-      state.invoice_items[id] = {
-        id,
-        customer: sub.customer,
-        subscription: sub.id,
-        line: { ...l, id: "", invoice_item: id },
-        invoice: null,
-      };
-    }
+    for (const l of plan.prorations) addPending(state, sub, l, now);
     sub.items.forEach((it) => {
       const next = plan.items.find((x) => x.id === it.id);
       if (next) {

@@ -248,3 +248,67 @@ Thin spots left after pass 5:
   assumes one interval per subscription.
 - LIF-06: the retry days 1 and 4 are one choice among the schedules the two cases allow.
 - Contradiction with rules.json, DSC-07 wording: still as in pass 4.
+
+## Pass 6: classic credits and quantity 0 (DSC-04, PRO-11), the agent's API calls
+
+Baseline: verify 994 of 1013 dev. Failing: 11 dev-b3-classic-_, 7 dev-ag-_, dev-v3-two-subscriptions.
+
+### 6a. DSC-04 and PRO-11 (rule groups PRO-01/PRO-05/MOD-01, 11 fixtures)
+
+- DSC-04 as now stated: the classic credit is -round_half_away(net x r / P), net = the old item's
+  amount after every discount on its billed line, in subscription order, applied to that item alone
+  (amount-off in full, percent-off round(pct x left), floor 0). The share each discount got on the
+  billing invoice no longer matters, a share of 0 included. Pass 5 kept only the non-zero ones;
+  that was an unforced choice the dev set could not refute (analysis of spent batch 3).
+- PRO-11: classic, the changed item's new amount (unit x new quantity) is 0 -> no remaining-time
+  line, under every behaviour; the renewal still lists the item at 0. Flexible keeps the 0 line.
+  A once coupon passed to the preview then takes nothing from the prorations, so (pass 5 rule) it
+  is listed and applies to the renewal (dev-b3-classic-b9-qty0-once-preview agrees: listed, 0).
+- Expected to flip: the 11 dev-b3-classic-* (a1, a2, a4, a5-three-start, b6 x3, b7, b8, b9 x2).
+  The flexible counterparts and b10 must not move.
+
+### 6b. The agent's API calls (dev-ag-*, dev-v3-two-subscriptions)
+
+Raw calls are compared whole (every field of the body), so the objects now carry Stripe's full
+shapes as recorded: subscription (legacy `plan`/`quantity` for a single item, `null` otherwise;
+`cancellation_details.reason` "cancellation_requested" after a cancel), subscription item (with
+`plan`), price, customer (currency set by the first subscription), discount (expandable),
+invoice item. `created` of prices is wall-clock on Stripe and recorded as noise; the clone uses
+the latest clock time. The classic `billing_mode` shape is not recorded; it is a guess.
+
+Rules read from the fixtures:
+
+- POST /v1/subscriptions/:id with `items[i][id|price|quantity]` changes the item in place (same
+  `si_` ID, quantity 1 when only the price is sent, PRO-10), at the clock time. Default and
+  create_prorations: the credit and the charge become pending invoice items dated now (list order:
+  newest date first, same date in creation order, credit then charge); none: no item.
+  always_invoice (no dev case): the pending items are invoiced at once and paid.
+- POST /v1/subscription_items/:id (price, quantity, proration_behavior): the same change; returns
+  the item.
+- `discounts[0][coupon]` replaces the subscription's discounts with a new one started now; the
+  legacy `coupon` parameter is refused on a flexible subscription ("...not supported: coupon.",
+  param null) and applied like `discounts` on a classic one (no dev case).
+- create_preview with only `subscription`: the pending invoice items first (their `ii_` IDs), then
+  the renewal; no `subscription_proration_date` unless a proration date was sent.
+- GET /v1/invoices/upcoming: 400 "This API method has been deprecated...".
+- GET /v1/subscriptions?customer=: newest first, canceled ones left out; GET /v1/prices/:id,
+  GET /v1/customers/:id, GET /v1/subscription_items?subscription=.
+- DELETE /v1/subscriptions/:id with invoice_now/prorate in the query: as LIF-05.
+
+Expected to flip: the 7 dev-ag-* and dev-v3-two-subscriptions. dev-v3-past-due-recovers already
+passes (retry at +1 day).
+
+Outcome, pass 6: 6a as predicted (1005 of 1013, the 11 dev-b3-classic-* flipped, nothing else
+moved). 6b: in a local replay the first attempt passed 8 of 9 agent cases; the last one,
+dev-ag-coupon-discounts, failed because `expand[]=discounts` parses to a plain string, not a list.
+After that fix, `npm run verify stripe-billing`: 1013 of 1013 dev.
+
+Thin spots after pass 6 (no dev case pins them):
+
+- always_invoice on a real update, an interval change made for real (cycle reset), the legacy
+  `coupon` on a classic subscription, and the classic `billing_mode` object shape.
+- A second change in the same period credits the item at its current price with the discounts of
+  the invoice that last billed it; Stripe may credit the earlier proration instead.
+- PRO-11 with a coupon on the subscription and a once coupon passed to the preview: pinned by the
+  two dev-b3-classic-b9 cases only.
+- Contradiction with rules.json, DSC-07 wording: still as in pass 4.
