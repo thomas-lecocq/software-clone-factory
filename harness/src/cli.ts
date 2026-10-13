@@ -21,6 +21,7 @@ const { positionals, values } = parseArgs({
     port: { type: "string", default: "4599" },
     expected: { type: "string" },
     sequential: { type: "string" },
+    concurrency: { type: "string" },
     "max-failures": { type: "string" },
   },
 });
@@ -45,6 +46,7 @@ if (command === "record") {
       : {}),
     literalsFile:
       process.env.SCRUB_LITERALS ?? join(import.meta.dirname, "..", "..", ".scrub.json"),
+    ...(values.concurrency !== undefined ? { concurrency: Number(values.concurrency) } : {}),
   });
 } else if (command === "verify") {
   const splits: Split[] =

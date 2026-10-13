@@ -71,6 +71,9 @@ claims tied to evidence. Several of its contracts would strengthen this factory:
 
 ## Spend fewer holdout cases
 
+Recording now runs eight probes at a time and mutation testing four mutants at a time, so a
+473-case batch takes minutes rather than hours; what remains is the cost in cases.
+
 A batch that drove a decision is spent, and recording a new one costs time (1.5 hours here,
 much more where a human records). Three ways to spend less:
 

@@ -59,8 +59,8 @@ mined` and a reference. Documentation seeds rules; only a fixture confirms them.
 5. **Policy**, before any clone code. `policy.json`: generated IDs canonicalised; every weakening
    (ignore, type, tolerance, perceptual, mask) carries its reason, decided from the target's own
    noise and semantics, never to make a clone pass.
-6. **Record dev** (`npm run record <t>`): every probe twice, noise kept, scrubbed, locked. Commit
-   fixtures and lock alone.
+6. **Record dev** (`npm run record <t>`): every probe twice, noise kept, scrubbed, locked; probes run
+   eight at a time (`--concurrency`). Commit fixtures and lock alone.
 7. **Pre-register a holdout batch.** Size it from the claim: with no failure, 299 cases bound the
    failure rate below 1 % at 95 %; 473 still do so with one failure, and bound it below 1 % at
    99 % with none. Write `analysis-plan*.md` (batch IDs `hold-<name>-001…`, D, size, decision

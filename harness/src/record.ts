@@ -23,6 +23,8 @@ export interface RecordOptions {
   only?: string[];
   rerecord?: { id: string; reason: string };
   literalsFile?: string;
+  // How many probes record at once (default 8).
+  concurrency?: number;
 }
 
 export async function record(target: string, opts: RecordOptions): Promise<void> {
@@ -43,11 +45,15 @@ export async function record(target: string, opts: RecordOptions): Promise<void>
   if (opts.only) probes = probes.filter((p) => opts.only?.includes(p.id));
   if (opts.rerecord) probes = probes.filter((p) => p.id === opts.rerecord?.id);
 
+  // Probes run in parallel, each in its own world (its own test clock); a probe's two recordings
+  // stay one after the other, since their difference is the noise. A failing probe is reported
+  // and the others go on.
   let written = 0;
-  for (const probe of probes) {
+  const failed: string[] = [];
+  const recordOne = async (probe: (typeof probes)[number]): Promise<void> => {
     const path = fixturePath(target, probe.id);
     const before = existsSync(path) ? sha256(readFileSync(path, "utf8")) : null;
-    if (before !== null && opts.rerecord?.id !== probe.id) continue;
+    if (before !== null && opts.rerecord?.id !== probe.id) return;
     const started = performance.now();
     const first = await adapter.run(probe, { kind: "target" });
     const second = await adapter.run(probe, { kind: "target" });
@@ -71,7 +77,19 @@ export async function record(target: string, opts: RecordOptions): Promise<void>
         `re-record ${probe.id}: ${opts.rerecord.reason}\n  old ${before}\n  new ${after}`,
       );
     }
-  }
+  };
+  const queue = [...probes];
+  const worker = async (): Promise<void> => {
+    for (let probe = queue.shift(); probe; probe = queue.shift()) {
+      try {
+        await recordOne(probe);
+      } catch (e) {
+        failed.push(`${probe.id}: ${String(e)}`);
+        console.error(`failed ${probe.id}: ${String(e)}`);
+      }
+    }
+  };
+  await Promise.all(Array.from({ length: Math.max(1, opts.concurrency ?? 8) }, worker));
   // Anything that changed during the recording, other than the fixtures written here, is left
   // for a deliberate relock: the lock never absorbs it silently.
   const recorded = new Set(probes.map((p) => `${splitOf(p.id)}/${p.id}.json`));
@@ -83,4 +101,9 @@ export async function record(target: string, opts: RecordOptions): Promise<void>
   }
   writeLock(target);
   console.log(`${String(written)} fixture(s) written, lock updated`);
+  if (failed.length > 0) {
+    throw new Error(
+      `${String(failed.length)} probe(s) failed to record:\n  ${failed.join("\n  ")}`,
+    );
+  }
 }

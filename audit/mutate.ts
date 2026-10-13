@@ -6,7 +6,7 @@
  * and it is killed at the first fixture that differs. Only fixtures the unchanged clone passes
  * count: a known divergence would "kill" every mutant. A surviving mutant is either harmless (an
  * equivalent change) or a behaviour no fixture pins: each one is listed for a human to read.
- * Usage: npx tsx audit/mutate.ts <target> [--mutants 40] [--seed 1]
+ * Usage: npx tsx audit/mutate.ts <target> [--mutants 40] [--seed 1] [--concurrency 4]
  */
 import { cpSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
@@ -119,7 +119,11 @@ async function firstDivergence(
 async function main(): Promise<void> {
   const { positionals, values } = parseArgs({
     allowPositionals: true,
-    options: { mutants: { type: "string", default: "40" }, seed: { type: "string", default: "1" } },
+    options: {
+      mutants: { type: "string", default: "40" },
+      seed: { type: "string", default: "1" },
+      concurrency: { type: "string", default: "4" },
+    },
   });
   const target = positionals[0];
   if (target === undefined) throw new Error("usage: mutate.ts <target> [--mutants n] [--seed s]");
@@ -135,11 +139,12 @@ async function main(): Promise<void> {
     `${String(fixtures.length)} dev fixtures pass on the unchanged clone; ${String(baseline.size)} excluded`,
   );
   const chosen = pick(sites(cloneDir), Number(values.mutants), Number(values.seed));
-  const scratch = `_mutant-${String(process.pid)}`;
-  const results: Record<string, unknown>[] = [];
-  let port = 4700;
-  for (const [i, s] of chosen.entries()) {
-    const dir = targetDir(scratch);
+  // Mutants run several at a time, each in its own copy of the clone and on its own port.
+  const scratch = (i: number): string => `_mutant-${String(process.pid)}-${String(i)}`;
+  const results: Record<string, unknown>[] = new Array<Record<string, unknown>>(chosen.length);
+  let done = 0;
+  const runMutant = async (i: number, s: Site): Promise<void> => {
+    const dir = targetDir(scratch(i));
     rmSync(dir, { recursive: true, force: true });
     mkdirSync(dir, { recursive: true });
     cpSync(cloneDir, join(dir, "clone"), { recursive: true });
@@ -153,21 +158,27 @@ async function main(): Promise<void> {
     let outcome: "killed" | "survived" | "invalid" = "survived";
     let by: string | null = null;
     try {
-      port += 1;
-      const failing = await firstDivergence(adapter, scratch, policy, fixtures, port, true);
+      const failing = await firstDivergence(adapter, scratch(i), policy, fixtures, 4700 + i, true);
       if (failing[0] !== undefined) {
         outcome = "killed";
         by = failing[0];
       }
     } catch {
       outcome = "invalid";
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
     }
-    results.push({ mutant: label, outcome, killed_by: by });
+    results[i] = { mutant: label, outcome, killed_by: by };
+    done += 1;
     console.log(
-      `${String(i + 1)}/${String(chosen.length)} ${outcome.padEnd(8)} ${label}${by ? ` by ${by}` : ""}`,
+      `${String(done)}/${String(chosen.length)} ${outcome.padEnd(8)} ${label}${by ? ` by ${by}` : ""}`,
     );
-  }
-  rmSync(targetDir(scratch), { recursive: true, force: true });
+  };
+  const queue = [...chosen.entries()];
+  const worker = async (): Promise<void> => {
+    for (let next = queue.shift(); next; next = queue.shift()) await runMutant(next[0], next[1]);
+  };
+  await Promise.all(Array.from({ length: Math.max(1, Number(values.concurrency)) }, worker));
   const valid = results.filter((r) => r.outcome !== "invalid");
   const killed = valid.filter((r) => r.outcome === "killed").length;
   const summary = {
