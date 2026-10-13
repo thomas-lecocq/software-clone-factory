@@ -14,7 +14,7 @@ import { parseArgs } from "node:util";
 import { loadAdapter } from "../harness/src/adapter.ts";
 import { startCloneProcess } from "../harness/src/clone-process.ts";
 import { loadFixtures, targetDir } from "../harness/src/fixtures.ts";
-import { diff, PolicySchema, type Policy } from "../harness/src/policy.ts";
+import { blocking, diff, PolicySchema, type Policy } from "../harness/src/policy.ts";
 
 interface Operator {
   name: string;
@@ -101,8 +101,10 @@ async function firstDivergence(
         .run({ id: f.id, rules: f.rules, input: f.input }, { kind: "clone", url: clone.url })
         .catch((e: unknown) => ({ error: String(e) }));
       const noise = f.noise.map((path) => ({ path, mode: "ignore" as const, why: "noise" }));
+      // The same rule as verify: perceptual differences are reported, never counted.
       if (
-        diff({ ...policy, fields: [...policy.fields, ...noise] }, f.observed, actual).length > 0
+        blocking(diff({ ...policy, fields: [...policy.fields, ...noise] }, f.observed, actual))
+          .length > 0
       ) {
         failing.push(f.id);
         if (stopAtFirst) break;
@@ -130,7 +132,7 @@ async function main(): Promise<void> {
   const baseline = new Set(await firstDivergence(adapter, target, policy, all, 4699, false));
   const fixtures = all.filter((f) => !baseline.has(f.id));
   console.log(
-    `${String(fixtures.length)} logic fixtures pass on the unchanged clone; ${String(baseline.size)} excluded`,
+    `${String(fixtures.length)} dev fixtures pass on the unchanged clone; ${String(baseline.size)} excluded`,
   );
   const chosen = pick(sites(cloneDir), Number(values.mutants), Number(values.seed));
   const scratch = `_mutant-${String(process.pid)}`;
