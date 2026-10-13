@@ -893,15 +893,25 @@ const Batches = z.object({
       size: z.number().int(),
       // Which distribution the batch is drawn from; batches 1 and 2 predate the field.
       generator: z.enum(["v1", "v2"]).default("v1"),
+      // Sequential testing: the batch is scored stage by stage (`<prefix>-s1-001`…), and scoring
+      // stops once failures exceed what the plan tolerates. Batches 1 to 3 have one stage.
+      stages: z.number().int().min(1).default(1),
     }),
   ),
 });
 function holdoutBatches(): [string, WideInput][] {
   if (!existsSync(HOLDOUT_SEED_FILE)) return [];
   const { batches } = Batches.parse(JSON.parse(readFileSync(HOLDOUT_SEED_FILE, "utf8")));
-  return batches.flatMap((b) =>
-    (b.generator === "v2" ? wideProbesV2 : wideProbes)(b.size, b.seed, b.prefix),
-  );
+  return batches.flatMap((b) => {
+    const drawn = (b.generator === "v2" ? wideProbesV2 : wideProbes)(b.size, b.seed, b.prefix);
+    if (b.stages === 1) return drawn;
+    // Stage k holds the k-th consecutive slice of the draw, numbered from 001 within the stage.
+    return drawn.map(([, input], i): [string, WideInput] => {
+      const stage = Math.floor((i * b.stages) / b.size) + 1;
+      const first = Math.ceil(((stage - 1) * b.size) / b.stages);
+      return [`${b.prefix}-s${String(stage)}-${String(i - first + 1).padStart(3, "0")}`, input];
+    });
+  });
 }
 
 // UI walkthroughs of the portal plan-change flow. Text in `until` is what the screen must show

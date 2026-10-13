@@ -71,11 +71,26 @@ const ExpectedFailures = z.object({
   failures: z.array(z.object({ id: z.string(), why: z.string().min(5) })),
 });
 
+// Sequential testing of a pre-registered batch split into stages (`<batch>-s1-001`, `-s2-`…):
+// stages are scored in order, and scoring stops as soon as the failures exceed what the plan's
+// claim tolerates. Stopping only on failure never makes a wrong claim likelier (the success
+// criterion still needs every stage), and the stages never scored stay fresh for the next clone.
+export interface Sequential {
+  batch: string;
+  maxFailures: number;
+}
+
+const stageOf = (batch: string, id: string): number | null => {
+  const m = new RegExp(`^${batch.replace(/[-]/g, "\\-")}-s(\\d+)-\\d+$`).exec(id);
+  return m?.[1] === undefined ? null : Number(m[1]);
+};
+
 export async function verify(
   target: string,
   splits: Split[],
   port = 4599,
   expectedFile?: string,
+  sequential?: Sequential,
 ): Promise<number> {
   const started = performance.now();
   const dir = targetDir(target);
@@ -88,7 +103,23 @@ export async function verify(
   }
   const policy = PolicySchema.parse(JSON.parse(readFileSync(join(dir, "policy.json"), "utf8")));
   const rules = loadLedger(target);
-  const fixtures = loadFixtures(target, splits);
+  const loaded = loadFixtures(target, sequential ? ["holdout"] : splits);
+  const fixtures = sequential
+    ? loaded
+        .filter((f) => stageOf(sequential.batch, f.id) !== null)
+        .sort(
+          (a, b) =>
+            (stageOf(sequential.batch, a.id) ?? 0) - (stageOf(sequential.batch, b.id) ?? 0) ||
+            a.id.localeCompare(b.id),
+        )
+    : loaded;
+  if (sequential && fixtures.length === 0) {
+    console.error(
+      `no staged fixture for batch ${sequential.batch} (expected ${sequential.batch}-s1-001…)`,
+    );
+    return 2;
+  }
+  let stoppedAfter: number | null = null;
   const adapter = await loadAdapter(target);
   // Rule tags are specification, not recorded output: take them from the current probe set so a
   // rule found later can claim the fixtures that already exhibit it.
@@ -98,7 +129,17 @@ export async function verify(
   const cases: CaseResult[] = [];
   let determinism: { identical: number; total: number };
   try {
+    let stage: number | null = null;
     for (const f of fixtures) {
+      if (sequential) {
+        const next = stageOf(sequential.batch, f.id);
+        const failures = cases.filter((c) => !c.pass).length;
+        if (stage !== null && next !== stage && failures > sequential.maxFailures) {
+          stoppedAfter = stage;
+          break;
+        }
+        stage = next;
+      }
       const reset = await fetch(`${clone.url}/__reset`, { method: "POST" });
       if (!reset.ok)
         throw new Error(`clone reset failed with HTTP ${reset.status}; refusing to score`);
@@ -214,6 +255,15 @@ export async function verify(
     ...gitState(),
     sandbox: process.env.RH_SANDBOX === "1",
     sets: heldSets,
+    ...(sequential
+      ? {
+          sequential: {
+            batch: sequential.batch,
+            max_failures: sequential.maxFailures,
+            stopped_after_stage: stoppedAfter,
+          },
+        }
+      : {}),
   };
   appendFileSync(join(out, "runs.jsonl"), `${JSON.stringify(run)}\n`);
   // A run in a linked worktree is a look too: it is also logged in the main checkout's run log.
@@ -296,6 +346,18 @@ export async function verify(
     sandbox: run.sandbox,
   });
   const failed = cases.filter((c) => !c.pass).length;
+  if (sequential) {
+    const all = new Set(fixtures.map((f) => stageOf(sequential.batch, f.id)));
+    const scored = new Set(cases.map((c) => stageOf(sequential.batch, c.id)));
+    const fresh = [...all].filter((x) => !scored.has(x));
+    console.log(
+      `${String(cases.length - failed)} of ${String(cases.length)} pass over stage(s) ${[...scored].join(", ")} of ${sequential.batch}` +
+        (stoppedAfter === null
+          ? `; every stage scored: the claim ${failed > sequential.maxFailures ? "is rejected" : "stands"}`
+          : `; stopped after stage ${String(stoppedAfter)} with ${String(failed)} failure(s), above ${String(sequential.maxFailures)}: claim rejected; stage(s) ${fresh.join(", ")} never scored, still fresh`),
+    );
+    return stoppedAfter === null && failed <= sequential.maxFailures ? 0 : 1;
+  }
   console.log(`${cases.length - failed} of ${cases.length} fixtures pass (${splits.join(" + ")})`);
   if (expectedFile === undefined) return failed === 0 ? 0 : 1;
   const expected = new Set(
@@ -406,55 +468,60 @@ function mainCheckout(): string | null {
   }
 }
 
+function planFacts(target: string, file: string, prefix: string): BatchPlan {
+  const git = (...args: string[]): string =>
+    execFileSync("git", args, { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim();
+  try {
+    const firstAdd = (path: string): string =>
+      git("log", "--diff-filter=A", "--format=%H", "--", path).split("\n").at(-1) ?? "";
+    const plan = firstAdd(`targets/${target}/${file}`);
+    const batch = firstAdd(`targets/${target}/fixtures/holdout/${prefix}-001.json`);
+    const policy = `targets/${target}/policy.json`;
+    let preRegistered: BatchPlan["preRegistered"] = "cannot check";
+    if (plan !== "" && batch !== "" && plan !== batch) {
+      try {
+        git("merge-base", "--is-ancestor", plan, batch);
+        preRegistered = "yes";
+      } catch {
+        preRegistered = "no";
+      }
+    }
+    const changes =
+      plan === "" || plan === batch
+        ? null
+        : git("log", "--format=%h %s", `${plan}..HEAD`, "--", policy);
+    const dirty = git("status", "--porcelain", "--", policy) !== "";
+    return {
+      file: plan === "" ? `${file} (not committed)` : file,
+      preRegistered,
+      policyChanges:
+        changes === null
+          ? null
+          : [
+              ...(changes === "" ? [] : changes.split("\n")),
+              ...(dirty ? ["uncommitted changes"] : []),
+            ],
+    };
+  } catch {
+    return { file: `${file} (outside git)`, preRegistered: "cannot check", policyChanges: null };
+  }
+}
+
 // Each analysis-plan*.md names its batch by its first probe ID (`hold-b2-001`). For each batch:
 // the plan file, whether git shows it committed strictly before the batch's first fixture, and
 // the commits that changed the diff policy since the plan.
 function batchPlans(target: string): Record<string, BatchPlan> {
-  const git = (...args: string[]): string =>
-    execFileSync("git", args, { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim();
   const dir = targetDir(target);
   const out: Record<string, BatchPlan> = {};
   for (const file of readdirSync(dir).filter((f) => /^analysis-plan.*\.md$/.test(f))) {
-    const prefix = /`(hold[\w-]*?)-001`/.exec(readFileSync(join(dir, file), "utf8"))?.[1];
-    if (prefix === undefined) continue;
-    try {
-      const firstAdd = (path: string): string =>
-        git("log", "--diff-filter=A", "--format=%H", "--", path).split("\n").at(-1) ?? "";
-      const plan = firstAdd(`targets/${target}/${file}`);
-      const batch = firstAdd(`targets/${target}/fixtures/holdout/${prefix}-001.json`);
-      const policy = `targets/${target}/policy.json`;
-      let preRegistered: BatchPlan["preRegistered"] = "cannot check";
-      if (plan !== "" && batch !== "" && plan !== batch) {
-        try {
-          git("merge-base", "--is-ancestor", plan, batch);
-          preRegistered = "yes";
-        } catch {
-          preRegistered = "no";
-        }
-      }
-      const changes =
-        plan === "" || plan === batch
-          ? null
-          : git("log", "--format=%h %s", `${plan}..HEAD`, "--", policy);
-      const dirty = git("status", "--porcelain", "--", policy) !== "";
-      out[prefix] = {
-        file: plan === "" ? `${file} (not committed)` : file,
-        preRegistered,
-        policyChanges:
-          changes === null
-            ? null
-            : [
-                ...(changes === "" ? [] : changes.split("\n")),
-                ...(dirty ? ["uncommitted changes"] : []),
-              ],
-      };
-    } catch {
-      out[prefix] = {
-        file: `${file} (outside git)`,
-        preRegistered: "cannot check",
-        policyChanges: null,
-      };
-    }
+    // A plan names its batch by its first probe, or a staged batch by each stage's first probe
+    // (`hold-b4-s1-001`, `hold-b4-s2-001`…); every prefix it names maps to it.
+    const text = readFileSync(join(dir, file), "utf8");
+    const prefixes = [
+      ...new Set([...text.matchAll(/`(hold[\w-]*?)-001`/g)].map((m) => m[1] ?? "")),
+    ];
+    for (const prefix of prefixes.filter((p) => p !== ""))
+      out[prefix] = planFacts(target, file, prefix);
   }
   return out;
 }

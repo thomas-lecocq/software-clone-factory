@@ -74,9 +74,9 @@ claims tied to evidence. Several of its contracts would strengthen this factory:
 A batch that drove a decision is spent, and recording a new one costs time (1.5 hours here,
 much more where a human records). Three ways to spend less:
 
-1. **Pre-registered sequential testing.** Split a batch into sub-batches (for example 3 × 158),
-   use a fresh one per iteration, with a stopping rule and thresholds corrected for repeated
-   looks (alpha spending).
+1. **Pre-registered sequential testing** (built): a batch split into stages, scored in order, stops
+   as soon as failures exceed what the claim tolerates; unscored stages stay fresh. Next: let a new
+   plan reuse the fresh stages of a stopped batch and top them up, instead of drawing a new batch.
 2. **Aggregate-only feedback.** Tell the builder side only "rejected", never which cases failed;
    it leaks less, though a look is still adaptive.
 3. **A reusable holdout** (Thresholdout, Dwork et al., 2015): noisy answers that allow reuse with

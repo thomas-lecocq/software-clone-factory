@@ -52,4 +52,17 @@ describe("reliability card", () => {
     expect(late).toContain("unrated");
     expect(reliabilityCard({ ...base, plans: {} })).toContain("unrated: no pre-registered batch");
   });
+
+  it("reads a staged batch as one, and says how many stages are still fresh", () => {
+    const plan = { file: "analysis-plan-b4.md", policyChanges: [], preRegistered: "yes" as const };
+    const md = reliabilityCard({
+      ...base,
+      batches: { "hold-b4-s1": { pass: 155, total: 158 } },
+      plans: { "hold-b4-s1": plan, "hold-b4-s2": plan, "hold-b4-s3": plan },
+      looks: { "hold-b4-s1": 1 },
+    });
+    expect(md).toContain("batch `hold-b4-`, 155 of 158");
+    expect(md).toContain("stopped after stage 1 of 3, the other 2 still fresh");
+    expect(md).toContain("**C**");
+  });
 });

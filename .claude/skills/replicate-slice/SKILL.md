@@ -65,6 +65,8 @@ mined` and a reference. Documentation seeds rules; only a fixture confirms them.
    failure rate below 1 % at 95 %; 473 still do so with one failure, and bound it below 1 % at
    99 % with none. Write `analysis-plan*.md` (batch IDs `hold-<name>-001…`, D, size, decision
    rule), draw the seed into `holdout-seed.json`, **commit both**, then record the batch.
+   Prefer a **staged** batch (`stages` in `holdout-seed.json`, IDs `hold-<name>-s1-001…`): the plan
+   then names each stage and the number of failures the claim tolerates.
 8. **Build** (`harness/run-builder.sh <t>`). The builder works in the agent container on a copy
    with no holdout, no seed and no git history; only `clone/` comes back.
 9. **Break** (`harness/run-agent.sh breaker <t> …`). The breaker reads the clone and proposes
@@ -73,6 +75,9 @@ mined` and a reference. Documentation seeds rules; only a fixture confirms them.
    share is reported, never used as an estimate.
 10. **Measure once.** Freeze the clone in a commit, run `npm run verify <t> -- --split holdout`
     once, apply the plan's decision rule and write the entry in `measurements.md`.
+    For a staged batch: `npm run verify <t> -- --sequential hold-<name> --max-failures <k>` scores
+    stage by stage and stops as soon as failures exceed k. Stopping only on failure leaves the
+    success criterion unchanged, and the stages never scored stay fresh for the next clone.
 11. **If the claim is rejected,** the batch is spent. Run `harness/run-analyst.sh <t> <batch>`
     right after the look; turn its findings into rules and `dev-` probes (designed after seeing
     failures, so they never certify); one more build pass; then a **new batch with a new seed

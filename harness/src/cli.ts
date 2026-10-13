@@ -20,6 +20,8 @@ const { positionals, values } = parseArgs({
     reason: { type: "string" },
     port: { type: "string", default: "4599" },
     expected: { type: "string" },
+    sequential: { type: "string" },
+    "max-failures": { type: "string" },
   },
 });
 const [command, target] = positionals;
@@ -51,7 +53,15 @@ if (command === "record") {
       : values.split === "holdout"
         ? ["holdout"]
         : ["dev"];
-  process.exit(await verify(target, splits, port, values.expected));
+  if (values.sequential !== undefined && values["max-failures"] === undefined) {
+    console.error("--sequential needs --max-failures, as the batch's analysis plan states it");
+    process.exit(64);
+  }
+  const sequential =
+    values.sequential === undefined
+      ? undefined
+      : { batch: values.sequential, maxFailures: Number(values["max-failures"]) };
+  process.exit(await verify(target, splits, port, values.expected, sequential));
 } else if (command === "new-slice") {
   for (const f of newSlice(target)) console.log(`created ${f}`);
 } else if (command === "relock") {

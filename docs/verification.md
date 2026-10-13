@@ -44,6 +44,9 @@ follows it. Read it before writing any harness component or target.
 - **Sized from the claim.** With zero failures in n random draws, the one-sided 95 % upper bound on
   the divergence rate is 1 − 0.05^(1/n): about 3/n. A "below 1 %" claim needs at least 299 clean
   cases. The bound only holds over the distribution the probes were drawn from, which is stated.
+- **Staged, to spend less.** A batch may be split into stages scored in order, stopping as soon as
+  failures exceed what the claim tolerates. Stopping only on failure leaves the success criterion
+  unchanged, and the stages never scored stay fresh for the next clone.
 - **Pre-registered.** Before recording a holdout batch, its distribution, size, threshold and
   stopping rule are committed in a `targets/<t>/analysis-plan*.md`, one per batch, and the batch is
   scored once (`measurements.md`).

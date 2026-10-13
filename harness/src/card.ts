@@ -48,17 +48,44 @@ export function level(t: Tally): { name: string; claim: string; color: string } 
   };
 }
 
-// The batch a card speaks about: the one whose plan was committed last, among those scored.
-function latestBatch(c: CardInput): string | null {
-  const scored = Object.keys(c.batches).filter((b) => c.plans[b] !== undefined);
-  return scored.sort((a, b) => a.localeCompare(b)).at(-1) ?? null;
+// A staged batch's stages (`hold-b4-s1`, `hold-b4-s2`…) are read together as one batch.
+const baseOf = (prefix: string): string => prefix.replace(/-s\d+$/, "");
+
+// The batch a card speaks about: the latest one with a plan, its stages summed. A staged batch
+// stopped early has fewer stages scored than planned: the rest are still fresh.
+function latestBatch(c: CardInput): {
+  name: string;
+  tally: Tally;
+  plan: BatchPlan;
+  looks: number;
+  staged: { scored: number; planned: number } | null;
+} | null {
+  const scoredKeys = Object.keys(c.batches).filter((b) => c.plans[b] !== undefined);
+  const base = [...new Set(scoredKeys.map(baseOf))].sort((x, y) => x.localeCompare(y)).at(-1);
+  if (base === undefined) return null;
+  const mine = scoredKeys.filter((k) => baseOf(k) === base);
+  const planned = Object.keys(c.plans).filter((k) => baseOf(k) === base && k !== base);
+  const tally = mine.reduce<Tally>(
+    (t, k) => ({
+      pass: t.pass + (c.batches[k]?.pass ?? 0),
+      total: t.total + (c.batches[k]?.total ?? 0),
+    }),
+    { pass: 0, total: 0 },
+  );
+  const plan = c.plans[mine[0] ?? ""];
+  if (plan === undefined) return null;
+  const looks = Math.max(...mine.map((k) => c.looks[k] ?? 1));
+  const staged = planned.length > 1 ? { scored: mine.length, planned: planned.length } : null;
+  return { name: base, tally, plan, looks, staged };
 }
 
 export function reliabilityCard(c: CardInput): string {
-  const batch = latestBatch(c);
-  const t = batch === null ? undefined : c.batches[batch];
-  const plan = batch === null ? undefined : c.plans[batch];
-  const looks = batch === null ? 0 : (c.looks[batch] ?? 1);
+  const latest = latestBatch(c);
+  const t = latest?.tally;
+  const plan = latest?.plan;
+  const batch = latest?.name ?? null;
+  const looks = latest?.looks ?? 0;
+  const staged = latest?.staged ?? null;
   const rated = t !== undefined && plan !== undefined && plan.preRegistered !== "no";
   const lvl = rated ? level(t) : null;
   const k = t === undefined ? 0 : t.total - t.pass;
@@ -91,7 +118,7 @@ export function reliabilityCard(c: CardInput): string {
     row(
       "Measured on",
       t && batch && plan
-        ? `batch \`${batch}-\`, ${String(t.pass)} of ${String(t.total)}; plan \`${plan.file}\`${plan.preRegistered === "yes" ? ", committed first" : ""}; ${looks <= 1 ? "first and only look" : `${String(looks)} looks, its claim rests on the first (\`measurements.md\`)`}`
+        ? `batch \`${batch}-\`, ${String(t.pass)} of ${String(t.total)}; plan \`${plan.file}\`${plan.preRegistered === "yes" ? ", committed first" : ""}; ${looks <= 1 ? "first and only look" : `${String(looks)} looks, its claim rests on the first (\`measurements.md\`)`}${staged && staged.scored < staged.planned ? `; stopped after stage ${String(staged.scored)} of ${String(staged.planned)}, the other ${String(staged.planned - staged.scored)} still fresh` : ""}`
         : "none",
     ),
     row(
