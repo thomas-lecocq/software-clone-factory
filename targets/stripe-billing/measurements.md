@@ -38,6 +38,25 @@ spent: it may be analysed, but no later claim rests on it.
 - The same run rescored the spent batch 1 at 473 of 473 and the hash-split holdout at 176 of
   176; neither carries a claim.
 
+## Batch 3: `hold-b3-001` to `hold-b3-473`
+
+- **Plan:** `analysis-plan-b3.md`, committed in `8d0e7f5` before any `hold-b3-` fixture existed.
+- **Distribution:** `WIDE_DISTRIBUTION_V2`, widened where breaker round 1 found failures and drawing
+  fewer easy cases (52 Stripe errors in 473, against 74 in batch 2).
+- **Clone:** clone A after a third builder pass in the agent container (30 min, $4.50,
+  `timings.jsonl`) on the breaker, `wide3-`, `dev-v2-` and minimum-charge fixtures; it never saw
+  batch 3. Frozen at `f0799d0` (976 of 976 dev).
+- **Look:** `npm run verify stripe-billing -- --split holdout`, 2026-10-13 09:25 UTC, the only run
+  of this batch, clean tree.
+- **Result:** 466 of 473 pass, 7 failures. One-sided exact upper bound on the failure rate:
+  2.76 % at 95 %, 3.35 % at 99 %.
+- **Decision (per the plan):** k ≥ 2, so the claim "below 1 %" on `WIDE_DISTRIBUTION_V2` is **not
+  supported**. What the batch supports: below 2.8 % at 95 %.
+- **Where:** all seven failures are in classic billing mode, most with several items and
+  amount-off coupons. The batch is spent; the analyst runs on it next.
+- **The claim on batch 2's distribution stands** (`claim-batch-2`); this batch measures a wider
+  one, where the same clone, improved, does worse.
+
 ## Secondary uses of batch 2 (no claim)
 
 - **Ablation of the second builder pass:** the clone measured on batch 1 (`7238f46`) scored on

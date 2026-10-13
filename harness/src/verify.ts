@@ -235,7 +235,13 @@ export async function verify(
     ),
   );
   const plans = batchPlans(target);
-  const looks = looksPerSet(join(out, "runs.jsonl"), heldSets);
+  // When each holdout set's first fixture was recorded: an older run cannot have looked at it.
+  const since: Record<string, string> = {};
+  for (const f of fixtures.filter((x) => x.split === "holdout")) {
+    const set = f.id.startsWith("hold-") ? batchOf(f.id) : "hash";
+    if (since[set] === undefined || f.recorded_at < (since[set] ?? "")) since[set] = f.recorded_at;
+  }
+  const looks = looksPerSet(join(out, "runs.jsonl"), heldSets, since);
   if (held.length > 0) {
     writeFileSync(
       join(out, "reliability-card.md"),

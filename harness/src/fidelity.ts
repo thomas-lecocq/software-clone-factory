@@ -211,20 +211,30 @@ export function fidelityReport(f: FidelityInput): string {
 }
 
 const RunLine = z.object({
+  at: z.string().optional(),
   holdout: z.object({ total: z.number() }),
   by: z.string().optional(),
   sets: z.array(z.string()).optional(),
 });
 
 // Counted over every run of the log, whatever its lock: a relock does not make a holdout fresh.
-export function looksPerSet(runsFile: string, sets: string[]): Record<string, number> {
+// Runs logged before sets were recorded count for every set that already existed at the time
+// (`since`: when each set's first fixture was recorded), never for a later batch.
+export function looksPerSet(
+  runsFile: string,
+  sets: string[],
+  since: Record<string, string> = {},
+): Record<string, number> {
   const looks = Object.fromEntries(sets.map((s) => [s, 0]));
   if (!existsSync(runsFile)) return looks;
   for (const line of readFileSync(runsFile, "utf8").split("\n")) {
     if (line.trim() === "") continue;
     const r = RunLine.safeParse(JSON.parse(line));
     if (!r.success || r.data.holdout.total === 0) continue;
-    for (const s of r.data.sets ?? sets) if (s in looks) looks[s] = (looks[s] ?? 0) + 1;
+    const at = r.data.at ?? "";
+    const listed =
+      r.data.sets ?? sets.filter((s) => since[s] === undefined || at >= (since[s] ?? ""));
+    for (const s of listed) if (s in looks) looks[s] = (looks[s] ?? 0) + 1;
   }
   return looks;
 }

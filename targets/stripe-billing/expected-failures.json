@@ -1,64 +1,36 @@
 {
   "failures": [
     {
-      "id": "dev-brk-big-half-charge-classic",
-      "why": "breaker round 1 probe outside the claim's distribution; not yet learnt by the measured clone (GAPS.md)"
+      "id": "hold-b3-086",
+      "why": "batch 3 divergence, claim rejected (measurements.md); classic billing mode"
     },
     {
-      "id": "dev-brk-free-once",
-      "why": "breaker round 1 probe outside the claim's distribution; not yet learnt by the measured clone (GAPS.md)"
+      "id": "hold-b3-135",
+      "why": "batch 3 divergence, claim rejected (measurements.md); classic billing mode"
     },
     {
-      "id": "dev-brk-interval-multi-first",
-      "why": "breaker round 1 probe outside the claim's distribution; not yet learnt by the measured clone (GAPS.md)"
+      "id": "hold-b3-136",
+      "why": "batch 3 divergence, claim rejected (measurements.md); classic billing mode"
     },
     {
-      "id": "dev-brk-interval-multi-second",
-      "why": "breaker round 1 probe outside the claim's distribution; not yet learnt by the measured clone (GAPS.md)"
+      "id": "hold-b3-282",
+      "why": "batch 3 divergence, claim rejected (measurements.md); classic billing mode"
     },
     {
-      "id": "dev-brk-inv-56-pct95",
-      "why": "breaker round 1 probe outside the claim's distribution; not yet learnt by the measured clone (GAPS.md)"
+      "id": "hold-b3-300",
+      "why": "batch 3 divergence, claim rejected (measurements.md); classic billing mode"
     },
     {
-      "id": "dev-brk-off-huge-half-flex",
-      "why": "breaker round 1 probe outside the claim's distribution; not yet learnt by the measured clone (GAPS.md)"
+      "id": "hold-b3-310",
+      "why": "batch 3 divergence, claim rejected (measurements.md); classic billing mode"
     },
     {
-      "id": "dev-brk-pct100-half-flex",
-      "why": "breaker round 1 probe outside the claim's distribution; not yet learnt by the measured clone (GAPS.md)"
+      "id": "hold-b3-393",
+      "why": "batch 3 divergence, claim rejected (measurements.md); classic billing mode"
     },
     {
-      "id": "dev-brk-pct20-half-discount",
-      "why": "breaker round 1 probe outside the claim's distribution; not yet learnt by the measured clone (GAPS.md)"
-    },
-    {
-      "id": "dev-brk-qty0-item",
-      "why": "breaker round 1 probe outside the claim's distribution; not yet learnt by the measured clone (GAPS.md)"
-    },
-    {
-      "id": "dev-brk-stack-full-half-flex",
-      "why": "breaker round 1 probe outside the claim's distribution; not yet learnt by the measured clone (GAPS.md)"
-    },
-    {
-      "id": "dev-brk-y2m-at-new-end",
-      "why": "breaker round 1 probe outside the claim's distribution; not yet learnt by the measured clone (GAPS.md)"
-    },
-    {
-      "id": "dev-brk-y2m-jan30-at-end",
-      "why": "breaker round 1 probe outside the claim's distribution; not yet learnt by the measured clone (GAPS.md)"
-    },
-    {
-      "id": "dev-t2-f-left56",
-      "why": "minimum charge is 56 cents; the measured clone uses 59 (GAPS.md)"
-    },
-    {
-      "id": "dev-t2-f-left57",
-      "why": "minimum charge is 56 cents; the measured clone uses 59 (GAPS.md)"
-    },
-    {
-      "id": "dev-t2-f-left58",
-      "why": "minimum charge is 56 cents; the measured clone uses 59 (GAPS.md)"
+      "id": "wide3-210",
+      "why": "hash-split holdout divergence of clone v2 (measurements.md)"
     }
   ]
 }

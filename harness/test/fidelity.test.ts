@@ -84,7 +84,7 @@ describe("fidelity report", () => {
     const dir = mkdtempSync(join(tmpdir(), "scf-looks-"));
     const file = join(dir, "runs.jsonl");
     const lines = [
-      { lock: "a", holdout: { total: 5 } },
+      { lock: "a", at: "2026-09-23", holdout: { total: 5 } },
       { lock: "b", holdout: { total: 5 }, sets: ["hash", "hold"] },
       { lock: "c", holdout: { total: 0 }, sets: [] },
       { lock: "d", holdout: { total: 9 }, sets: ["hash", "hold", "hold-b2"] },
@@ -94,6 +94,11 @@ describe("fidelity report", () => {
       hash: 3,
       hold: 3,
       "hold-b2": 2,
+    });
+    // The legacy run (no "at", no sets) is older than any recorded batch: it never counts for one.
+    expect(looksPerSet(file, ["hash", "hold-b2"], { "hold-b2": "2026-10-01" })).toEqual({
+      hash: 3,
+      "hold-b2": 1,
     });
     rmSync(dir, { recursive: true, force: true });
   });
