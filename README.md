@@ -164,17 +164,18 @@ file. Today's, on the hardest batch:
 
 ![reliability: level C](https://img.shields.io/badge/reliability-level%20C-dfb317?style=flat-square) ![holdout: 466/473](https://img.shields.io/badge/holdout-466%2F473-dfb317?style=flat-square) ![breaker probes: 40/40](https://img.shields.io/badge/breaker%20probes-40%2F40-blue?style=flat-square) ![mutants caught: 34/40](https://img.shields.io/badge/mutants%20caught-34%2F40-blue?style=flat-square) ![auditor recall: 12/12](https://img.shields.io/badge/auditor%20recall-12%2F12-blue?style=flat-square)
 
-|                      |                                                                                                                                      |
-| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| **Level**            | **C**: measured: below 2.76 % at 95 % confidence                                                                                     |
-| **Measured on**      | batch `hold-b3-`, 466 of 473; plan `analysis-plan-b3.md`, committed first; 4 looks, its claim rests on the first (`measurements.md`) |
-| **Bound**            | 2.76 % at 95 %, 3.35 % at 99 %                                                                                                       |
-| **Breaker probes**   | 40 of 40 pass; they are dev cases the builder may have learnt, so only a new breaker round tests the clone out of distribution       |
-| **Dev (training)**   | 976 of 976                                                                                                                           |
-| **Determinism**      | 10 of 10 replays identical after reset                                                                                               |
-| **Mutation testing** | 34 of 40 planted bugs caught by the fixtures (run 2026-10-13)                                                                        |
-| **Auditors**         | found 12 of 12 planted defects                                                                                                       |
-| **Evaluator**        | lock `1aa9c77dffe4`, commit 1283fd7, clean tree                                                                                      |
+|                      |                                                                                                                                                                               |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Level**            | **C**: measured: below 2.76 % at 95 % confidence                                                                                                                              |
+| **Measured on**      | batch `hold-b3-`, 466 of 473; plan `analysis-plan-b3.md`, committed first; 5 looks, its claim rests on the first (`measurements.md`)                                          |
+| **Bound**            | 2.76 % at 95 %, 3.35 % at 99 %                                                                                                                                                |
+| **Breaker probes**   | 40 of 40 pass; they are dev cases the builder may have learnt, so only a new breaker round tests the clone out of distribution                                                |
+| **Dev (training)**   | 976 of 976                                                                                                                                                                    |
+| **Determinism**      | 10 of 10 replays identical after reset                                                                                                                                        |
+| **Mutation testing** | 34 of 40 planted bugs caught by the fixtures (run 2026-10-13)                                                                                                                 |
+| **Auditors**         | found 12 of 12 planted defects                                                                                                                                                |
+| **Agent tasks**      | an agent (claude-sonnet-5-5) gets the same outcome on the clone as on the original in 10 of 16 task runs; it succeeds in 10 on the clone, 16 on the original (run 2026-10-13) |
+| **Evaluator**        | lock `9f4cf489b0a8`, commit 962d7ef, clean tree                                                                                                                               |
 
 ## Run it
 
