@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { level, reliabilityCard, type CardInput } from "../src/card.ts";
+import { level, reliabilityCard, reliabilitySvg, type CardInput } from "../src/card.ts";
 
 const base: CardInput = {
   target: "t",
@@ -73,5 +73,15 @@ describe("reliability card", () => {
     expect(md).toContain("batch `hold-b4-`, 155 of 158");
     expect(md).toContain("stopped after stage 1 of 3, the other 2 still fresh");
     expect(md).toContain("**C**");
+  });
+
+  it("draws the same facts as an SVG card, escaped", () => {
+    const svg = reliabilitySvg({ ...base, target: "a<b" });
+    expect(svg).toMatch(/^<svg xmlns="http:\/\/www.w3.org\/2000\/svg"/);
+    expect(svg).toContain("Reliability card · a&lt;b");
+    expect(svg).toContain(">A</text>");
+    expect(svg).toContain(">473/473</text>");
+    expect(svg).toContain(">10/16</text>");
+    expect(svg).not.toContain("a<b");
   });
 });

@@ -239,3 +239,90 @@ export function auditFacts(repo: string, target: string): Pick<CardInput, "mutat
   }
   return { mutation, auditors: planted > 0 ? { found, planted } : null };
 }
+
+const xml = (s: string): string =>
+  s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+
+const LEVEL_FILL: Record<string, string> = { A: "#2ea44f", B: "#7cb305", C: "#d4a72c" };
+
+// The same facts as the Markdown card, drawn: the level large, one gauge per measure. Every
+// number is the card's; the drawing adds nothing.
+export function reliabilitySvg(c: CardInput): string {
+  const latest = latestBatch(c);
+  const t = latest?.tally;
+  const rated = t !== undefined && latest !== null && latest.plan.preRegistered !== "no";
+  const lvl = rated ? level(t) : null;
+  const k = t === undefined ? 0 : t.total - t.pass;
+  const gauges: [string, number, number][] = [
+    ...(t ? ([["Holdout", t.pass, t.total]] as [string, number, number][]) : []),
+    ...(c.tasks
+      ? ([["Agent tasks agree", c.tasks.sameOutcome, c.tasks.pairs]] as [string, number, number][])
+      : []),
+    ...(c.mutation
+      ? ([["Mutants caught", c.mutation.killed, c.mutation.valid]] as [string, number, number][])
+      : []),
+    ...(c.auditors
+      ? ([["Auditor recall", c.auditors.found, c.auditors.planted]] as [string, number, number][])
+      : []),
+    ["Determinism", c.determinism.identical, c.determinism.total],
+    ...(c.adversarial.total > 0
+      ? ([["Breaker probes (dev)", c.adversarial.pass, c.adversarial.total]] as [
+          string,
+          number,
+          number,
+        ][])
+      : []),
+  ];
+  const width = 680;
+  const top = 92;
+  const rowH = 30;
+  const height = top + gauges.length * rowH + 52;
+  const barX = 420;
+  const barW = 170;
+  const rows = gauges
+    .map(([label, n, d], i) => {
+      const y = top + i * rowH;
+      const share = d === 0 ? 0 : n / d;
+      const fill =
+        share === 1 ? "#2ea44f" : share >= 0.9 ? "#7cb305" : share >= 0.75 ? "#d4a72c" : "#cf222e";
+      return [
+        `<text x="236" y="${String(y + 14)}" class="label">${xml(label)}</text>`,
+        `<rect x="${String(barX)}" y="${String(y + 3)}" width="${String(barW)}" height="12" rx="6" class="track"/>`,
+        `<rect x="${String(barX)}" y="${String(y + 3)}" width="${String(Math.round(barW * share))}" height="12" rx="6" fill="${fill}"/>`,
+        `<text x="${String(barX + barW + 12)}" y="${String(y + 14)}" class="value">${String(n)}/${String(d)}</text>`,
+      ].join("");
+    })
+    .join("\n  ");
+  const claim = lvl ? lvl.claim : "unrated: no pre-registered batch";
+  const footer = [
+    latest ? `batch ${latest.name}-` : "no batch",
+    t ? `bound ${pct(upperBound(k, t.total))} at 95 %` : "",
+    latest ? (latest.looks <= 1 ? "first and only look" : `${String(latest.looks)} looks`) : "",
+    c.commit ? `commit ${c.commit}` : "",
+    c.at.slice(0, 10),
+  ]
+    .filter((s) => s !== "")
+    .join("  ·  ");
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${String(width)}" height="${String(height)}" viewBox="0 0 ${String(width)} ${String(height)}" role="img" aria-label="Reliability card: ${xml(c.target)}, level ${lvl?.name ?? "unrated"}">
+  <style>
+    .card { fill: #ffffff; stroke: #d0d7de; }
+    .title { font: 600 20px system-ui, -apple-system, Segoe UI, sans-serif; fill: #1f2328; }
+    .claim { font: 400 13px system-ui, -apple-system, Segoe UI, sans-serif; fill: #59636e; }
+    .label { font: 500 13px system-ui, -apple-system, Segoe UI, sans-serif; fill: #1f2328; }
+    .value { font: 600 13px ui-monospace, SFMono-Regular, Menlo, monospace; fill: #1f2328; }
+    .foot { font: 400 11px ui-monospace, SFMono-Regular, Menlo, monospace; fill: #59636e; }
+    .track { fill: #eaeef2; }
+    .grade { font: 700 72px system-ui, -apple-system, Segoe UI, sans-serif; fill: #ffffff; }
+    .caption { font: 600 11px system-ui, -apple-system, Segoe UI, sans-serif; fill: #59636e; letter-spacing: 0.08em; }
+  </style>
+  <rect x="0.5" y="0.5" width="${String(width - 1)}" height="${String(height - 1)}" rx="14" class="card"/>
+  <text x="28" y="40" class="title">Reliability card · ${xml(c.target)}</text>
+  <text x="28" y="62" class="claim">${xml(claim)}</text>
+  <circle cx="112" cy="${String(top + 66)}" r="62" fill="${lvl ? (LEVEL_FILL[lvl.name] ?? "#8c959f") : "#8c959f"}"/>
+  <text x="112" y="${String(top + 91)}" text-anchor="middle" class="grade">${xml(lvl?.name ?? "?")}</text>
+  <text x="112" y="${String(top + 150)}" text-anchor="middle" class="caption">LEVEL</text>
+  ${rows}
+  <text x="28" y="${String(height - 22)}" class="foot">${xml(footer)}</text>
+</svg>
+`;
+}

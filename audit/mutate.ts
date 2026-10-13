@@ -1,7 +1,8 @@
 /**
  * Measures the verifier the way the auditors are measured: plant a known bug and see whether it is
- * caught. Each mutant is a copy of the clone with one small change in its logic (a rounding mode,
- * a comparison, a constant, a boolean operator); the dev logic fixtures are replayed against it,
+ * caught. Each mutant is a copy of the clone with one small change in any of its files (a rounding
+ * mode, a comparison, a constant, a boolean operator); every dev fixture is replayed against it,
+ * screens included,
  * and it is killed at the first fixture that differs. Only fixtures the unchanged clone passes
  * count: a known divergence would "kill" every mutant. A surviving mutant is either harmless (an
  * equivalent change) or a behaviour no fixture pins: each one is listed for a human to read.
@@ -10,7 +11,6 @@
 import { cpSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { parseArgs } from "node:util";
-import { z } from "zod";
 import { loadAdapter } from "../harness/src/adapter.ts";
 import { startCloneProcess } from "../harness/src/clone-process.ts";
 import { loadFixtures, targetDir } from "../harness/src/fixtures.ts";
@@ -38,8 +38,8 @@ const OPERATORS: Operator[] = [
   },
 ];
 
-// The clone's logic files; screens need a browser per fixture and are left to a later version.
-const LOGIC_FILES = ["billing.ts", "api.ts", "objects.ts", "life.ts", "state.ts", "time.ts"];
+// The clone's entry module only wires the server; every other file can carry behaviour.
+const SKIP = new Set(["server.ts"]);
 
 interface Site {
   file: string;
@@ -51,7 +51,7 @@ interface Site {
 
 function sites(cloneDir: string): Site[] {
   const out: Site[] = [];
-  for (const file of LOGIC_FILES.filter((f) => readdirSync(cloneDir).includes(f))) {
+  for (const file of readdirSync(cloneDir).filter((f) => f.endsWith(".ts") && !SKIP.has(f))) {
     const text = readFileSync(join(cloneDir, file), "utf8");
     // Comments and string literals are skipped by blanking them, keeping offsets intact.
     const code = text
@@ -126,12 +126,7 @@ async function main(): Promise<void> {
   const policy: Policy = PolicySchema.parse(
     JSON.parse(readFileSync(join(targetDir(target), "policy.json"), "utf8")),
   );
-  // Logic fixtures only: their observations carry no screen.
-  const Kind = z.object({ kind: z.string() });
-  const all = loadFixtures(target, ["dev"]).filter((f) => {
-    const k = Kind.safeParse(f.input);
-    return !(k.success && ["ui", "explore"].includes(k.data.kind));
-  });
+  const all = loadFixtures(target, ["dev"]);
   const baseline = new Set(await firstDivergence(adapter, target, policy, all, 4699, false));
   const fixtures = all.filter((f) => !baseline.has(f.id));
   console.log(
@@ -177,6 +172,7 @@ async function main(): Promise<void> {
     at: new Date().toISOString(),
     target,
     fixtures: fixtures.length,
+    scope: "every clone file except its entry module; every dev fixture the unchanged clone passes",
     excluded_known_failures: [...baseline].sort(),
     mutants: chosen.length,
     valid: valid.length,

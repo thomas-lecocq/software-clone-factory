@@ -28,7 +28,7 @@ import {
   type BatchPlan,
   type Tally,
 } from "./fidelity.ts";
-import { auditFacts, reliabilityCard, taskFacts } from "./card.ts";
+import { auditFacts, reliabilityCard, reliabilitySvg, taskFacts } from "./card.ts";
 import { loadLedger, ruleStatuses, type RuleResult } from "./ledger.ts";
 import { logTiming, secondsSince } from "./timings.ts";
 import {
@@ -293,24 +293,23 @@ export async function verify(
   }
   const looks = looksPerSet(join(out, "runs.jsonl"), heldSets, since);
   if (held.length > 0) {
-    writeFileSync(
-      join(out, "reliability-card.md"),
-      reliabilityCard({
-        target,
-        at: run.at,
-        batches,
-        plans,
-        looks,
-        dev: tally(dev),
-        adversarial: tally(dev.filter((c) => c.id.startsWith("dev-brk-"))),
-        determinism,
-        lockHash: run.lock,
-        commit: run.commit,
-        dirty: run.dirty,
-        ...auditFacts(join(dir, "..", ".."), target),
-        tasks: taskFacts(dir),
-      }),
-    );
+    const cardInput = {
+      target,
+      at: run.at,
+      batches,
+      plans,
+      looks,
+      dev: tally(dev),
+      adversarial: tally(dev.filter((c) => c.id.startsWith("dev-brk-"))),
+      determinism,
+      lockHash: run.lock,
+      commit: run.commit,
+      dirty: run.dirty,
+      ...auditFacts(join(dir, "..", ".."), target),
+      tasks: taskFacts(dir),
+    };
+    writeFileSync(join(out, "reliability-card.md"), reliabilityCard(cardInput));
+    writeFileSync(join(out, "reliability-card.svg"), reliabilitySvg(cardInput));
   }
   writeFileSync(
     join(out, "fidelity-report.md"),
