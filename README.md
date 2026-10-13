@@ -6,6 +6,8 @@ A factory for **verified clones of closed-source software**: resettable, determi
 product's behaviour that agents can be trained and evaluated in, with the fidelity of every clone
 **measured against the original** rather than asserted.
 
+> Building is the easy part; knowing how much to trust the clone is the hard part.
+
 Agents build, code judges:
 
 - **The truth is recorded.** Designed and random probes are sent to the real product (here, Stripe

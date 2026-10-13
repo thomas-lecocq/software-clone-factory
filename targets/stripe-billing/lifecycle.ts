@@ -4,9 +4,10 @@
  * clock, swap in a failing card), with a snapshot of the subscription and its latest invoice after
  * the steps that matter. Snapshots are a projection: fields outside it are not compared.
  */
-import type Stripe from "stripe";
+import Stripe from "stripe";
 import { z } from "zod";
 import type { Json } from "../../harness/src/json.ts";
+import { Coupon, couponId } from "./wide.ts";
 
 export const LifeStep = z.discriminatedUnion("do", [
   z.object({ do: z.literal("cancel_at_period_end") }),
@@ -15,6 +16,8 @@ export const LifeStep = z.discriminatedUnion("do", [
   z.object({ do: z.literal("advance"), seconds: z.number() }),
   z.object({ do: z.literal("failing_card") }),
   z.object({ do: z.literal("snapshot"), as: z.string() }),
+  // Reads a subscription that does not exist, to pin the error a missing object returns.
+  z.object({ do: z.literal("retrieve_missing"), as: z.string() }),
 ]);
 export type LifeStep = z.infer<typeof LifeStep>;
 
@@ -23,6 +26,8 @@ export const LifeInput = z.object({
   start: z.number(),
   amount: z.number(),
   trial_days: z.number().nullable(),
+  // A coupon on the subscription from its creation; absent in fixtures recorded before it existed.
+  coupon: Coupon.nullable().default(null),
   steps: z.array(LifeStep),
 });
 export type LifeInput = z.infer<typeof LifeInput>;
@@ -75,6 +80,9 @@ export async function runLifecycle(
     customer: customer.id,
     items: [{ price: price.id }],
     ...(input.trial_days !== null ? { trial_period_days: input.trial_days } : {}),
+    ...(input.coupon !== null
+      ? { discounts: [{ coupon: await couponId(stripe, input.coupon) }] }
+      : {}),
   });
   let now = input.start;
   const out: Record<string, Json> = {};
@@ -99,6 +107,16 @@ export async function runLifecycle(
       await stripe.customers.update(customer.id, {
         invoice_settings: { default_payment_method: pm.id },
       });
+    } else if (step.do === "retrieve_missing") {
+      try {
+        await stripe.subscriptions.retrieve("sub_Missing0000000000");
+        out[step.as] = { error: null };
+      } catch (e) {
+        if (!(e instanceof Stripe.errors.StripeError)) throw e;
+        out[step.as] = {
+          error: { type: e.type, code: e.code ?? null, param: e.param ?? null, message: e.message },
+        };
+      }
     } else {
       const sub = await stripe.subscriptions.retrieve(created.id, { expand: ["latest_invoice"] });
       const item = sub.items.data[0];

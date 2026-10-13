@@ -1,0 +1,64 @@
+{
+  "id": "dev-v2-forever-pct-renews",
+  "rules": [
+    "DSC-01",
+    "LIF-01"
+  ],
+  "input": {
+    "kind": "lifecycle",
+    "start": 1791158400,
+    "amount": 1999,
+    "trial_days": null,
+    "coupon": {
+      "percent_off": 20,
+      "duration": "forever"
+    },
+    "steps": [
+      {
+        "do": "advance",
+        "seconds": 2682000
+      },
+      {
+        "do": "snapshot",
+        "as": "first_renewal"
+      }
+    ]
+  },
+  "observed": {
+    "first_renewal": {
+      "status": "active",
+      "cancel_at_period_end": false,
+      "cancel_at": null,
+      "canceled_at": null,
+      "ended_at": null,
+      "trial_end": null,
+      "period_start": 1793836800,
+      "period_end": 1796428800,
+      "latest_invoice": {
+        "status": "paid",
+        "billing_reason": "subscription_cycle",
+        "subtotal": 1999,
+        "total": 1599,
+        "amount_due": 1599,
+        "amount_paid": 1599,
+        "amount_remaining": 0,
+        "attempt_count": 1,
+        "period_start": 1791158400,
+        "period_end": 1793836800,
+        "lines": [
+          {
+            "amount": 1999,
+            "description": "1 × Basic (at $19.99 / month)"
+          }
+        ]
+      },
+      "invoice_count": 2
+    }
+  },
+  "noise": [],
+  "recorded_at": "2026-10-13T06:17:09.503Z",
+  "recorded_with": {
+    "stripe_api_version": "2026-08-26.dahlia",
+    "stripe_node": "22.6.2"
+  }
+}

@@ -1,0 +1,66 @@
+{
+  "id": "wide3-266",
+  "rules": [
+    "DSC-07",
+    "INT-01",
+    "ITM-01",
+    "PRO-01",
+    "PRO-02",
+    "PRO-03",
+    "PRO-04",
+    "PRO-07",
+    "PRO-10"
+  ],
+  "input": {
+    "kind": "wide",
+    "start": 1812591119,
+    "billing_mode": "flexible",
+    "interval": "year",
+    "items": [
+      {
+        "amount": 5880408,
+        "quantity": 2
+      },
+      {
+        "amount": 3549,
+        "quantity": 10
+      },
+      {
+        "amount": 1795,
+        "quantity": 4
+      }
+    ],
+    "coupons": [],
+    "change": {
+      "item": 2,
+      "amount": 6102659,
+      "interval": "month",
+      "quantity": null,
+      "offset": 25528977,
+      "proration_behavior": "always_invoice",
+      "discount": null
+    }
+  },
+  "observed": {
+    "preview": {
+      "error": {
+        "type": "StripeInvalidRequestError",
+        "code": null,
+        "param": null,
+        "message": "You cannot specify `proration_date` past the updated subscription period end when using flexible billing mode. The value should be less than 1815183119."
+      }
+    },
+    "first_invoice": {
+      "subtotal": 11803486,
+      "total": 11803486,
+      "amount_due": 11803486,
+      "status": "paid"
+    }
+  },
+  "noise": [],
+  "recorded_at": "2026-10-13T07:21:11.701Z",
+  "recorded_with": {
+    "stripe_api_version": "2026-08-26.dahlia",
+    "stripe_node": "22.6.2"
+  }
+}

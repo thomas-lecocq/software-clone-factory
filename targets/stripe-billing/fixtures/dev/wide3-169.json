@@ -1,0 +1,83 @@
+{
+  "id": "wide3-169",
+  "rules": [
+    "DSC-01",
+    "DSC-03",
+    "DSC-05",
+    "DSC-06",
+    "INT-01",
+    "ITM-01",
+    "PRO-05",
+    "PRO-06",
+    "PRO-08",
+    "PRO-09"
+  ],
+  "input": {
+    "kind": "wide",
+    "start": 1810883337,
+    "billing_mode": "flexible",
+    "interval": "month",
+    "items": [
+      {
+        "amount": 775428,
+        "quantity": 2
+      },
+      {
+        "amount": 37170,
+        "quantity": 10
+      },
+      {
+        "amount": 102,
+        "quantity": 8
+      },
+      {
+        "amount": 126,
+        "quantity": 5
+      }
+    ],
+    "coupons": [
+      {
+        "amount_off": 39680,
+        "duration": "forever"
+      },
+      {
+        "percent_off": 13,
+        "duration": "forever"
+      }
+    ],
+    "change": {
+      "item": 3,
+      "amount": 3596,
+      "interval": "year",
+      "quantity": 0,
+      "offset": 1,
+      "proration_behavior": "none",
+      "discount": {
+        "percent_off": 14,
+        "duration": "once"
+      }
+    }
+  },
+  "observed": {
+    "preview": {
+      "error": {
+        "type": "StripeInvalidRequestError",
+        "code": null,
+        "param": "proration_date",
+        "message": "Cannot specify proration date if no proration is being done"
+      }
+    },
+    "first_invoice": {
+      "subtotal": 1924002,
+      "total": 1639360,
+      "amount_due": 1639360,
+      "status": "paid"
+    }
+  },
+  "noise": [],
+  "recorded_at": "2026-10-13T06:59:38.797Z",
+  "recorded_with": {
+    "stripe_api_version": "2026-08-26.dahlia",
+    "stripe_node": "22.6.2"
+  }
+}

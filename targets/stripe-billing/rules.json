@@ -413,6 +413,15 @@
         "kind": "observed",
         "ref": "dev fixtures and spent holdout batch 1, analysed in analysis/batch1-failures.md (2026-10-01)"
       }
+    },
+    {
+      "id": "ERR-02",
+      "area": "logic",
+      "statement": "Reading an object that does not exist returns an invalid_request_error with code resource_missing, naming the id parameter.",
+      "provenance": {
+        "kind": "documented",
+        "ref": "Stripe API errors documentation; to be confirmed by dev-v2-missing-object"
+      }
     }
   ]
 }

@@ -1,0 +1,101 @@
+{
+  "id": "dev-v2-once-coupon-trial",
+  "rules": [
+    "DSC-05",
+    "LIF-07"
+  ],
+  "input": {
+    "kind": "lifecycle",
+    "start": 1791158400,
+    "amount": 1000,
+    "trial_days": 7,
+    "coupon": {
+      "amount_off": 400,
+      "duration": "once"
+    },
+    "steps": [
+      {
+        "do": "advance",
+        "seconds": 691200
+      },
+      {
+        "do": "snapshot",
+        "as": "after_trial"
+      },
+      {
+        "do": "advance",
+        "seconds": 2678400
+      },
+      {
+        "do": "snapshot",
+        "as": "renewal"
+      }
+    ]
+  },
+  "observed": {
+    "after_trial": {
+      "status": "active",
+      "cancel_at_period_end": false,
+      "cancel_at": null,
+      "canceled_at": null,
+      "ended_at": null,
+      "trial_end": 1791763200,
+      "period_start": 1791763200,
+      "period_end": 1794441600,
+      "latest_invoice": {
+        "status": "paid",
+        "billing_reason": "subscription_cycle",
+        "subtotal": 1000,
+        "total": 600,
+        "amount_due": 600,
+        "amount_paid": 600,
+        "amount_remaining": 0,
+        "attempt_count": 1,
+        "period_start": 1791158400,
+        "period_end": 1791763200,
+        "lines": [
+          {
+            "amount": 1000,
+            "description": "1 × Basic (at $10.00 / month)"
+          }
+        ]
+      },
+      "invoice_count": 2
+    },
+    "renewal": {
+      "status": "active",
+      "cancel_at_period_end": false,
+      "cancel_at": null,
+      "canceled_at": null,
+      "ended_at": null,
+      "trial_end": 1791763200,
+      "period_start": 1794441600,
+      "period_end": 1797033600,
+      "latest_invoice": {
+        "status": "paid",
+        "billing_reason": "subscription_cycle",
+        "subtotal": 1000,
+        "total": 1000,
+        "amount_due": 1000,
+        "amount_paid": 1000,
+        "amount_remaining": 0,
+        "attempt_count": 1,
+        "period_start": 1791763200,
+        "period_end": 1794441600,
+        "lines": [
+          {
+            "amount": 1000,
+            "description": "1 × Basic (at $10.00 / month)"
+          }
+        ]
+      },
+      "invoice_count": 3
+    }
+  },
+  "noise": [],
+  "recorded_at": "2026-10-13T06:18:21.930Z",
+  "recorded_with": {
+    "stripe_api_version": "2026-08-26.dahlia",
+    "stripe_node": "22.6.2"
+  }
+}

@@ -617,6 +617,93 @@ export function rulesForWide(p: WideInput): string[] {
   return [...r].sort();
 }
 
+// Distribution v2 for slice 1, after holdout batch 2 and breaker round 1: the same change,
+// widened where the breaker found the clone failing, and drawing fewer easy cases (the `none`
+// behaviour with a proration date always errors; a change that changes nothing proves little).
+export const WIDE_DISTRIBUTION_V2 =
+  "start uniform over 2026-11-01..2027-11-01, 20 % on a 28th-31st; mode flexible 70 % / classic " +
+  "30 %; interval month 70 % / year 30 %; 1-4 items (40/30/20/10 %), unit amount log-uniform in " +
+  "[50, 10,000,000] cents per month (x10 per year), quantity uniform 1-10; 0-2 coupons " +
+  "(50/35/15 %), each percent-off uniform 1-100 with 10 % at exactly 100, or amount-off " +
+  "log-uniform [1, 1,000,000] cents, forever or once; one item changed: new amount 70 %, new " +
+  "interval 15 % (any item count), new quantity 40 % (uniform 0-20); a change that would change " +
+  "nothing becomes a quantity change 80 % of the time; offset uniform over [0, period length] with " +
+  "10 % on {0, 1, end - 1, end}; behaviour default 60 % / create 15 % / always 20 % / none 5 %; a " +
+  "preview coupon 15 %.";
+
+const V2_FROM = utc(2026, 11, 1);
+const V2_TO = utc(2027, 11, 1);
+
+export function wideProbesV2(n: number, seed: number, prefix: string): [string, WideInput][] {
+  const r = rng(seed);
+  const int = (lo: number, hi: number): number => lo + Math.floor(r() * (hi - lo + 1));
+  const logInt = (lo: number, hi: number): number =>
+    Math.round(Math.exp(Math.log(lo) + r() * (Math.log(hi) - Math.log(lo))));
+  const coupon = (): Coupon => {
+    const duration = r() < 0.5 ? "forever" : "once";
+    if (r() < 0.5) return { percent_off: r() < 0.1 ? 100 : int(1, 100), duration };
+    return { amount_off: logInt(1, 1_000_000), duration };
+  };
+  const out: [string, WideInput][] = [];
+  for (let i = 1; i <= n; i += 1) {
+    let start = int(V2_FROM, V2_TO - 1);
+    if (r() < 0.2) {
+      const d = new Date(start * 1000);
+      const last = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 1, 0)).getUTCDate();
+      d.setUTCDate(int(28, last));
+      start = Math.floor(d.getTime() / 1000);
+    }
+    const interval = r() < 0.7 ? "month" : "year";
+    const amount = (iv: "month" | "year"): number =>
+      iv === "month" ? logInt(50, 10_000_000) : logInt(500, 100_000_000);
+    const u = r();
+    const count = u < 0.4 ? 1 : u < 0.7 ? 2 : u < 0.9 ? 3 : 4;
+    const items = Array.from({ length: count }, () => ({
+      amount: amount(interval),
+      quantity: int(1, 10),
+    }));
+    const c = r();
+    const coupons = c < 0.5 ? [] : c < 0.85 ? [coupon()] : [coupon(), coupon()];
+    const item = int(0, count - 1);
+    const newInterval = r() < 0.15 ? (interval === "month" ? "year" : "month") : null;
+    const newAmount = r() < 0.7 || newInterval !== null ? amount(newInterval ?? interval) : null;
+    let quantity = r() < 0.4 ? int(0, 20) : null;
+    const current = items[item]?.quantity ?? 1;
+    if (
+      newAmount === null &&
+      newInterval === null &&
+      (quantity === null || quantity === current) &&
+      r() < 0.8
+    )
+      quantity = current === 20 ? 19 : current + 1 + int(0, 19 - current);
+    const len = periodLength(start, interval);
+    const offset = r() < 0.1 ? ([0, 1, len - 1, len][int(0, 3)] ?? 0) : int(0, len);
+    const b = r();
+    out.push([
+      `${prefix}-${String(i).padStart(3, "0")}`,
+      {
+        kind: "wide",
+        start,
+        billing_mode: r() < 0.7 ? "flexible" : "classic",
+        interval,
+        items,
+        coupons,
+        change: {
+          item,
+          amount: newAmount,
+          interval: newInterval,
+          quantity,
+          offset,
+          proration_behavior:
+            b < 0.6 ? null : b < 0.75 ? "create_prorations" : b < 0.95 ? "always_invoice" : "none",
+          discount: r() < 0.15 ? coupon() : null,
+        },
+      },
+    ]);
+  }
+  return out;
+}
+
 // Targeted dev probes after holdout batch 1 was spent, one family per root cause found in it
 // (analysis/batch1-failures.md): A percent coupons over several lines, B once coupons passed to
 // the preview, C credit-line discounts in immediate flexible invoices, D credits that prorate a
@@ -804,13 +891,17 @@ const Batches = z.object({
       prefix: z.string().startsWith("hold"),
       seed: z.number().int(),
       size: z.number().int(),
+      // Which distribution the batch is drawn from; batches 1 and 2 predate the field.
+      generator: z.enum(["v1", "v2"]).default("v1"),
     }),
   ),
 });
 function holdoutBatches(): [string, WideInput][] {
   if (!existsSync(HOLDOUT_SEED_FILE)) return [];
   const { batches } = Batches.parse(JSON.parse(readFileSync(HOLDOUT_SEED_FILE, "utf8")));
-  return batches.flatMap((b) => wideProbes(b.size, b.seed, b.prefix));
+  return batches.flatMap((b) =>
+    (b.generator === "v2" ? wideProbesV2 : wideProbes)(b.size, b.seed, b.prefix),
+  );
 }
 
 // UI walkthroughs of the portal plan-change flow. Text in `until` is what the screen must show
@@ -1278,6 +1369,94 @@ const explorations: [string, Record<string, unknown>][] = [
   ],
 ];
 
+// Probes for behaviour mutation testing showed no fixture pins (GAPS.md): once coupons over the
+// lifecycle, the delay before each payment retry, and the error for a missing object. Designed
+// after seeing the gaps, so they are dev.
+const DAY_S = 86400;
+const lifecycleV2: [string, string[], Record<string, unknown>][] = [
+  [
+    "dev-v2-once-coupon-renews",
+    ["DSC-05", "LIF-01"],
+    {
+      amount: 1000,
+      trial_days: null,
+      coupon: { amount_off: 300, duration: "once" },
+      steps: [
+        { do: "advance", seconds: 31 * DAY_S + 3600 },
+        { do: "snapshot", as: "first_renewal" },
+        { do: "advance", seconds: 30 * DAY_S },
+        { do: "snapshot", as: "second_renewal" },
+      ],
+    },
+  ],
+  [
+    "dev-v2-forever-pct-renews",
+    ["DSC-01", "LIF-01"],
+    {
+      amount: 1999,
+      trial_days: null,
+      coupon: { percent_off: 20, duration: "forever" },
+      steps: [
+        { do: "advance", seconds: 31 * DAY_S + 3600 },
+        { do: "snapshot", as: "first_renewal" },
+      ],
+    },
+  ],
+  [
+    "dev-v2-once-coupon-cancel-now",
+    ["DSC-05", "LIF-05"],
+    {
+      amount: 3000,
+      trial_days: null,
+      coupon: { percent_off: 50, duration: "once" },
+      steps: [
+        { do: "advance", seconds: 10 * DAY_S },
+        { do: "cancel_now", prorate: true, invoice_now: true },
+        { do: "snapshot", as: "canceled" },
+      ],
+    },
+  ],
+  [
+    "dev-v2-once-coupon-trial",
+    ["DSC-05", "LIF-07"],
+    {
+      amount: 1000,
+      trial_days: 7,
+      coupon: { amount_off: 400, duration: "once" },
+      steps: [
+        { do: "advance", seconds: 8 * DAY_S },
+        { do: "snapshot", as: "after_trial" },
+        { do: "advance", seconds: 31 * DAY_S },
+        { do: "snapshot", as: "renewal" },
+      ],
+    },
+  ],
+  [
+    "dev-v2-retry-days",
+    ["LIF-06"],
+    {
+      amount: 1000,
+      trial_days: null,
+      steps: [
+        { do: "failing_card" },
+        { do: "advance", seconds: 31 * DAY_S + 3600 },
+        { do: "snapshot", as: "failed" },
+        { do: "advance", seconds: 2 * DAY_S },
+        { do: "snapshot", as: "day2" },
+        { do: "advance", seconds: DAY_S + 3600 },
+        { do: "snapshot", as: "day3" },
+        { do: "advance", seconds: DAY_S },
+        { do: "snapshot", as: "day4" },
+      ],
+    },
+  ],
+  [
+    "dev-v2-missing-object",
+    ["ERR-02"],
+    { amount: 1000, trial_days: null, steps: [{ do: "retrieve_missing", as: "missing" }] },
+  ],
+];
+
 export function probes(): Probe[] {
   const logic = [
     ...designed.map(([id, p]) => [`d-${id}`, p] as const),
@@ -1299,6 +1478,11 @@ export function probes(): Probe[] {
   }));
   const slice2 = [
     ...lifecycle.map(([id, rules, rest]) => ({
+      id,
+      rules,
+      input: JsonSchema.parse({ kind: "lifecycle", start: STARTS.oct, ...rest }),
+    })),
+    ...lifecycleV2.map(([id, rules, rest]) => ({
       id,
       rules,
       input: JsonSchema.parse({ kind: "lifecycle", start: STARTS.oct, ...rest }),
@@ -1326,6 +1510,7 @@ export function probes(): Probe[] {
     ...wideProbes(150, 20261001, "wide"),
     ...wideProbes(300, 20261002, "wide2"),
     ...targetedWide(),
+    ...wideProbesV2(300, 20261013, "wide3"),
     ...holdoutBatches(),
   ].map(([id, p]) => ({
     id,

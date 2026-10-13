@@ -25,7 +25,7 @@ export const WideInput = z.object({
   items: z
     .array(z.object({ amount: z.number(), quantity: z.number() }))
     .min(1)
-    .max(3),
+    .max(4),
   coupons: z.array(Coupon).max(2),
   change: z.object({
     item: z.number().int().min(0),

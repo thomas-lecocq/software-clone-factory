@@ -6,7 +6,15 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { loadAdapter } from "./adapter.ts";
-import { checkLock, fixturePath, sha256, targetDir, writeFixture, writeLock } from "./fixtures.ts";
+import {
+  checkLock,
+  fixturePath,
+  sha256,
+  splitOf,
+  targetDir,
+  writeFixture,
+  writeLock,
+} from "./fixtures.ts";
 import { diff, PolicySchema } from "./policy.ts";
 import { loadLiterals, scrub } from "./scrub.ts";
 import { logTiming, secondsSince } from "./timings.ts";
@@ -64,6 +72,15 @@ export async function record(target: string, opts: RecordOptions): Promise<void>
       );
     }
   }
+  // Anything that changed during the recording, other than the fixtures written here, is left
+  // for a deliberate relock: the lock never absorbs it silently.
+  const recorded = new Set(probes.map((p) => `${splitOf(p.id)}/${p.id}.json`));
+  const others = checkLock(target).filter((p) => ![...recorded].some((f) => p.startsWith(`${f} `)));
+  if (others.length > 0) {
+    throw new Error(
+      `fixtures written, lock NOT updated: the evaluator changed during the recording:\n  ${others.join("\n  ")}\nrelock deliberately, with a reason`,
+    );
+  }
   writeLock(target);
-  console.log(`${written} fixture(s) written, lock updated`);
+  console.log(`${String(written)} fixture(s) written, lock updated`);
 }

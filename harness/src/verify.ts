@@ -28,6 +28,7 @@ import {
   type BatchPlan,
   type Tally,
 } from "./fidelity.ts";
+import { auditFacts, reliabilityCard } from "./card.ts";
 import { loadLedger, ruleStatuses, type RuleResult } from "./ledger.ts";
 import { logTiming, secondsSince } from "./timings.ts";
 import {
@@ -228,17 +229,39 @@ export async function verify(
     total: cs.length,
   });
   const gapsFile = join(dir, "GAPS.md");
+  const batches = Object.fromEntries(
+    [...new Set(held.filter((c) => c.id.startsWith("hold-")).map((c) => batchOf(c.id)))].map(
+      (b) => [b, tally(held.filter((c) => c.id.startsWith("hold-") && batchOf(c.id) === b))],
+    ),
+  );
+  const plans = batchPlans(target);
+  const looks = looksPerSet(join(out, "runs.jsonl"), heldSets);
+  if (held.length > 0) {
+    writeFileSync(
+      join(out, "reliability-card.md"),
+      reliabilityCard({
+        target,
+        at: run.at,
+        batches,
+        plans,
+        looks,
+        dev: tally(dev),
+        adversarial: tally(dev.filter((c) => c.id.startsWith("dev-brk-"))),
+        determinism,
+        lockHash: run.lock,
+        commit: run.commit,
+        dirty: run.dirty,
+        ...auditFacts(join(dir, "..", ".."), target),
+      }),
+    );
+  }
   writeFileSync(
     join(out, "fidelity-report.md"),
     fidelityReport({
       target,
       at: run.at,
       dev: tally(dev),
-      batches: Object.fromEntries(
-        [...new Set(held.filter((c) => c.id.startsWith("hold-")).map((c) => batchOf(c.id)))].map(
-          (b) => [b, tally(held.filter((c) => c.id.startsWith("hold-") && batchOf(c.id) === b))],
-        ),
-      ),
+      batches,
       hashHoldout: tally(held.filter((c) => !c.id.startsWith("hold-"))),
       pixelsReported: cases
         .filter((c) => c.split === "dev")
@@ -253,8 +276,8 @@ export async function verify(
         dirty: run.dirty,
         sandbox: run.sandbox,
       },
-      looks: looksPerSet(join(out, "runs.jsonl"), heldSets),
-      plans: batchPlans(target),
+      looks,
+      plans,
       gaps: existsSync(gapsFile) ? readFileSync(gapsFile, "utf8") : null,
       breakerRounds: breakerRounds(dir),
     }),

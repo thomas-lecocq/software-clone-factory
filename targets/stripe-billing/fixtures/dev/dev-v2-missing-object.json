@@ -1,0 +1,34 @@
+{
+  "id": "dev-v2-missing-object",
+  "rules": [
+    "ERR-02"
+  ],
+  "input": {
+    "kind": "lifecycle",
+    "start": 1791158400,
+    "amount": 1000,
+    "trial_days": null,
+    "steps": [
+      {
+        "do": "retrieve_missing",
+        "as": "missing"
+      }
+    ]
+  },
+  "observed": {
+    "missing": {
+      "error": {
+        "type": "StripeInvalidRequestError",
+        "code": "resource_missing",
+        "param": "id",
+        "message": "No such subscription: 'sub_Missing0000000000'"
+      }
+    }
+  },
+  "noise": [],
+  "recorded_at": "2026-10-13T06:19:45.083Z",
+  "recorded_with": {
+    "stripe_api_version": "2026-08-26.dahlia",
+    "stripe_node": "22.6.2"
+  }
+}
