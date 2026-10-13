@@ -35,6 +35,7 @@ describe("reliability card", () => {
       "batch `hold-b2-`, 473 of 473; plan `analysis-plan-b2.md`, committed first",
     );
     expect(md).toContain("first and only look");
+    expect(md).toContain("30 of 40 planted bugs caught by the fixtures (run 2026-10-13)");
     expect(md).toContain("28 of 40 pass; they are dev cases the builder may have learnt");
     expect(md).toContain("https://img.shields.io/badge/reliability-level%20A-2ea44f");
     expect(md).toContain("https://img.shields.io/badge/breaker%20probes-28%2F40-blue");

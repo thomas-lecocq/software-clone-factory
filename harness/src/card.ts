@@ -114,7 +114,7 @@ export function reliabilityCard(c: CardInput): string {
     row(
       "Mutation testing",
       c.mutation
-        ? `${String(c.mutation.killed)} of ${String(c.mutation.valid)} planted bugs caught by the fixtures`
+        ? `${String(c.mutation.killed)} of ${String(c.mutation.valid)} planted bugs caught by the fixtures (run ${c.mutation.at.slice(0, 10)})`
         : "not run",
     ),
     row(
