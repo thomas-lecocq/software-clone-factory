@@ -16,13 +16,14 @@ export interface CardInput {
   plans: Record<string, BatchPlan>;
   looks: Record<string, number>;
   dev: Tally;
-  // Dev cases a breaker chose to make the clone fail (`dev-brk-` probes).
+  // Dev cases a breaker chose to make the clone fail (`dev-brk-` probes). Once the builder has
+  // learnt them they say nothing about generalisation; only a new round tests the clone again.
   adversarial: Tally;
   determinism: { identical: number; total: number };
   lockHash: string;
   commit: string | null;
   dirty: boolean | null;
-  mutation: { killed: number; valid: number } | null;
+  mutation: { killed: number; valid: number; at: string } | null;
   auditors: { found: number; planted: number } | null;
 }
 
@@ -68,11 +69,7 @@ export function reliabilityCard(c: CardInput): string {
     t
       ? badge("holdout", `${String(t.pass)}/${String(t.total)}`, k === 0 ? "2ea44f" : "dfb317")
       : "",
-    badge(
-      "out of distribution",
-      `${String(c.adversarial.pass)}/${String(c.adversarial.total)}`,
-      "blue",
-    ),
+    badge("breaker probes", `${String(c.adversarial.pass)}/${String(c.adversarial.total)}`, "blue"),
     c.mutation
       ? badge("mutants caught", `${String(c.mutation.killed)}/${String(c.mutation.valid)}`, "blue")
       : "",
@@ -104,10 +101,10 @@ export function reliabilityCard(c: CardInput): string {
         : "none",
     ),
     row(
-      "Out of distribution",
+      "Breaker probes",
       c.adversarial.total === 0
         ? "no breaker round yet"
-        : `${String(c.adversarial.pass)} of ${String(c.adversarial.total)} breaker probes pass: a claim never covers them`,
+        : `${String(c.adversarial.pass)} of ${String(c.adversarial.total)} pass; they are dev cases the builder may have learnt, so only a new breaker round tests the clone out of distribution`,
     ),
     row("Dev (training)", `${String(c.dev.pass)} of ${String(c.dev.total)}`),
     row(
@@ -134,7 +131,12 @@ export function reliabilityCard(c: CardInput): string {
   ].join("\n");
 }
 
-const Mutation = z.object({ target: z.string(), killed: z.number(), valid: z.number() });
+const Mutation = z.object({
+  at: z.string(),
+  target: z.string(),
+  killed: z.number(),
+  valid: z.number(),
+});
 const AuditRun = z.object({ planted: z.array(z.object({ found: z.boolean() })) });
 
 // The latest mutation run for the target, and the auditor recall over every series, if any.
@@ -147,7 +149,9 @@ export function auditFacts(repo: string, target: string): Pick<CardInput, "mutat
       .filter((f) => f.startsWith("mutation-") && f.endsWith(".json"))
       .map((f) => Mutation.safeParse(JSON.parse(readFileSync(join(dir, f), "utf8"))))
       .filter((r) => r.success && r.data.target === target)
-      .map((r) => (r.success ? { killed: r.data.killed, valid: r.data.valid } : null))
+      .map((r) =>
+        r.success ? { killed: r.data.killed, valid: r.data.valid, at: r.data.at } : null,
+      )
       .at(-1) ?? null;
   let found = 0;
   let planted = 0;
