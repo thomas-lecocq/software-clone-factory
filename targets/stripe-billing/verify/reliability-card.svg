@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="680" height="294" viewBox="0 0 680 294" role="img" aria-label="Reliability card: stripe-billing, level B">
+  <style>
+    .card { fill: #ffffff; stroke: #d0d7de; }
+    .title { font: 600 20px system-ui, -apple-system, Segoe UI, sans-serif; fill: #1f2328; }
+    .claim { font: 400 13px system-ui, -apple-system, Segoe UI, sans-serif; fill: #59636e; }
+    .label { font: 500 13px system-ui, -apple-system, Segoe UI, sans-serif; fill: #1f2328; }
+    .value { font: 600 13px ui-monospace, SFMono-Regular, Menlo, monospace; fill: #1f2328; }
+    .foot { font: 400 11px ui-monospace, SFMono-Regular, Menlo, monospace; fill: #59636e; }
+    .track { fill: #eaeef2; }
+    .grade { font: 700 72px system-ui, -apple-system, Segoe UI, sans-serif; fill: #ffffff; }
+    .caption { font: 600 11px system-ui, -apple-system, Segoe UI, sans-serif; fill: #59636e; letter-spacing: 0.08em; }
+  </style>
+  <rect x="0.5" y="0.5" width="679" height="293" rx="14" class="card"/>
+  <text x="28" y="40" class="title">Reliability card · stripe-billing</text>
+  <text x="28" y="62" class="claim">below 1 % of cases diverge, at 95 % confidence</text>
+  <circle cx="112" cy="158" r="62" fill="#7cb305"/>
+  <text x="112" y="183" text-anchor="middle" class="grade">B</text>
+  <text x="112" y="242" text-anchor="middle" class="caption">LEVEL</text>
+  <text x="236" y="106" class="label">Holdout</text><rect x="420" y="95" width="170" height="12" rx="6" class="track"/><rect x="420" y="95" width="170" height="12" rx="6" fill="#7cb305"/><text x="602" y="106" class="value">472/473</text>
+  <text x="236" y="136" class="label">Agent tasks agree</text><rect x="420" y="125" width="170" height="12" rx="6" class="track"/><rect x="420" y="125" width="106" height="12" rx="6" fill="#cf222e"/><text x="602" y="136" class="value">10/16</text>
+  <text x="236" y="166" class="label">Mutants caught</text><rect x="420" y="155" width="170" height="12" rx="6" class="track"/><rect x="420" y="155" width="145" height="12" rx="6" fill="#d4a72c"/><text x="602" y="166" class="value">34/40</text>
+  <text x="236" y="196" class="label">Auditor recall</text><rect x="420" y="185" width="170" height="12" rx="6" class="track"/><rect x="420" y="185" width="170" height="12" rx="6" fill="#2ea44f"/><text x="602" y="196" class="value">12/12</text>
+  <text x="236" y="226" class="label">Determinism</text><rect x="420" y="215" width="170" height="12" rx="6" class="track"/><rect x="420" y="215" width="0" height="12" rx="6" fill="#cf222e"/><text x="602" y="226" class="value">0/0</text>
+  <text x="28" y="272" class="foot">batch hold-b4-  ·  bound 1.00 % at 95 %  ·  first and only look  ·  commit 58e4006  ·  2026-10-13</text>
+</svg>

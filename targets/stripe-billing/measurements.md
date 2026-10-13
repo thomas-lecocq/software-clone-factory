@@ -57,6 +57,20 @@ spent: it may be analysed, but no later claim rests on it.
 - **The claim on batch 2's distribution stands** (`claim-batch-2`); this batch measures a wider
   one, where the same clone, improved, does worse.
 
+## Batch 4: `hold-b4-s1-001` to `hold-b4-s3-157`, staged
+
+- **Plan:** `analysis-plan-b4.md`, committed in `cf677a4` before any `hold-b4-` fixture existed:
+  473 cases in three stages, scored sequentially, at most one failure tolerated.
+- **Distribution:** `WIDE_DISTRIBUTION_V2`, the one batch 3 rejected the claim on.
+- **Clone:** after a fourth builder pass in the agent container, behind the egress allowlist (40
+  min, $4.86), on the agent-trace, batch 3 analysis and mutation-hole probes; it never saw batch 4. Frozen at `58e4006` (1013 of 1013 dev).
+- **Look:** `npm run verify stripe-billing -- --sequential hold-b4 --max-failures 1`,
+  2026-10-13 14:47 UTC, the only run of this batch, clean tree. Every stage was scored.
+- **Result:** 472 of 473 pass, one failure (`hold-b4-s1-089`). One-sided exact upper bound: 0.999 %
+  at 95 %, 1.40 % at 99 %.
+- **Decision (per the plan):** all stages scored and k = 1, so **"below 1 % at 95 % confidence"**
+  on `WIDE_DISTRIBUTION_V2`, not at 99 %.
+
 ## Secondary uses of batch 2 (no claim)
 
 - **Ablation of the second builder pass:** the clone measured on batch 1 (`7238f46`) scored on
