@@ -881,6 +881,234 @@ function breakerProbes(file: string): Probe[] {
   return BreakerRound.parse(JSON.parse(readFileSync(path, "utf8"))).probes;
 }
 
+// Dev probes from the analysis of spent batch 3 (analysis/hold-b3-failures.md): A, discounts on
+// classic credit lines with several items; B, an item moved to quantity 0. Each design runs in
+// classic and, as a control, in flexible.
+function batch3Probes(): [string, WideInput][] {
+  const out: [string, WideInput][] = [];
+  const start = utc(2026, 11, 15);
+  const len = periodLength(start, "month");
+  const half = Math.floor(len / 2);
+  const two = [
+    { amount: 1000, quantity: 1 },
+    { amount: 1000000, quantity: 1 },
+  ];
+  const designs: [string, Omit<WideInput, "kind" | "start" | "billing_mode" | "interval">][] = [
+    [
+      "a1-off-forever",
+      {
+        items: two,
+        coupons: [off(500)],
+        change: {
+          item: 0,
+          amount: null,
+          interval: null,
+          quantity: 2,
+          offset: half,
+          proration_behavior: null,
+          discount: null,
+        },
+      },
+    ],
+    [
+      "a2-off-once",
+      {
+        items: two,
+        coupons: [off(500, "once")],
+        change: {
+          item: 0,
+          amount: null,
+          interval: null,
+          quantity: 2,
+          offset: half,
+          proration_behavior: null,
+          discount: null,
+        },
+      },
+    ],
+    [
+      "a3-once-then-pct",
+      {
+        items: two,
+        coupons: [off(1500, "once"), pct(50)],
+        change: {
+          item: 0,
+          amount: null,
+          interval: null,
+          quantity: 2,
+          offset: half,
+          proration_behavior: null,
+          discount: null,
+        },
+      },
+    ],
+    [
+      "a4-pct-then-off",
+      {
+        items: two,
+        coupons: [pct(50), off(400)],
+        change: {
+          item: 0,
+          amount: null,
+          interval: null,
+          quantity: 2,
+          offset: half,
+          proration_behavior: null,
+          discount: null,
+        },
+      },
+    ],
+    [
+      "a5-three-start",
+      {
+        items: [
+          { amount: 100, quantity: 1 },
+          { amount: 500000, quantity: 1 },
+          { amount: 500000, quantity: 1 },
+        ],
+        coupons: [off(3)],
+        change: {
+          item: 0,
+          amount: null,
+          interval: null,
+          quantity: 2,
+          offset: 1,
+          proration_behavior: null,
+          discount: null,
+        },
+      },
+    ],
+    [
+      "a5-three-end",
+      {
+        items: [
+          { amount: 100, quantity: 1 },
+          { amount: 500000, quantity: 1 },
+          { amount: 500000, quantity: 1 },
+        ],
+        coupons: [off(3)],
+        change: {
+          item: 0,
+          amount: null,
+          interval: null,
+          quantity: 2,
+          offset: len - 1,
+          proration_behavior: null,
+          discount: null,
+        },
+      },
+    ],
+    ...(["default", "create_prorations", "always_invoice"] as const).map(
+      (b): [string, Omit<WideInput, "kind" | "start" | "billing_mode" | "interval">] => [
+        `b6-price-qty0-${b}`,
+        {
+          items: [{ amount: 2000, quantity: 2 }],
+          coupons: [],
+          change: {
+            item: 0,
+            amount: 5000,
+            interval: null,
+            quantity: 0,
+            offset: half,
+            proration_behavior: b === "default" ? null : b,
+            discount: null,
+          },
+        },
+      ],
+    ),
+    [
+      "b7-qty0",
+      {
+        items: [{ amount: 2000, quantity: 2 }],
+        coupons: [],
+        change: {
+          item: 0,
+          amount: null,
+          interval: null,
+          quantity: 0,
+          offset: half,
+          proration_behavior: null,
+          discount: null,
+        },
+      },
+    ],
+    [
+      "b8-two-items-qty0",
+      {
+        items: [
+          { amount: 2000, quantity: 2 },
+          { amount: 700, quantity: 1 },
+        ],
+        coupons: [],
+        change: {
+          item: 0,
+          amount: null,
+          interval: null,
+          quantity: 0,
+          offset: half,
+          proration_behavior: null,
+          discount: null,
+        },
+      },
+    ],
+    [
+      "b9-qty0-pct",
+      {
+        items: [{ amount: 2000, quantity: 2 }],
+        coupons: [pct(20)],
+        change: {
+          item: 0,
+          amount: 5000,
+          interval: null,
+          quantity: 0,
+          offset: half,
+          proration_behavior: null,
+          discount: null,
+        },
+      },
+    ],
+    [
+      "b9-qty0-once-preview",
+      {
+        items: [{ amount: 2000, quantity: 2 }],
+        coupons: [],
+        change: {
+          item: 0,
+          amount: 5000,
+          interval: null,
+          quantity: 0,
+          offset: half,
+          proration_behavior: null,
+          discount: off(300, "once"),
+        },
+      },
+    ],
+    [
+      "b10-control-last-second",
+      {
+        items: [{ amount: 2000, quantity: 2 }],
+        coupons: [],
+        change: {
+          item: 0,
+          amount: null,
+          interval: null,
+          quantity: 1,
+          offset: len - 1,
+          proration_behavior: null,
+          discount: null,
+        },
+      },
+    ],
+  ];
+  for (const mode of ["classic", "flexible"] as const)
+    for (const [id, d] of designs)
+      out.push([
+        `dev-b3-${mode}-${id}`,
+        { kind: "wide", start, billing_mode: mode, interval: "month", ...d },
+      ]);
+  return out;
+}
+
 // Dedicated holdout batches, one per pre-registered plan (analysis-plan*.md). Their seeds live in a
 // holdout-* file, which never enters a builder sandbox: there the batches simply do not exist.
 // Batch IDs start with `hold-`, which `splitOf` sends to the holdout whatever their hash.
@@ -1467,6 +1695,174 @@ const lifecycleV2: [string, string[], Record<string, unknown>][] = [
   ],
 ];
 
+// Probes from task validation: the calls an agent made when asked to change a price, add a coupon
+// or cancel (tasks/), most of which no fixture exercised. Each replays such calls whole, then
+// snapshots the subscription. Designed after seeing the agent fail on the clone, so they are dev.
+const M = 31 * 86400 + 3600;
+const sub = (as: string) => ({ do: "snapshot", as }) as const;
+const raw = (
+  as: string,
+  method: "GET" | "POST" | "DELETE",
+  path: string,
+  params: Record<string, string> = {},
+) => ({ do: "raw", as, method, path, params }) as const;
+const agentTraces: [string, string[], Record<string, unknown>][] = [
+  [
+    "dev-ag-upgrade-items",
+    ["PRO-01", "PRO-05"],
+    {
+      amount: 1000,
+      second_amount: 3000,
+      trial_days: null,
+      steps: [
+        raw("read", "GET", "/v1/subscriptions/{subscription}"),
+        raw("update", "POST", "/v1/subscriptions/{subscription}", {
+          "items[0][id]": "{item}",
+          "items[0][price]": "{price2}",
+          proration_behavior: "create_prorations",
+        }),
+        raw("preview", "POST", "/v1/invoices/create_preview", { subscription: "{subscription}" }),
+        raw("upcoming", "GET", "/v1/invoices/upcoming", { subscription: "{subscription}" }),
+        sub("after"),
+      ],
+    },
+  ],
+  [
+    "dev-ag-upgrade-subscription-item",
+    ["PRO-01", "PRO-05"],
+    {
+      amount: 1000,
+      second_amount: 3000,
+      trial_days: null,
+      steps: [
+        raw("update", "POST", "/v1/subscription_items/{item}", {
+          price: "{price2}",
+          proration_behavior: "create_prorations",
+        }),
+        raw("items", "GET", "/v1/subscription_items", { subscription: "{subscription}" }),
+        raw("pending", "GET", "/v1/invoiceitems", { customer: "{customer}", pending: "true" }),
+        sub("after"),
+      ],
+    },
+  ],
+  [
+    "dev-ag-downgrade-no-proration",
+    ["PRO-06"],
+    {
+      amount: 3000,
+      second_amount: 1000,
+      trial_days: null,
+      steps: [
+        raw("update", "POST", "/v1/subscriptions/{subscription}", {
+          "items[0][id]": "{item}",
+          "items[0][price]": "{price2}",
+          proration_behavior: "none",
+        }),
+        raw("pending", "GET", "/v1/invoiceitems", { customer: "{customer}", pending: "true" }),
+        sub("after"),
+      ],
+    },
+  ],
+  [
+    "dev-ag-coupon-discounts",
+    ["DSC-01"],
+    {
+      amount: 1000,
+      spare_coupon: { percent_off: 20, duration: "forever" },
+      trial_days: null,
+      steps: [
+        raw("apply", "POST", "/v1/subscriptions/{subscription}", {
+          "discounts[0][coupon]": "{coupon}",
+        }),
+        raw("read", "GET", "/v1/subscriptions/{subscription}", { "expand[]": "discounts" }),
+        { do: "advance", seconds: M },
+        sub("renewal"),
+      ],
+    },
+  ],
+  [
+    "dev-ag-coupon-legacy-param",
+    ["DSC-01"],
+    {
+      amount: 1000,
+      spare_coupon: { percent_off: 20, duration: "forever" },
+      trial_days: null,
+      steps: [
+        raw("apply", "POST", "/v1/subscriptions/{subscription}", { coupon: "{coupon}" }),
+        sub("after"),
+      ],
+    },
+  ],
+  [
+    "dev-ag-reads",
+    ["ERR-02"],
+    {
+      amount: 1000,
+      second_amount: 3000,
+      trial_days: null,
+      steps: [
+        raw("price", "GET", "/v1/prices/{price2}"),
+        raw("customer", "GET", "/v1/customers/{customer}"),
+        raw("subscriptions", "GET", "/v1/subscriptions", { customer: "{customer}" }),
+      ],
+    },
+  ],
+  [
+    "dev-ag-cancel-now-delete",
+    ["LIF-05"],
+    {
+      amount: 3000,
+      trial_days: null,
+      steps: [
+        { do: "advance", seconds: 10 * 86400 },
+        raw("cancel", "DELETE", "/v1/subscriptions/{subscription}", {
+          invoice_now: "true",
+          prorate: "true",
+        }),
+        sub("after"),
+      ],
+    },
+  ],
+  [
+    "dev-v3-past-due-recovers",
+    ["LIF-06"],
+    {
+      amount: 1000,
+      trial_days: null,
+      steps: [
+        { do: "failing_card" },
+        { do: "advance", seconds: M },
+        sub("past_due"),
+        { do: "good_card" },
+        { do: "advance", seconds: 2 * 86400 },
+        sub("after_retry"),
+      ],
+    },
+  ],
+  [
+    "dev-v3-two-subscriptions",
+    ["ITM-01"],
+    {
+      amount: 1000,
+      second_amount: 3000,
+      trial_days: null,
+      steps: [
+        raw("second", "POST", "/v1/subscriptions", {
+          customer: "{customer}",
+          "items[0][price]": "{price2}",
+        }),
+        raw("list", "GET", "/v1/subscriptions", { customer: "{customer}" }),
+        raw("update", "POST", "/v1/subscriptions/{subscription}", {
+          "items[0][id]": "{item}",
+          "items[0][price]": "{price2}",
+        }),
+        raw("pending", "GET", "/v1/invoiceitems", { customer: "{customer}", pending: "true" }),
+        sub("first"),
+      ],
+    },
+  ],
+];
+
 export function probes(): Probe[] {
   const logic = [
     ...designed.map(([id, p]) => [`d-${id}`, p] as const),
@@ -1488,6 +1884,11 @@ export function probes(): Probe[] {
   }));
   const slice2 = [
     ...lifecycle.map(([id, rules, rest]) => ({
+      id,
+      rules,
+      input: JsonSchema.parse({ kind: "lifecycle", start: STARTS.oct, ...rest }),
+    })),
+    ...agentTraces.map(([id, rules, rest]) => ({
       id,
       rules,
       input: JsonSchema.parse({ kind: "lifecycle", start: STARTS.oct, ...rest }),
@@ -1521,6 +1922,7 @@ export function probes(): Probe[] {
     ...wideProbes(300, 20261002, "wide2"),
     ...targetedWide(),
     ...wideProbesV2(300, 20261013, "wide3"),
+    ...batch3Probes(),
     ...holdoutBatches(),
   ].map(([id, p]) => ({
     id,

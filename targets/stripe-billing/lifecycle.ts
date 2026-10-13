@@ -6,7 +6,7 @@
  */
 import Stripe from "stripe";
 import { z } from "zod";
-import type { Json } from "../../harness/src/json.ts";
+import { JsonSchema, type Json } from "../../harness/src/json.ts";
 import { Coupon, couponId } from "./wide.ts";
 
 export const LifeStep = z.discriminatedUnion("do", [
@@ -15,9 +15,20 @@ export const LifeStep = z.discriminatedUnion("do", [
   z.object({ do: z.literal("cancel_now"), prorate: z.boolean(), invoice_now: z.boolean() }),
   z.object({ do: z.literal("advance"), seconds: z.number() }),
   z.object({ do: z.literal("failing_card") }),
+  // Swaps the failing card for a working one, to see a past_due subscription recover.
+  z.object({ do: z.literal("good_card") }),
   z.object({ do: z.literal("snapshot"), as: z.string() }),
   // Reads a subscription that does not exist, to pin the error a missing object returns.
   z.object({ do: z.literal("retrieve_missing"), as: z.string() }),
+  // Any API call, recorded whole: replays the calls an agent made in task validation. Path and
+  // parameter values may name {subscription}, {customer}, {item}, {price}, {price2}, {coupon}.
+  z.object({
+    do: z.literal("raw"),
+    as: z.string(),
+    method: z.enum(["GET", "POST", "DELETE"]),
+    path: z.string(),
+    params: z.record(z.string(), z.string()).default({}),
+  }),
 ]);
 export type LifeStep = z.infer<typeof LifeStep>;
 
@@ -28,6 +39,10 @@ export const LifeInput = z.object({
   trial_days: z.number().nullable(),
   // A coupon on the subscription from its creation; absent in fixtures recorded before it existed.
   coupon: Coupon.nullable().default(null),
+  // A second monthly price ("Pro") to move to, for raw calls; absent in older fixtures.
+  second_amount: z.number().nullable().default(null),
+  // A coupon created but not applied, for raw calls to apply ({coupon}); absent in older fixtures.
+  spare_coupon: Coupon.nullable().default(null),
   steps: z.array(LifeStep),
 });
 export type LifeInput = z.infer<typeof LifeInput>;
@@ -70,6 +85,19 @@ export async function runLifecycle(
     unit_amount: input.amount,
     recurring: { interval: "month" },
   });
+  let price2: string | null = null;
+  if (input.second_amount !== null) {
+    const pro = await stripe.products.create({ name: "Pro" });
+    price2 = (
+      await stripe.prices.create({
+        product: pro.id,
+        currency: "usd",
+        unit_amount: input.second_amount,
+        recurring: { interval: "month" },
+      })
+    ).id;
+  }
+  const spare = input.spare_coupon !== null ? await couponId(stripe, input.spare_coupon) : null;
   const customer = await stripe.customers.create({
     test_clock: clock.id,
     payment_method: "pm_card_visa",
@@ -100,6 +128,11 @@ export async function runLifecycle(
       now += step.seconds;
       await stripe.testHelpers.testClocks.advance(clock.id, { frozen_time: now });
       await waitReady(stripe, clock.id);
+    } else if (step.do === "good_card") {
+      const pm = await stripe.paymentMethods.attach("pm_card_visa", { customer: customer.id });
+      await stripe.customers.update(customer.id, {
+        invoice_settings: { default_payment_method: pm.id },
+      });
     } else if (step.do === "failing_card") {
       const pm = await stripe.paymentMethods.attach("pm_card_chargeCustomerFail", {
         customer: customer.id,
@@ -107,6 +140,31 @@ export async function runLifecycle(
       await stripe.customers.update(customer.id, {
         invoice_settings: { default_payment_method: pm.id },
       });
+    } else if (step.do === "raw") {
+      const fill = (v: string): string =>
+        v
+          .replaceAll("{subscription}", created.id)
+          .replaceAll("{customer}", customer.id)
+          .replaceAll("{item}", created.items.data[0]?.id ?? "")
+          .replaceAll("{price}", price.id)
+          .replaceAll("{price2}", price2 ?? "")
+          .replaceAll("{coupon}", spare ?? "");
+      const params = Object.fromEntries(Object.entries(step.params).map(([k, v]) => [k, fill(v)]));
+      try {
+        // The SDK takes parameters on POST only; GET and DELETE carry them in the query string.
+        const query = new URLSearchParams(params).toString();
+        const body: unknown =
+          step.method === "POST"
+            ? await stripe.rawRequest("POST", fill(step.path), params)
+            : await stripe.rawRequest(step.method, `${fill(step.path)}${query ? `?${query}` : ""}`);
+        out[step.as] = { ok: true, body: JsonSchema.parse(JSON.parse(JSON.stringify(body))) };
+      } catch (e) {
+        if (!(e instanceof Stripe.errors.StripeError)) throw e;
+        out[step.as] = {
+          ok: false,
+          error: { type: e.type, code: e.code ?? null, param: e.param ?? null, message: e.message },
+        };
+      }
     } else if (step.do === "retrieve_missing") {
       try {
         await stripe.subscriptions.retrieve("sub_Missing0000000000");

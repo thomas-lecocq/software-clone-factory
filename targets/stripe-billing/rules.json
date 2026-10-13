@@ -30,10 +30,10 @@
     {
       "id": "PRO-04",
       "area": "logic",
-      "statement": "Proration lines are rounded to the cent: credits round half away from zero, the classic-mode charge rounds half up, and the flexible-mode charge behaves like rounding of a floating-point 1 - elapsed/period (7.5 and 22.5 down, 1501.5 up).",
+      "statement": "Rounding of a prorated amount exactly at half a cent differs by mode: credits round away from zero; a classic charge of 5555555.5 is charged 5555555 (dev-brk-big-half-charge-classic), not rounded half up.",
       "provenance": {
-        "kind": "mined",
-        "ref": "builder report, pass 2 (dev fixtures); t-round-half-*, b-round-half"
+        "kind": "observed",
+        "ref": "builder pass v2 notes (clone/NOTES.md), checked against the dev fixtures named"
       }
     },
     {
@@ -102,7 +102,7 @@
     {
       "id": "INT-01",
       "area": "logic",
-      "statement": "Interval changes. Flexible mode: monthly to yearly prorates the yearly price over the remaining time and keeps the anchor; yearly to monthly keeps the anchor while the proration date is inside the new monthly period and is rejected past it. Classic mode: an interval change resets the billing cycle to the clock time. Yearly to yearly keeps the period.",
+      "statement": "Interval changes. Flexible mode: monthly to yearly prorates the yearly price over the remaining time and keeps the anchor; yearly to monthly keeps the anchor while the proration date is inside the new monthly period and is rejected past it. Classic mode: an interval change resets the billing cycle to the clock time. Yearly to yearly keeps the period. In flexible mode each item keeps its own billing period; a proration date exactly at the new period end is accepted. Classic mode refuses mixed intervals, and flexible mixed intervals refuse a forever amount-off coupon.",
       "provenance": {
         "kind": "observed",
         "ref": "t-month-to-year-*, u-year-to-month-*, u-year-to-year (dev); builder pass 3 (dev fixtures), clone/NOTES.md pass 6; edited 2026-09-23 after the final measurement, statements only"
@@ -111,10 +111,10 @@
     {
       "id": "DSC-01",
       "area": "logic",
-      "statement": "A percent-off coupon takes round(percent × sum) from the discountable lines it applies to and allocates that amount across them like an amount-off: floor of the proportional share, with the remainder one cent per line from the last line. This includes the first invoice, whose allocation sets the discount a flexible credit carries.",
+      "statement": "A percent-off coupon takes round(percent × sum) from the discountable lines it applies to and spreads it across them by a running rounded-down total: each line gets floor(running share) minus what earlier lines already got. This includes the first invoice, whose allocation sets the discount a flexible credit carries (wide3-256 for four lines).",
       "provenance": {
         "kind": "observed",
-        "ref": "dev fixtures and spent holdout batch 1, analysed in analysis/batch1-failures.md (2026-10-01)"
+        "ref": "builder pass v2 notes (clone/NOTES.md), checked against the dev fixtures named"
       }
     },
     {
@@ -138,25 +138,25 @@
     {
       "id": "DSC-04",
       "area": "logic",
-      "statement": "Classic mode: proration lines are not discountable; the credit is the prorated discounted amount, round((b - D) f), for percent and amount-off coupons; the charge prorates first and subtracts the prorated discount after.",
+      "statement": "Classic mode: proration lines are not discountable. The credit is -round_half_away(net × r/P), where net is the old item's amount after applying, in subscription order and to that item alone, every discount on the subscription when the credited period was billed: an amount-off in full, a percent-off as round(pct × what is left), never below 0. The share each discount got on the billing invoice is irrelevant, a share of 0 included. The charge prorates first and subtracts the prorated discount after.",
       "provenance": {
-        "kind": "mined",
-        "ref": "fresh2-002/081/124/140, u-classic-off-* (dev); builder pass 3 (dev fixtures), clone/NOTES.md pass 6; edited 2026-09-23 after the final measurement, statements only"
+        "kind": "observed",
+        "ref": "spent batch 3, analysed in analysis/hold-b3-failures.md (2026-10-13), and dev fixtures"
       }
     },
     {
       "id": "DSC-05",
       "area": "logic",
-      "statement": "A once coupon on the subscription discounts its first invoice only. A once coupon passed to the preview: (a) with prorations and no immediate invoice, discounts only the remaining-time charge and is not listed in the invoice's discounts; (b) when the change prorates nothing, discounts the renewal invoice and is listed; (c) in an immediate invoice, is listed in discounts and total_discount_amounts at 0 and on the proration lines at 0.",
+      "statement": "A once coupon is used up only by an invoice where it actually took something off; a subscription's once coupon that took nothing stays active (dev-brk-free-once, wide3-027, -054, -230, -249). A once coupon passed to the preview discounts the remaining-time charge and is then used up, so it no longer discounts the renewal; when the change prorates nothing it discounts the renewal and is listed; in an immediate invoice it is listed at 0.",
       "provenance": {
         "kind": "observed",
-        "ref": "dev fixtures and spent holdout batch 1, analysed in analysis/batch1-failures.md (2026-10-01)"
+        "ref": "builder pass v2 notes (clone/NOTES.md), checked against the dev fixtures named"
       }
     },
     {
       "id": "MOD-01",
       "area": "logic",
-      "statement": "Classic and flexible modes differ by the order of prorating and discounting (DSC-02, DSC-04), which can move a line by one cent, by the credit line's discount list for a used once coupon, and by the cycle reset on an interval change in classic mode.",
+      "statement": "Classic and flexible modes differ by the order of prorating and discounting (DSC-02, DSC-04), which can move a line by one cent, by the credit line's discount list for a used once coupon, and by the cycle reset on an interval change in classic mode, and by the remaining-time line of a new item billed at 0 (PRO-11).",
       "provenance": {
         "kind": "mined",
         "ref": "builder pass 3 (dev fixtures), clone/NOTES.md pass 6; edited 2026-09-23 after the final measurement, statements only"
@@ -363,7 +363,7 @@
     {
       "id": "ITM-01",
       "area": "logic",
-      "statement": "With several items, a change to one item prorates that item only: the other items produce neither credit nor charge lines in the preview's proration, and recur at their own amounts.",
+      "statement": "With several items, a change to one item prorates that item only: the other items produce neither credit nor charge lines in the preview's proration, and recur at their own amounts. An old item billed at 0 gets no credit line (dev-brk-qty0-item).",
       "provenance": {
         "kind": "inferred",
         "ref": "widened distribution, 2026-10-01; to be checked against the wide fixtures"
@@ -421,6 +421,15 @@
       "provenance": {
         "kind": "documented",
         "ref": "Stripe API errors documentation; to be confirmed by dev-v2-missing-object"
+      }
+    },
+    {
+      "id": "PRO-11",
+      "area": "logic",
+      "statement": "Classic mode: when the changed item's new amount (unit amount × new quantity) is 0, the preview has no remaining-time line (default, create_prorations and always_invoice); the renewal still lists the item at 0. Flexible mode keeps a remaining-time line at 0. A remaining-time line at 0 for a positive new amount (rounding, a 100 % coupon) is kept in both modes.",
+      "provenance": {
+        "kind": "observed",
+        "ref": "spent batch 3, analysed in analysis/hold-b3-failures.md (2026-10-13), and dev fixtures"
       }
     }
   ]

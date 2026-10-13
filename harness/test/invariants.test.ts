@@ -222,6 +222,16 @@ describe("invariant 3: the guard hook keeps agents away from the evaluator", () 
       },
     }).status ?? -1;
 
+  it("reads a shell call's command, not its description", () => {
+    const call = (command: string, description: string) => ({
+      agent_type: "builder",
+      tool_name: "Bash",
+      tool_input: { command, description },
+    });
+    expect(run(call("ls targets/t/clone", "List the clone next to the fixtures"))).toBe(0);
+    expect(run(call("cat targets/t/fixtures/holdout/a.json", "Read a file"))).toBe(2);
+  });
+
   it("exempts nobody inside a builder sandbox, the top-level session included", () => {
     const write = {
       tool_name: "Write",
@@ -239,6 +249,7 @@ describe("invariant 3: the guard hook keeps agents away from the evaluator", () 
       tool_input: { file_path },
     });
     expect(run(write("targets/t/analysis/hold-failures.md"))).toBe(0);
+    expect(run(write("/tmp/scratch/replay.ts"))).toBe(0);
     expect(run(write("targets/t/clone/server.ts"))).toBe(2);
     expect(run(write("targets/t/rules.json"))).toBe(2);
     expect(run(write("targets/t/fixtures/dev/a.json"))).toBe(2);

@@ -13,6 +13,9 @@ role="$(jq -r '.agent_type // "main"' <<<"$input")"
 # For file tools only the path fields count: the text being written may mention anything.
 if [[ "$tool" =~ ^(Write|Edit|MultiEdit|NotebookEdit)$ ]]; then
   target="$(jq -r '[.tool_input.file_path, .tool_input.notebook_path] | map(select(. != null)) | join(" ")' <<<"$input")"
+elif [[ "$tool" == "Bash" ]]; then
+  # The command alone: its free-text description is not something the shell runs.
+  target="$(jq -r '.tool_input.command // ""' <<<"$input")"
 else
   target="$(jq -r '.tool_input // {} | [.. | strings] | join(" ")' <<<"$input")"
 fi
@@ -88,8 +91,8 @@ if [[ "$tool" =~ $writes ]] && [[ "$target" =~ $oracle ]]; then
 fi
 # Inside a target, implementers write only the clone: the adapter and probes drive the evaluation.
 # The analyst writes only its report.
-if [[ "$role" == "analyst" && "$tool" =~ $writes ]] && [[ "$target" != */analysis/* ]]; then
-  block "the analyst writes only under targets/<t>/analysis/ ($target)"
+if [[ "$role" == "analyst" && "$tool" =~ $writes ]] && [[ "$target" != */analysis/* && "$target" != /tmp/* ]]; then
+  block "the analyst writes only its report under targets/<t>/analysis/, and scratch files in /tmp ($target)"
 fi
 if [[ "$role" == "analyst" && "$tool" =~ $writes ]]; then
   exit 0
