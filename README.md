@@ -140,6 +140,12 @@ there.
   result is the best build's, not every build's.
 - It is test mode only, USD only, and none of the factory's components was ablated.
 
+**An agent was given real tasks.** Eight everyday billing tasks, twice each, against the clone and
+against Stripe test mode, with every call logged: the agent succeeds 16 times in 16 on Stripe and
+10 in 16 on the clone. The failures are all subscription updates (changing a price, adding a
+coupon) that no fixture ever exercised. Fidelity on the measured slice does not make a clone a
+good environment for the calls an agent actually makes; the factory now measures both.
+
 **The auditors were measured, then used.** On copies of the repository with 12 planted defects,
 the committed auditor prompt found 12 of 12 (recall at least 77.9 % at 95 %). Two more runs on the
 clean repository found 20 real problems, all fixed, among them: the clone ran inside the scorer's

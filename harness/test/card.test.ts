@@ -18,6 +18,14 @@ const base: CardInput = {
   dirty: false,
   mutation: { killed: 30, valid: 40, at: "2026-10-13T00:00:00Z" },
   auditors: { found: 12, planted: 12 },
+  tasks: {
+    at: "2026-10-13T00:00:00Z",
+    model: "claude-sonnet-5-5",
+    pairs: 16,
+    sameOutcome: 10,
+    successClone: 10,
+    successTarget: 16,
+  },
 };
 
 describe("reliability card", () => {
@@ -35,6 +43,7 @@ describe("reliability card", () => {
       "batch `hold-b2-`, 473 of 473; plan `analysis-plan-b2.md`, committed first",
     );
     expect(md).toContain("first and only look");
+    expect(md).toContain("same outcome on the clone as on the original in 10 of 16 task runs");
     expect(md).toContain("30 of 40 planted bugs caught by the fixtures (run 2026-10-13)");
     expect(md).toContain("28 of 40 pass; they are dev cases the builder may have learnt");
     expect(md).toContain("https://img.shields.io/badge/reliability-level%20A-2ea44f");

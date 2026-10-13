@@ -28,9 +28,9 @@ item says why it matters and roughly what it costs.
   misses the bar below 10 % needs about 29 builds (about $600 at today's cost).
 - **Ablations of the factory's components** (record-first, the sandbox, holdout batches, the
   guard) and a **documentation-first baseline**, so that a component can be credited.
-- **Task validation without training.** Give an existing agent scripted tasks ("change this
-  customer's plan with a 20 % coupon"), run it against the clone and against the target's test
-  mode, and compare success and the actions taken: does an agent behave the same in the clone?
+- **Task validation, further** (built: `harness/src/tasks.ts`, 10 of 16 pairs agree). Next: turn the
+  agent's call traces into dev probes for the endpoints it used and the clone lacks, rebuild, and
+  rerun the tasks; then more tasks, and screens as well as the API.
 - **Live mode check** on a small, cheap sample, since test mode is assumed equal to live.
 - **The two last layers of screen verification.** Layer 4: an LLM triages the flagged pixel and
   layout differences (never scores them); layer 5: a human reviews a sample to calibrate the

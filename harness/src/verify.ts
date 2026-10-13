@@ -28,7 +28,7 @@ import {
   type BatchPlan,
   type Tally,
 } from "./fidelity.ts";
-import { auditFacts, reliabilityCard } from "./card.ts";
+import { auditFacts, reliabilityCard, taskFacts } from "./card.ts";
 import { loadLedger, ruleStatuses, type RuleResult } from "./ledger.ts";
 import { logTiming, secondsSince } from "./timings.ts";
 import {
@@ -308,6 +308,7 @@ export async function verify(
         commit: run.commit,
         dirty: run.dirty,
         ...auditFacts(join(dir, "..", ".."), target),
+        tasks: taskFacts(dir),
       }),
     );
   }
@@ -336,6 +337,7 @@ export async function verify(
       plans,
       gaps: existsSync(gapsFile) ? readFileSync(gapsFile, "utf8") : null,
       breakerRounds: breakerRounds(dir),
+      tasks: taskFacts(dir),
     }),
   );
 

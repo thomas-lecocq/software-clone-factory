@@ -52,6 +52,17 @@ The analysis of batch 1 is `analysis/batch1-failures.md`. The clone measured bef
 - **PRO-04 (rounding at exactly .5)** and **MOD-01 (classic vs flexible)**: few separating cases.
 - **LIF-03 and LIF-04** have no dev fixture: coded from their statements only, unverified.
 
+## Found by task validation
+
+`harness/src/tasks.ts` gave an agent (Sonnet 5.5) eight everyday billing tasks, twice each, once
+against the clone and once against Stripe test mode, through a proxy that logs every call. The
+agent succeeds in 16 of 16 runs on Stripe and 10 of 16 on the clone. The six failures are the three
+tasks that change a subscription's items or discounts (moving to another price, up or down, and
+adding a coupon): the agent calls `POST /v1/subscriptions/:id` with `items` or `discounts`, or
+`POST /v1/subscription_items/:id`, which no fixture ever exercised and the clone does not
+implement. High fidelity on the measured slice says nothing about the calls an agent will make;
+the traces in `tasks/` are the design of the next dev probes.
+
 ## Holes found by mutation testing
 
 `audit/mutate.ts` planted 40 one-line bugs in the clone's logic and replayed the 715 dev logic

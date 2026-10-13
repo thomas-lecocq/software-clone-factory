@@ -60,6 +60,7 @@ describe("fidelity report", () => {
       },
       gaps: null,
       breakerRounds: ["breaker-round1.json"],
+      tasks: null,
     });
     const headings = md.split("\n").filter((l) => /^## \d\. /.test(l));
     expect(headings).toHaveLength(9);

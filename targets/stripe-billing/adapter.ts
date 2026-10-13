@@ -38,7 +38,7 @@ const Input = z.object({
 
 // The key comes from STRIPE_SECRET_KEY, else from the file named by STRIPE_ENV, else from .env at
 // the repository root (git-ignored).
-function testKey(): string {
+export function testKey(): string {
   const file = process.env.STRIPE_ENV ?? join(import.meta.dirname, "..", "..", ".env");
   const fromFile = existsSync(file)
     ? /STRIPE_SECRET_KEY=(\S+)/.exec(readFileSync(file, "utf8"))?.[1]
@@ -51,7 +51,7 @@ function testKey(): string {
   return key;
 }
 
-function client(side: Side): Stripe {
+export function client(side: Side): Stripe {
   if (side.kind === "target") return new Stripe(testKey(), { maxNetworkRetries: 2 });
   const url = new URL(side.url);
   return new Stripe("sk_test_clone", {

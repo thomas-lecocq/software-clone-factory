@@ -8,6 +8,7 @@
  */
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { z } from "zod";
+import type { TaskFacts } from "./card.ts";
 import type { RuleResult } from "./ledger.ts";
 
 export interface Tally {
@@ -48,6 +49,7 @@ export interface FidelityInput {
   gaps: string | null;
   // Breaker rounds stored as data (`breaker-round*.json`), so they survive a fresh clone.
   breakerRounds: string[];
+  tasks: TaskFacts | null;
 }
 
 // One-sided exact (Clopper-Pearson) upper bound on the failure rate, given k failures in n.
@@ -193,8 +195,9 @@ export function fidelityReport(f: FidelityInput): string {
     "",
     "## 8. Task validation",
     "",
-    "Not applicable: no downstream task suite exists for this target, so whether agents trained on",
-    "the clone succeed on the original was never measured.",
+    f.tasks === null
+      ? "Not measured: no task suite has been run for this target (`harness/src/tasks.ts`)."
+      : `An agent (${f.tasks.model}) was given the same tasks against the clone and the original: same outcome in ${String(f.tasks.sameOutcome)} of ${String(f.tasks.pairs)} runs; success ${String(f.tasks.successClone)} on the clone, ${String(f.tasks.successTarget)} on the original (\`tasks/\`, ${f.tasks.at.slice(0, 10)}). This measures whether an agent behaves the same in the clone, not whether training in it transfers.`,
     "",
     "## 9. Integrity",
     "",

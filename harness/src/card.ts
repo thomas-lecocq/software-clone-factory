@@ -25,6 +25,46 @@ export interface CardInput {
   dirty: boolean | null;
   mutation: { killed: number; valid: number; at: string } | null;
   auditors: { found: number; planted: number } | null;
+  tasks: TaskFacts | null;
+}
+
+export interface TaskFacts {
+  at: string;
+  model: string;
+  pairs: number;
+  sameOutcome: number;
+  successClone: number;
+  successTarget: number;
+}
+
+const TaskSummary = z.object({
+  at: z.string(),
+  model: z.string(),
+  pairs: z.number(),
+  same_outcome: z.number(),
+  success_clone: z.number(),
+  success_target: z.number(),
+});
+
+// The latest task-validation run for the target (`harness/src/tasks.ts`), if any.
+export function taskFacts(targetDirectory: string): TaskFacts | null {
+  const dir = join(targetDirectory, "tasks");
+  if (!existsSync(dir)) return null;
+  const latest = readdirSync(dir)
+    .filter((f) => f.startsWith("results-") && f.endsWith(".json"))
+    .sort()
+    .at(-1);
+  if (latest === undefined) return null;
+  const r = TaskSummary.safeParse(JSON.parse(readFileSync(join(dir, latest), "utf8")));
+  if (!r.success) return null;
+  return {
+    at: r.data.at,
+    model: r.data.model,
+    pairs: r.data.pairs,
+    sameOutcome: r.data.same_outcome,
+    successClone: r.data.success_clone,
+    successTarget: r.data.success_target,
+  };
 }
 
 const pct = (x: number): string => `${(x * 100).toFixed(2)} %`;
@@ -148,6 +188,12 @@ export function reliabilityCard(c: CardInput): string {
       "Auditors",
       c.auditors
         ? `found ${String(c.auditors.found)} of ${String(c.auditors.planted)} planted defects`
+        : "not measured",
+    ),
+    row(
+      "Agent tasks",
+      c.tasks
+        ? `an agent (${c.tasks.model}) gets the same outcome on the clone as on the original in ${String(c.tasks.sameOutcome)} of ${String(c.tasks.pairs)} task runs; it succeeds in ${String(c.tasks.successClone)} on the clone, ${String(c.tasks.successTarget)} on the original (run ${c.tasks.at.slice(0, 10)})`
         : "not measured",
     ),
     row(
