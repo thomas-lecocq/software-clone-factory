@@ -112,13 +112,21 @@ committed before it was recorded, scored once.
 
 **How it got there, failures included.**
 
-| Step                                                   | Result                                              |
-| ------------------------------------------------------ | --------------------------------------------------- |
-| Builder agent, from an empty server, in the container  | 379 of 387 dev (logged on the host), 1 h, about $16 |
-| Pre-registered batch 1, single look                    | **448 of 473: claim rejected**                      |
-| Analysis of the 25 failures by a separate session      | six root causes, mostly discounts                   |
-| 379 new dev probes, one more builder pass (32 min, $7) | 696 of 696 dev                                      |
-| Pre-registered batch 2 (new seed), single look         | **473 of 473: claim holds**                         |
+| Step                                                                                             | Result                                               |
+| ------------------------------------------------------------------------------------------------ | ---------------------------------------------------- |
+| Builder agent, from an empty server, in the container                                            | 379 of 387 dev (logged on the host), 1 h, about $16  |
+| Pre-registered batch 1, single look                                                              | **448 of 473: claim rejected**                       |
+| Analysis of the 25 failures by a separate session                                                | six root causes, mostly discounts                    |
+| 379 new dev probes, one more builder pass (32 min, $7)                                           | 696 of 696 dev                                       |
+| Pre-registered batch 2 (new seed), single look                                                   | **473 of 473: claim holds**                          |
+| Breaker round, 306 new dev probes on a wider distribution, one more builder pass (30 min, $4.50) | 976 of 976 dev                                       |
+| Pre-registered batch 3, on the wider distribution, single look                                   | **466 of 473: claim rejected** (below 2.8 % at 95 %) |
+
+**The wider distribution is harder.** Batch 3 draws from a distribution widened where the breaker
+found failures (up to 4 items, amounts from 50 cents to $100,000, 100 % coupons, quantity 0): the
+improved clone fails 7 of 473, all in classic billing mode. Batch 2's claim stands for its own
+distribution; on the wider one, the clone is below 2.8 % at 95 %, and the next iteration starts
+there.
 
 **What the claim does not say.**
 
@@ -141,6 +149,26 @@ world.
 
 Not affiliated with Stripe. The clone reimplements observed behaviour of the public API in test
 mode; it contains no Stripe code, and no documentation text beyond short quotes.
+
+### Reliability card
+
+Every holdout run writes one ([`verify/reliability-card.md`](targets/stripe-billing/verify/reliability-card.md)):
+its level comes from a pre-registered batch only, and every figure from a run or a measurement
+file. Today's, on the hardest batch:
+
+![reliability: level C](https://img.shields.io/badge/reliability-level%20C-dfb317?style=flat-square) ![holdout: 466/473](https://img.shields.io/badge/holdout-466%2F473-dfb317?style=flat-square) ![breaker probes: 40/40](https://img.shields.io/badge/breaker%20probes-40%2F40-blue?style=flat-square) ![mutants caught: 34/40](https://img.shields.io/badge/mutants%20caught-34%2F40-blue?style=flat-square) ![auditor recall: 12/12](https://img.shields.io/badge/auditor%20recall-12%2F12-blue?style=flat-square)
+
+|                      |                                                                                                                                      |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| **Level**            | **C**: measured: below 2.76 % at 95 % confidence                                                                                     |
+| **Measured on**      | batch `hold-b3-`, 466 of 473; plan `analysis-plan-b3.md`, committed first; 4 looks, its claim rests on the first (`measurements.md`) |
+| **Bound**            | 2.76 % at 95 %, 3.35 % at 99 %                                                                                                       |
+| **Breaker probes**   | 40 of 40 pass; they are dev cases the builder may have learnt, so only a new breaker round tests the clone out of distribution       |
+| **Dev (training)**   | 976 of 976                                                                                                                           |
+| **Determinism**      | 10 of 10 replays identical after reset                                                                                               |
+| **Mutation testing** | 34 of 40 planted bugs caught by the fixtures (run 2026-10-13)                                                                        |
+| **Auditors**         | found 12 of 12 planted defects                                                                                                       |
+| **Evaluator**        | lock `1aa9c77dffe4`, commit 1283fd7, clean tree                                                                                      |
 
 ## Run it
 
