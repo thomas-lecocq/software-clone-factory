@@ -84,8 +84,8 @@ much more where a human records). Three ways to spend less:
 
 ## Harden the evaluator
 
-- **A network allowlist for the agent container** (a proxy that lets through the model API and
-  documentation only); the guard's code-host block is string matching today.
+- **Egress allowlist, further** (built for implementer agents: internal network plus an
+  allowlist proxy). Next: the same for the auditors and the task-validation agent.
 - **Independent authors.** Probes, planted defects and the auditor prompt share one author; a
   second author, or defects mined from real escapes, would test the auditors on blind spots.
 - **Timestamped pre-registration.** Commit order proves the plan came first only as far as the

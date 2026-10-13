@@ -736,6 +736,43 @@ describe("invariant 3: implementers see only a stripped sandbox", () => {
     expect(r.status).toBe(2);
   });
 
+  it("gives the agent no network but an allowlist proxy", () => {
+    const script = readFileSync(join(root, "harness", "sandbox.sh"), "utf8");
+    const run = script.slice(script.indexOf("docker run --rm \\\n"), script.indexOf("| tee"));
+    expect(run).toContain("--network scf-internal");
+    expect(run).toContain('HTTPS_PROXY="http://$egress:3128"');
+    expect(script).toContain("docker network create --internal scf-internal");
+    expect(script).toContain('allow="api.anthropic.com"');
+  });
+
+  it("lets the egress proxy through only the allowed hosts, on port 443", async () => {
+    const { spawn } = await import("node:child_process");
+    const { request } = await import("node:http");
+    const proxy = spawn(process.execPath, [join(root, "harness", "docker", "egress-proxy.mjs")], {
+      env: { ...process.env, ALLOW: "allowed.invalid" },
+      stdio: ["ignore", "pipe", "ignore"],
+    });
+    await new Promise((r) => setTimeout(r, 500));
+    const status = (target: string): Promise<number> =>
+      new Promise((resolve) => {
+        const req = request({ host: "127.0.0.1", port: 3128, method: "CONNECT", path: target });
+        req.on("connect", (res, socket) => {
+          socket.destroy();
+          resolve(res.statusCode ?? 0);
+        });
+        req.on("error", () => {
+          resolve(-1);
+        });
+        req.end();
+      });
+    try {
+      expect(await status("github.com:443")).toBe(403);
+      expect(await status("allowed.invalid:80")).toBe(403);
+    } finally {
+      proxy.kill();
+    }
+  });
+
   it("never copies a symlink back from the sandbox", () => {
     const script = readFileSync(join(root, "harness", "sandbox.sh"), "utf8");
     const back = script.slice(script.indexOf('if [ -n "$copy_back" ]'));
@@ -744,7 +781,7 @@ describe("invariant 3: implementers see only a stripped sandbox", () => {
 
   it("mounts the sandbox alone into the agent container", () => {
     const script = readFileSync(join(root, "harness", "sandbox.sh"), "utf8");
-    const run = script.slice(script.indexOf("docker run"), script.indexOf("| tee"));
+    const run = script.slice(script.indexOf("docker run --rm \\\n"), script.indexOf("| tee"));
     expect(run.match(/(^|\s)(-v|--volume|--mount)\s/g)).toEqual([" -v "]);
     expect(run).toContain('-v "$sandbox:/work"');
     expect(script).toContain('make-sandbox.sh" "$repo" "$sandbox"');

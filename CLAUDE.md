@@ -17,7 +17,8 @@ Prettier, Vitest, zod at every boundary, Playwright. `npm run check` clean befor
 3. Implementer agents run in the agent container (`harness/sandbox.sh`, image
    `harness/docker/Dockerfile`), which mounts only a sandbox copy with no holdout (hash-split, or
    a `hold-` batch with its seed), no audit material, no env or scrub files and no git history;
-   only the requested folder (the clone) is copied back. Inside it, `harness/hooks/guard-oracle.sh`
+   only the requested folder (the clone) is copied back. Its network is internal: an egress proxy
+   lets through the model API and listed hosts only. Inside it, `harness/hooks/guard-oracle.sh`
    is a guardrail that blocks evaluator writes and holdout or audit reads, and logs what it blocks.
 4. Recording refuses any Stripe key that is not a test key.
 5. Clone state lives in memory only. `POST /__reset` restores the seed; the same probe run twice
@@ -36,5 +37,4 @@ Language: English for every file in the repository.
 - Re-recording an existing fixture, or editing `docs/verification.md` or `docs/target-triage.md`.
 - Any call to a target outside its test mode.
 
-Free without asking: test-mode calls, subagents one at a time, everything else. After a deliberate
-evaluator change: `npm run relock <t> -- --reason ...`, then commit.
+Free without asking: test-mode calls, subagents one at a time, the rest. Evaluator change: relock.

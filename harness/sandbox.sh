@@ -21,7 +21,8 @@ command -v docker >/dev/null || { echo "refusing: docker is required (OrbStack o
 docker image inspect "$image" >/dev/null 2>&1 || docker build -q -t "$image" -f "$repo/harness/docker/Dockerfile" "$repo" >/dev/null
 
 sandbox="$(mktemp -d "${TMPDIR:-/tmp}/scf-sandbox-$agent-XXXX")"
-trap 'rm -rf "$sandbox"' EXIT
+egress="scf-egress-$agent-$stamp"
+trap 'docker rm -f "$egress" >/dev/null 2>&1 || true; rm -rf "$sandbox"' EXIT
 "$repo/harness/make-sandbox.sh" "$repo" "$sandbox"
 
 # An analyst may see one spent batch, and only one recorded as spent in measurements.md (its single
@@ -40,9 +41,24 @@ fi
 mkdir -p "$repo/targets/$target/logs"
 # Hours of agent work must not vanish with the sandbox: the clone is copied back even when the run
 # fails, and the run's status is returned at the end.
+# Egress allowlist: the agent sits on an internal network with no route out; its only way out is
+# a proxy container that lets through the model API (and the hosts a target lists in
+# egress-allow.txt, such as its documentation) and refuses the rest, a code host included.
+allow="api.anthropic.com"
+if [ -f "$repo/targets/$target/egress-allow.txt" ]; then
+  allow="$allow,$(grep -v '^#' "$repo/targets/$target/egress-allow.txt" | grep -v '^$' | paste -sd, -)"
+fi
+docker network inspect scf-internal >/dev/null 2>&1 || docker network create --internal scf-internal >/dev/null
+docker run -d --rm --name "$egress" -e ALLOW="$allow" \
+  -v "$repo/harness/docker/egress-proxy.mjs:/egress-proxy.mjs:ro" "$image" node /egress-proxy.mjs >/dev/null
+docker network connect scf-internal "$egress"
+
 status=0
 docker run --rm \
   --env-file "$credential" -e RH_SANDBOX=1 \
+  --network scf-internal \
+  -e HTTPS_PROXY="http://$egress:3128" -e HTTP_PROXY="http://$egress:3128" -e NO_PROXY=localhost,127.0.0.1 \
+  -e CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=1 \
   -v "$sandbox:/work" \
   "$image" \
   claude -p "Use the $agent subagent (Agent tool, subagent_type $agent) on target '$target' with this task, following .claude/agents/$agent.md: $task When it finishes, report its final answer verbatim." \
@@ -50,6 +66,10 @@ docker run --rm \
   --permission-mode acceptEdits \
   --allowedTools "Bash Read Write Edit Grep Glob Agent WebFetch" \
   --output-format stream-json --verbose | tee "$log" | jq -rj 'select(.type == "assistant") | .message.content[]? | select(.type == "text") | .text + "\n"' || status=$?
+
+# What the egress proxy refused, kept next to the run's log.
+docker logs "$egress" 2>/dev/null | grep '^denied' >"${log%.jsonl}-egress-denied.log" || true
+[ -s "${log%.jsonl}-egress-denied.log" ] || rm -f "${log%.jsonl}-egress-denied.log"
 
 # The last line of the stream carries the run's totals: duration, turns, cost and tokens per model.
 jq -c --arg agent "$agent" --arg stamp "$stamp" 'select(.type == "result")

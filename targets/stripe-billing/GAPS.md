@@ -112,9 +112,10 @@ dialog, **live mode** (assumed equal to test mode).
 - **No ablation of the factory's components.** Record-first, the sandbox, the holdout batches
   and the guard were never switched off one at a time, so none of them can be credited with the
   result on its own. The one ablation run is of the second builder pass (`measurements.md`).
-- **Guardrails are string matching.** The guard hook blocks by pattern and can be phrased around;
-  isolation rests on the container and the sandbox copy. The container has network access (no
-  Stripe key inside); code hosts are refused by the guard, not by the network.
+- **Guardrails are string matching**, but no longer the network's only defence: the agent
+  container is on an internal network whose only way out is an egress proxy that lets through the
+  model API (and hosts a target lists) and refuses the rest. The task-validation agent and the
+  auditors still run with an open network.
 - **Auditors** found 12 of 12 planted defects (`audit/results/`); the defects and the auditor
   prompt share one author, and precision was adjudicated by that same author.
 - **Account fragment in history.** Recorded object IDs carried an account-specific fragment;

@@ -11,5 +11,5 @@ export default tseslint.config(
     },
     rules: { "@typescript-eslint/restrict-template-expressions": ["error", { allowNumber: true }] },
   },
-  { files: ["*.js"], ...tseslint.configs.disableTypeChecked },
+  { files: ["*.js", "**/*.mjs"], ...tseslint.configs.disableTypeChecked },
 );
