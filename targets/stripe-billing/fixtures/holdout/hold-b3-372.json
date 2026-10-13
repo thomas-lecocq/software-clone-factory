@@ -1,0 +1,68 @@
+{
+  "id": "hold-b3-372",
+  "rules": [
+    "DSC-01",
+    "ITM-01",
+    "MOD-01",
+    "PRO-05",
+    "PRO-06",
+    "PRO-09",
+    "PRO-10"
+  ],
+  "input": {
+    "kind": "wide",
+    "start": 1793615743,
+    "billing_mode": "classic",
+    "interval": "month",
+    "items": [
+      {
+        "amount": 48656,
+        "quantity": 9
+      },
+      {
+        "amount": 498093,
+        "quantity": 10
+      }
+    ],
+    "coupons": [
+      {
+        "percent_off": 24,
+        "duration": "forever"
+      }
+    ],
+    "change": {
+      "item": 0,
+      "amount": 332,
+      "interval": null,
+      "quantity": null,
+      "offset": 1406401,
+      "proration_behavior": "none",
+      "discount": {
+        "percent_off": 74,
+        "duration": "forever"
+      }
+    }
+  },
+  "observed": {
+    "preview": {
+      "error": {
+        "type": "StripeInvalidRequestError",
+        "code": null,
+        "param": "proration_date",
+        "message": "Cannot specify proration date if no proration is being done"
+      }
+    },
+    "first_invoice": {
+      "subtotal": 5418834,
+      "total": 4118314,
+      "amount_due": 4118314,
+      "status": "paid"
+    }
+  },
+  "noise": [],
+  "recorded_at": "2026-10-13T08:51:57.464Z",
+  "recorded_with": {
+    "stripe_api_version": "2026-08-26.dahlia",
+    "stripe_node": "22.6.2"
+  }
+}

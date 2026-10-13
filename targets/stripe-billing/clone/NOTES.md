@@ -191,3 +191,60 @@ attaches after load. After the fix every settle on that path takes 0-1 ms, and x
 
 Result: `npm run verify stripe-billing` 696 of 696 dev fixtures pass (whole run 415 s). Every
 rule with dev fixtures is verified; LIF-03 and LIF-04 still have none (unverified).
+
+## Pass 5: breaker probes, wide3, dev-v2, minimum charge
+
+Baseline: verify 939 of 976 dev. 37 failures, read one by one (the rule groups overlap; the
+largest, PRO-01..05 / ITM-01 / INT-01, share the causes below):
+
+1. Allocation (DSC-01/DSC-03; wide3-018, wide3-256 and the credits that inherit it). "Remainder
+   one cent per line from the last line" is a special case of cumulative flooring: line i gets
+   floor(T C_i / S) - floor(T C_(i-1) / S), C_i the running sum of the bases. wide3-256 (4
+   lines, remainder 2) gives the 2nd and 4th lines a cent, which only the cumulative form
+   explains; all 90 dev renewal allocations with a remainder agree with it (checked offline).
+2. Once coupons (DSC-05; dev-brk-free-once, wide3-027, -054, -230, -249). A once coupon is spent
+   only by an invoice where it took more than 0; one that got 0 (a 0 first invoice, or another
+   coupon took everything) stays active. In a preview, an active once coupon (kept from the
+   subscription or passed) that takes something from a remaining-time charge is spent there: not
+   listed, not applied to the renewal. One that takes nothing from the prorations is listed and
+   applies to the renewal lines (generalises DSC-05 a/b). Immediate invoices list it (c).
+3. Zero-amount items (ITM-01/PRO-08; dev-brk-qty0-item, dev-brk-free-once): an old item billed at
+   0 (amount 0 or quantity 0) gets no credit line.
+4. Classic credit label (wide3-054, -249): counts every discount on the billed line, zero ones
+   included ("with discounts"); the prorated amount still uses the non-zero ones.
+5. Flexible charge discount rounding (PRO-04; dev-brk-off-huge/pct100/stack-full/pct20-half):
+   the discount is prorated with the charge's float factor, Math.round(D (1 - e/P)); credits
+   stay exact, half away from zero.
+6. Classic charge at an exact half (dev-brk-big-half-charge-classic: 99999999/18 = 5555555.5 is
+   charged 5555555, while 3000 x 0.0075 = 22.5 is charged 23): consistent with r/P truncated to a
+   fixed number of decimals before multiplying, then half up. Any 4..15 decimals fit the dev
+   cases; 12 is a guess.
+7. Mixed intervals (INT-01/ITM-01; dev-brk-interval-multi-*, wide3-080/093/270/274): in flexible
+   mode each item keeps its own period; a changed item's new period runs from the current
+   period start for its new interval. The preview is the invoice at the earliest item period
+   end and renews only the items whose period ends there. The proration date may equal the new
+   end (dev-brk-y2m-at-new-end, -jan30-at-end) and is rejected only past it. Errors
+   (wide3-086/105/146/155/168/223/225/238/290): classic with items of different intervals ->
+   "All prices on a subscription must have the same `recurring.interval`..."; flexible with
+   mixed intervals and a forever amount-off coupon in the new state -> "Subscriptions with
+   multiple intervals only support percent_off coupons...".
+8. INV-01: minimum charge 56 (dev-t2-f-left56..58, dev-brk-inv-56-pct95).
+9. ERR-02: code resource_missing on 404s (dev-v2-missing-object).
+10. LIF-06: dev-v2-retry-days pins the first retry within 2 days and the second between 3 days
+    1 hour and 4 days 1 hour after the first failure; retries at +1 and +4 days.
+
+Prediction: all 37 flip and nothing else moves (risk: point 2 changes when a passed once coupon
+is listed in non-immediate previews; point 5 may move older flexible coupon cases).
+
+Outcome: first attempt, verify 976 of 976 dev, as predicted; no earlier case moved.
+
+Thin spots left after pass 5:
+
+- Point 6 (classic truncation digits) is pinned by two cases only; the number of decimals is a
+  guess within 4..15.
+- Point 7: which coupons the mixed-interval error looks at when a coupon is passed to the
+  preview (the clone checks the new state's discounts) and the order of the errors are not
+  pinned. Classic previews never mix intervals (they error), so the clone's lifecycle code still
+  assumes one interval per subscription.
+- LIF-06: the retry days 1 and 4 are one choice among the schedules the two cases allow.
+- Contradiction with rules.json, DSC-07 wording: still as in pass 4.

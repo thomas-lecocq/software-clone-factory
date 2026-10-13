@@ -4,6 +4,7 @@
  */
 import {
   allocate,
+  spendOnce,
   amountDue,
   creditLine,
   deferSmall,
@@ -26,9 +27,10 @@ import { periodAt } from "./time.ts";
 
 const HOUR = 3600;
 const DAY = 86400;
-// Retries after a failed renewal payment, counted from the first attempt (LIF-06: three attempts
-// within five days; the spacing in between is not pinned by the recordings).
-const RETRIES = [3 * DAY, 5 * DAY];
+// Retries after a failed renewal payment, counted from the first attempt (LIF-06). Pinned by
+// dev-v2-retry-days: the first retry within 2 days, the second after 3 days 1 hour and by 4 days
+// 1 hour; l-payment-fails-retries: no fourth attempt by 5 days. 1 and 4 days fit both.
+const RETRIES = [1 * DAY, 4 * DAY];
 
 function failing(state: State, customer: string): boolean {
   const c = get(state.customers, customer);
@@ -90,10 +92,7 @@ function renew(state: State, sub: Subscription): void {
   lines.forEach((l, i) => {
     l.discount_amounts = specs.map((s, k) => ({ discount: s.id, amount: alloc[k]?.[i] ?? 0 }));
   });
-  for (const s of specs) {
-    const d = get(state.discounts, s.id);
-    if (d && s.once) d.used = true;
-  }
+  spendOnce(state, specs, alloc);
   sub.items.forEach((it, i) => {
     const l = lines[i];
     if (l) it.billed = { invoice: id, line: l.id, amount: l.amount, discounts: l.discount_amounts };

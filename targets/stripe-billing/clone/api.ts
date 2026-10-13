@@ -3,6 +3,7 @@ import type { CloneRequest, CloneResponse } from "../../../harness/src/clone-kit
 import type { Json } from "../../../harness/src/json.ts";
 import {
   allocate,
+  spendOnce,
   amountDue,
   deferSmall,
   draftFromPlan,
@@ -36,12 +37,16 @@ export const fail = (
   status: number,
   message: string,
   param: string | null = null,
+  code: string | null = null,
 ): CloneResponse => ({
   status,
-  body: { error: { type: "invalid_request_error", message, param } },
+  body: {
+    error: { type: "invalid_request_error", message, param, ...(code !== null ? { code } : {}) },
+  },
 });
+// ERR-02: a missing object is a 404 resource_missing naming the id parameter.
 const missing = (what: string, id: string): CloneResponse =>
-  fail(404, `No such ${what}: '${id}'`, "id");
+  fail(404, `No such ${what}: '${id}'`, "id", "resource_missing");
 
 export function str(v: Json | undefined): string | null {
   return typeof v === "string" ? v : typeof v === "number" ? String(v) : null;
@@ -126,10 +131,7 @@ export function billFirstInvoice(state: State, sub: Subscription, now: number): 
     const l = lines[i];
     if (l) it.billed = { invoice: id, line: l.id, amount: l.amount, discounts: l.discount_amounts };
   });
-  for (const s of specs) {
-    const d = get(state.discounts, s.id);
-    if (d && s.once) d.used = true;
-  }
+  spendOnce(state, specs, alloc);
   const tda = specs.map((s, k) => ({
     discount: s.id,
     amount: (alloc[k] ?? []).reduce((a, b) => a + b, 0),

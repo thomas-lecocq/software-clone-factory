@@ -67,25 +67,32 @@ export function allocate(bases: number[], discounts: DiscSpec[]): number[][] {
       d.percent_off !== null
         ? roundRatio(sum * ppm(d.percent_off), PPM)
         : Math.min(d.amount_off ?? 0, sum);
+    // Cumulative flooring: line i gets floor(T C_i / S) - floor(T C_(i-1) / S), C_i the running
+    // sum of the bases (pass 5; "one cent from the last line" is its 2- and 3-line case).
+    const T = BigInt(total);
+    const S = BigInt(sum);
+    let cum = 0n;
+    let prev = 0n;
     left.forEach((b, i) => {
-      out[i] = Math.floor((total * b) / sum);
+      cum += BigInt(b);
+      const upTo = (T * cum) / S;
+      out[i] = Number(upTo - prev);
+      prev = upTo;
     });
-    // The rounding remainder goes one cent per line, from the last line backwards.
-    let rest = total - out.reduce((a, b) => a + b, 0);
-    const open = left.map((b, i) => (b > 0 ? i : -1)).filter((i) => i >= 0);
-    for (
-      let k = open.length - 1;
-      rest > 0 && open.length > 0;
-      k = k === 0 ? open.length - 1 : k - 1
-    ) {
-      const i = open[k] ?? 0;
-      out[i] = (out[i] ?? 0) + 1;
-      rest -= 1;
-    }
     left.forEach((b, i) => {
       left[i] = b - (out[i] ?? 0);
     });
     return out;
+  });
+}
+
+// A once coupon is spent by the first invoice where it took more than 0 (pass 5): one that got
+// nothing stays active for the next invoice.
+export function spendOnce(state: State, specs: DiscSpec[], alloc: number[][]): void {
+  specs.forEach((s, k) => {
+    const d = get(state.discounts, s.id);
+    const took = (alloc[k] ?? []).reduce((a, b) => a + b, 0);
+    if (d && s.once && took > 0) d.used = true;
   });
 }
 
@@ -153,19 +160,22 @@ export interface Plan {
   // Per proration line: how many discounts a credit line carried (null for a charge).
   carried: (number | null)[];
   items: PlannedItem[];
+  // Per planned item: its interval and the end of its current (possibly new) period.
+  intervals: Interval[];
+  ends: number[];
   // Items whose price or quantity changes.
   changed: string[];
   // Discounts of the new state (a once coupon passed to the preview included).
   discounts: string[];
-  // Whether the discounts were passed with the change rather than kept from the subscription.
-  passed: boolean;
+  // Once coupons that took something from the remaining-time charges (spent there).
+  spent: string[];
   immediate: boolean;
   // A classic interval change restarts the cycle at the clock time.
   reset: boolean;
   period_start: number;
+  // When the preview invoice falls: the earliest item period end (or the reset period's end).
   period_end: number;
   anchor: number;
-  interval: Interval;
   proration_date: number;
   now: number;
 }
@@ -184,15 +194,17 @@ export interface PlanInput {
   now: number;
 }
 
-function creditDiscounts(
-  state: State,
-  billed: Billed | null,
-): { spec: DiscSpec; amount: number }[] {
+interface Carried {
+  spec: DiscSpec;
+  amount: number;
+}
+
+// Every discount on the line that billed the period, those it got nothing from included.
+function billedDiscounts(state: State, billed: Billed | null): Carried[] {
   if (!billed) return [];
   return billed.discounts
-    .filter((d) => d.amount !== 0)
     .map((d) => ({ spec: specOf(state, d.discount), amount: d.amount }))
-    .filter((x): x is { spec: DiscSpec; amount: number } => x.spec !== undefined);
+    .filter((x): x is Carried => x.spec !== undefined);
 }
 
 // Credit for the unused time of an item, from `prd` to the period end, carrying the discounts the
@@ -207,20 +219,22 @@ export function creditLine(
   const P = sub.period_end - sub.period_start;
   const r = sub.period_end - prd;
   const b = oldPrice.unit_amount * it.quantity;
-  const carried = creditDiscounts(state, it.billed);
+  const all = billedDiscounts(state, it.billed);
+  const carried = all.filter((c) => c.amount !== 0);
   let credit: number;
-  // Flexible: a carried discount whose prorated amount rounds to 0 is not applied (DSC-08);
-  // classic prorates the net amount in one step and keeps every label.
-  let applied = carried.map((c) => c.spec);
+  let applied: DiscSpec[];
   if (sub.billing_mode === "classic") {
     // Classic: the coupons apply to the credited item on its own (an amount-off coupon in full,
-    // not its share of a multi-item invoice), then the net amount is prorated.
+    // not its share of a multi-item invoice), then the net amount is prorated. The label names
+    // every discount of the billed line, zero ones included (pass 5).
     const D = allocate(
       [b],
       carried.map((c) => c.spec),
     ).reduce((a, x) => a + (x[0] ?? 0), 0);
     credit = -roundRatio((b - D) * r, P);
+    applied = all.map((c) => c.spec);
   } else {
+    // Flexible: a carried discount whose prorated amount rounds to 0 is not applied (DSC-08).
     const prorated = carried.map((c) => roundRatio(c.amount * r, P));
     credit = -(roundRatio(b * r, P) - prorated.reduce((a, x) => a + x, 0));
     applied = carried.filter((_, k) => (prorated[k] ?? 0) !== 0).map((c) => c.spec);
@@ -241,9 +255,25 @@ export function creditLine(
     },
     own: applied,
     // Discounts on the billed line, those it got nothing from included (DSC-07).
-    carried: it.billed?.discounts.length ?? 0,
+    carried: all.length,
   };
 }
+
+// Classic charge: r/P truncated to a fixed number of decimals, times the amount, half up
+// (pass 5: 99999999 x 1/18 = 5555555.5 is charged 5555555, 3000 x 0.0075 = 22.5 is charged 23).
+const CLASSIC_DIGITS = 10n ** 12n;
+function classicProrate(n: number, r: number, P: number): number {
+  const f = (BigInt(r) * CLASSIC_DIGITS) / BigInt(P);
+  const x = BigInt(n) * f;
+  const sign = x < 0n ? -1n : 1n;
+  const a = x < 0n ? -x : x;
+  return Number(sign * ((2n * a + CLASSIC_DIGITS) / (2n * CLASSIC_DIGITS)));
+}
+
+const SAME_INTERVAL =
+  "All prices on a subscription must have the same `recurring.interval` and `recurring.interval_count` unless flexible billing mode is enabled and you're on the 2025-06-30.basil API version or later. To proceed, update the subscription to flexible billing mode, then retry this update. For information about flexible billing mode, go to https://docs.stripe.com/billing/subscriptions/billing-mode. ";
+const MIXED_COUPONS =
+  "Subscriptions with multiple intervals only support percent_off coupons, `duration=once` amount_off coupons, and `duration=repeating` amount_off coupons.";
 
 export function planChange(state: State, sub: Subscription, input: PlanInput): Plan | PlanError {
   const behavior = input.behavior ?? "create_prorations";
@@ -260,7 +290,6 @@ export function planChange(state: State, sub: Subscription, input: PlanInput): P
       param: "proration_date",
     };
   }
-  const oldInterval = intervalOf(state, sub);
   const items: PlannedItem[] = sub.items.map((it) => {
     const ch = input.changes.find((c) => c.id === it.id);
     if (!ch) return { id: it.id, price: it.price, quantity: it.quantity };
@@ -271,30 +300,40 @@ export function planChange(state: State, sub: Subscription, input: PlanInput): P
       quantity: ch.quantity ?? (priceChanged ? 1 : it.quantity),
     };
   });
-  const firstPlanned = items[0];
-  const newInterval = firstPlanned ? priceOf(state, firstPlanned.price).interval : oldInterval;
+  const oldIntervals = sub.items.map((it) => priceOf(state, it.price).interval);
+  const intervals = items.map((it) => priceOf(state, it.price).interval);
   const discounts =
     input.discounts ?? sub.discounts.filter((id) => get(state.discounts, id)?.used !== true);
   const chargeSpecs = specsOf(state, discounts);
 
   let periodStart = sub.period_start;
-  let periodEnd = sub.period_end;
   let anchor = sub.anchor;
   let reset = false;
-  const intervalChange = newInterval !== oldInterval;
+  let ends = items.map(() => sub.period_end);
+  const intervalChange = intervals.some((iv, i) => iv !== oldIntervals[i]);
+  const mixed = new Set(intervals).size > 1;
   if (intervalChange) {
     if (sub.billing_mode === "classic") {
+      if (mixed) return { message: SAME_INTERVAL, param: null };
       reset = true;
       periodStart = input.now;
       anchor = input.now;
-      periodEnd = addIntervals(input.now, newInterval, 1);
+      ends = intervals.map((iv) => addIntervals(input.now, iv, 1));
     } else {
-      periodEnd = addIntervals(sub.period_start, newInterval, 1);
-      if (periodEnd < sub.period_end && prd >= periodEnd) {
-        return {
-          message: `You cannot specify \`proration_date\` past the updated subscription period end when using flexible billing mode. The value should be less than ${periodEnd}.`,
-          param: null,
-        };
+      if (mixed && chargeSpecs.some((s) => !s.once && s.amount_off !== null)) {
+        return { message: MIXED_COUPONS, param: null };
+      }
+      // Each item keeps its own period; a new interval runs from the current period start.
+      ends = intervals.map((iv, i) =>
+        iv === oldIntervals[i] ? sub.period_end : addIntervals(sub.period_start, iv, 1),
+      );
+      for (const end of ends) {
+        if (end < sub.period_end && prd > end) {
+          return {
+            message: `You cannot specify \`proration_date\` past the updated subscription period end when using flexible billing mode. The value should be less than ${end}.`,
+            param: null,
+          };
+        }
       }
     }
   }
@@ -302,6 +341,7 @@ export function planChange(state: State, sub: Subscription, input: PlanInput): P
   const prorations: Plan["prorations"] = [];
   const own: DiscSpec[][] = [];
   const carried: (number | null)[] = [];
+  const spent = new Set<string>();
   const changed = sub.items
     .filter((it, i) => {
       const next = items[i];
@@ -312,41 +352,48 @@ export function planChange(state: State, sub: Subscription, input: PlanInput): P
     sub.items.forEach((it: SubItem, i) => {
       const next = items[i];
       if (!next || !changed.includes(it.id)) return;
-      // A credit with no remaining time is omitted (INT-02).
-      if (prd < sub.period_end) {
+      // A credit with no remaining time is omitted (INT-02), and so is the credit of an item
+      // billed at 0 (pass 5).
+      const b = priceOf(state, it.price).unit_amount * it.quantity;
+      if (prd < sub.period_end && b !== 0) {
         const credit = creditLine(state, sub, it, prd);
         prorations.push(credit.line);
         own.push(credit.own);
         carried.push(credit.carried);
       }
       if (reset) return;
-      // Charge for the remaining time on the new item, over the new period.
+      // Charge for the remaining time on the new item, over the item's new period.
+      const end = ends[i] ?? sub.period_end;
       const newPrice = priceOf(state, next.price);
       const n = newPrice.unit_amount * next.quantity;
-      const P2 = periodEnd - periodStart;
-      const r2 = periodEnd - prd;
+      const P2 = end - periodStart;
+      const r2 = end - prd;
       const e2 = prd - periodStart;
       if (r2 <= 0) return;
       const D2 = allocate([n], chargeSpecs).map((x) => x[0] ?? 0);
-      const base =
-        sub.billing_mode === "classic" ? roundRatio(n * r2, P2) : Math.round(n * (1 - e2 / P2));
-      // Flexible discounts the full-period amount, then prorates the discount (DSC-02); classic
-      // prorates first and takes a percent-off on the prorated amount (DSC-04).
+      const factor = 1 - e2 / P2;
+      const classic = sub.billing_mode === "classic";
+      const base = classic ? classicProrate(n, r2, P2) : Math.round(n * factor);
+      // Flexible discounts the full-period amount, then prorates the discount with the charge's
+      // factor (DSC-02); classic prorates first and takes a percent-off on the prorated amount
+      // (DSC-04).
       let left = base;
       const prorated = chargeSpecs.map((s, k) => {
-        const d =
-          sub.billing_mode === "classic" && s.percent_off !== null
+        const full = D2[k] ?? 0;
+        const d = !classic
+          ? Math.round(full * factor)
+          : s.percent_off !== null
             ? roundRatio(Math.max(0, left) * ppm(s.percent_off), PPM)
-            : roundRatio((D2[k] ?? 0) * r2, P2);
+            : roundRatio(full * r2, P2);
         left -= d;
         return d;
       });
       const applied = chargeSpecs.filter((_, k) => (prorated[k] ?? 0) !== 0);
-      const charge = left;
+      for (const s of applied) if (s.once) spent.add(s.id);
       prorations.push({
-        amount: charge,
+        amount: left,
         description: `Remaining time on ${qtyPrefix(next.quantity)}${productName(state, next.price)}${withDiscounts(applied)} after ${shortDate(prd)}`,
-        period: { start: prd, end: periodEnd },
+        period: { start: prd, end },
         price: next.price,
         quantity: next.quantity,
         proration: true,
@@ -366,15 +413,16 @@ export function planChange(state: State, sub: Subscription, input: PlanInput): P
     own,
     carried,
     items,
+    intervals,
+    ends,
     changed,
     discounts,
-    passed: input.discounts !== null,
+    spent: [...spent],
     immediate,
     reset,
     period_start: periodStart,
-    period_end: periodEnd,
+    period_end: Math.min(...ends),
     anchor,
-    interval: newInterval,
     proration_date: prd,
     now: input.now,
   };
@@ -397,7 +445,7 @@ export interface Draft {
 }
 
 // The invoice a plan produces: now (immediate) or at the next renewal (prorations plus the next
-// full period of every item).
+// full period of every item whose period ends then).
 export function draftFromPlan(
   state: State,
   sub: Subscription,
@@ -405,15 +453,13 @@ export function draftFromPlan(
   ids: { line: () => string; item: () => string },
   mode: Subscription["billing_mode"],
 ): Draft {
-  // A once coupon passed with the change (DSC-05) is on the invoice when the change prorates
-  // nothing (it then discounts the renewal) or when the invoice is immediate; with prorations
-  // at the next renewal it discounts only the remaining-time charge. A once coupon kept from the
-  // subscription never discounts a later invoice.
-  const passedOnceShows = plan.immediate || plan.prorations.length === 0;
+  // An active once coupon (DSC-05, pass 5) that took something from a remaining-time charge is
+  // spent there: off the invoice and off the renewal lines. Otherwise it is on the invoice and
+  // discounts the renewal. An immediate invoice lists it either way (at 0 there).
   const top = plan.discounts.filter((id) => {
     const s = specOf(state, id);
     if (!s) return false;
-    return !s.once || (plan.passed && passedOnceShows);
+    return !s.once || plan.immediate || !plan.spent.includes(id);
   });
   const topSpecs = specsOf(state, top);
   const lines: Line[] = plan.prorations.map((p) => ({
@@ -423,15 +469,19 @@ export function draftFromPlan(
   }));
   const recurring: Line[] = [];
   if (plan.reset) {
-    for (const it of plan.items) {
-      if (!plan.changed.includes(it.id)) continue;
-      recurring.push(recurringLine(state, it, plan.period_start, plan.period_end, ids.line()));
-    }
+    plan.items.forEach((it, i) => {
+      if (!plan.changed.includes(it.id)) return;
+      const end = plan.ends[i] ?? plan.period_end;
+      recurring.push(recurringLine(state, it, plan.period_start, end, ids.line()));
+    });
   } else if (!plan.immediate) {
-    const next = periodAt(plan.anchor, plan.interval, plan.period_end)[1];
-    for (const it of plan.items) {
-      recurring.push(recurringLine(state, it, plan.period_end, next, ids.line()));
-    }
+    const at = plan.period_end;
+    plan.items.forEach((it, i) => {
+      const iv = plan.intervals[i];
+      if (plan.ends[i] !== at || iv === undefined) return;
+      const next = periodAt(plan.anchor, iv, at)[1];
+      recurring.push(recurringLine(state, it, at, next, ids.line()));
+    });
   }
   const alloc = allocate(
     recurring.map((l) => l.amount),
@@ -505,9 +555,8 @@ export function recurringLine(
   };
 }
 
-// The smallest amount the account charges (INV-01). The dev cases pin it above 51 cents and at
-// most 291; 59 cents is 0.50 EUR (the French account's minimum) converted, an assumption.
-export const MIN_CHARGE = 59;
+// The smallest amount the account charges (INV-01): dev-t2-f-left55 is not charged, left56 is.
+export const MIN_CHARGE = 56;
 
 // What an invoice asks for: its total plus the starting balance, less an amount deferred to the
 // customer balance because it was below the minimum charge.
