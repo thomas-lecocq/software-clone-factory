@@ -4,55 +4,55 @@ Fixtures per rule and split, from `npm run verify`. Counts only.
 
 | Rule | Dev fixtures | Holdout fixtures | Evidence |
 | --- | --- | --- | --- |
-| PRO-01 | 0 | 440 | dev and holdout |
-| PRO-02 | 0 | 440 | dev and holdout |
-| PRO-03 | 0 | 440 | dev and holdout |
-| PRO-04 | 0 | 440 | dev and holdout |
-| PRO-05 | 0 | 366 | dev and holdout |
-| PRO-06 | 0 | 22 | dev and holdout |
-| PRO-07 | 0 | 107 | dev and holdout |
-| PRO-08 | 0 | 260 | dev and holdout |
-| PRO-09 | 0 | 173 | dev and holdout |
-| PRO-10 | 0 | 171 | dev and holdout |
-| PER-01 | 0 | 81 | dev and holdout |
-| INT-01 | 0 | 76 | dev and holdout |
-| DSC-01 | 0 | 155 | dev and holdout |
-| DSC-02 | 0 | 189 | dev and holdout |
-| DSC-03 | 0 | 162 | dev and holdout |
-| DSC-04 | 0 | 69 | dev and holdout |
-| DSC-05 | 0 | 156 | dev and holdout |
-| MOD-01 | 0 | 142 | dev and holdout |
-| ERR-01 | 0 | 0 | none |
-| UI-01 | 0 | 0 | none |
-| UI-02 | 0 | 0 | none |
-| UI-03 | 0 | 0 | none |
-| UI-04 | 0 | 0 | none |
-| UI-05 | 0 | 0 | none |
-| UI-06 | 0 | 0 | none |
-| LIF-01 | 0 | 0 | none |
-| LIF-02 | 0 | 0 | none |
-| LIF-03 | 0 | 0 | none |
-| LIF-04 | 0 | 0 | none |
-| LIF-05 | 0 | 0 | none |
-| LIF-06 | 0 | 0 | none |
-| LIF-07 | 0 | 0 | none |
-| UI-07 | 0 | 0 | none |
-| UI-08 | 0 | 0 | none |
-| UI-09 | 0 | 0 | none |
-| UI-10 | 0 | 0 | none |
-| UI-11 | 0 | 0 | none |
-| UI-12 | 0 | 0 | none |
-| UI-13 | 0 | 0 | none |
-| UI-14 | 0 | 0 | none |
-| ITM-01 | 0 | 284 | dev and holdout |
-| DSC-06 | 0 | 74 | dev and holdout |
-| DSC-07 | 0 | 70 | dev and holdout |
-| DSC-08 | 0 | 13 | dev and holdout |
-| INT-02 | 0 | 4 | dev and holdout |
-| INV-01 | 0 | 1 | dev and holdout |
-| ERR-02 | 0 | 0 | none |
+| PRO-01 | 809 | 2239 | dev and holdout |
+| PRO-02 | 808 | 2239 | dev and holdout |
+| PRO-03 | 805 | 2239 | dev and holdout |
+| PRO-04 | 815 | 2239 | dev and holdout |
+| PRO-05 | 807 | 2119 | dev and holdout |
+| PRO-06 | 70 | 227 | dev and holdout |
+| PRO-07 | 135 | 491 | dev and holdout |
+| PRO-08 | 363 | 1238 | dev and holdout |
+| PRO-09 | 398 | 1051 | dev and holdout |
+| PRO-10 | 322 | 1050 | dev and holdout |
+| PER-01 | 158 | 455 | dev and holdout |
+| INT-01 | 91 | 307 | dev and holdout |
+| DSC-01 | 319 | 862 | dev and holdout |
+| DSC-02 | 344 | 918 | dev and holdout |
+| DSC-03 | 324 | 860 | dev and holdout |
+| DSC-04 | 149 | 400 | dev and holdout |
+| DSC-05 | 208 | 664 | dev and holdout |
+| MOD-01 | 291 | 799 | dev and holdout |
+| ERR-01 | 4 | 1 | dev and holdout |
+| UI-01 | 3 | 2 | dev and holdout |
+| UI-02 | 4 | 0 | dev only |
+| UI-03 | 6 | 1 | dev and holdout |
+| UI-04 | 3 | 1 | dev and holdout |
+| UI-05 | 6 | 2 | dev and holdout |
+| UI-06 | 2 | 0 | dev only |
+| LIF-01 | 4 | 0 | dev only |
+| LIF-02 | 1 | 2 | dev and holdout |
+| LIF-03 | 1 | 2 | dev and holdout |
+| LIF-04 | 1 | 1 | dev and holdout |
+| LIF-05 | 6 | 0 | dev only |
+| LIF-06 | 3 | 1 | dev and holdout |
+| LIF-07 | 2 | 1 | dev and holdout |
+| UI-07 | 1 | 2 | dev and holdout |
+| UI-08 | 4 | 1 | dev and holdout |
+| UI-09 | 4 | 1 | dev and holdout |
+| UI-10 | 2 | 0 | dev only |
+| UI-11 | 3 | 1 | dev and holdout |
+| UI-12 | 8 | 2 | dev and holdout |
+| UI-13 | 8 | 2 | dev and holdout |
+| UI-14 | 8 | 2 | dev and holdout |
+| ITM-01 | 329 | 1411 | dev and holdout |
+| DSC-06 | 112 | 390 | dev and holdout |
+| DSC-07 | 90 | 323 | dev and holdout |
+| DSC-08 | 23 | 52 | dev and holdout |
+| INT-02 | 11 | 14 | dev and holdout |
+| INV-01 | 6 | 2 | dev and holdout |
+| ERR-02 | 2 | 0 | dev only |
 | PRO-11 | 0 | 0 | none |
-| DSC-09 | 0 | 0 | none |
-| INV-02 | 0 | 0 | none |
-| LIF-08 | 0 | 0 | none |
-| ITM-02 | 0 | 0 | none |
+| DSC-09 | 4 | 0 | dev only |
+| INV-02 | 2 | 0 | dev only |
+| LIF-08 | 3 | 0 | dev only |
+| ITM-02 | 1 | 0 | dev only |
