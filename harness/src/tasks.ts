@@ -48,10 +48,7 @@ interface Proxy {
 
 // Listens on the loopback only: the container reaches it through host.docker.internal, nothing
 // else on the network can, and the credentials it adds never leave this process.
-function startProxy(
-  upstream: { url: string; headers: Record<string, string> },
-  port: number,
-): Promise<Proxy> {
+function startProxy(upstream: { url: string; headers: Record<string, string> }): Promise<Proxy> {
   const log: string[] = [];
   const server: Server = createServer((req, res) => {
     const chunks: Buffer[] = [];
@@ -81,7 +78,10 @@ function startProxy(
     });
   });
   return new Promise((resolve) => {
-    server.listen(port, "127.0.0.1", () => {
+    // Port 0: the system picks a free one, so no other process's port can collide.
+    server.listen(0, "127.0.0.1", () => {
+      const address = server.address();
+      const port = typeof address === "object" && address !== null ? address.port : 0;
       resolve({
         url: `http://host.docker.internal:${String(port)}`,
         log,
@@ -184,15 +184,13 @@ async function main(): Promise<void> {
   const adapter = await loadAdapter(target);
   const clone = await startCloneProcess(target, adapter.cloneEntry, 4660);
   const results: Record<string, Json>[] = [];
-  let port = 4670;
   try {
     for (const task of tasks) {
       for (let rep = 1; rep <= Number(values.reps); rep += 1) {
         for (const side of [{ kind: "clone", url: clone.url }, { kind: "target" }] as Side[]) {
           if (side.kind === "clone") await fetch(`${clone.url}/__reset`, { method: "POST" });
           const facts = await task.setup(side);
-          port += 1;
-          const proxy = await startProxy(tm.upstream(side), port);
+          const proxy = await startProxy(tm.upstream(side));
           const started = performance.now();
           const out = await runAgent(
             repo,
