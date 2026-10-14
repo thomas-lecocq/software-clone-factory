@@ -1,0 +1,719 @@
+{
+  "at": "2026-10-14T22:49:42.309Z",
+  "target": "stripe-billing",
+  "model": "claude-sonnet-5-5",
+  "reps": 2,
+  "pairs": 16,
+  "same_outcome": 16,
+  "same_trace": 10,
+  "success_clone": 16,
+  "success_target": 16,
+  "cost_usd": 1.0766303999999998,
+  "pairs_detail": [
+    {
+      "task": "upgrade-and-quote",
+      "rep": 1,
+      "same_outcome": true,
+      "same_trace": false,
+      "clone": true,
+      "target": true
+    },
+    {
+      "task": "upgrade-and-quote",
+      "rep": 2,
+      "same_outcome": true,
+      "same_trace": true,
+      "clone": true,
+      "target": true
+    },
+    {
+      "task": "apply-coupon",
+      "rep": 1,
+      "same_outcome": true,
+      "same_trace": true,
+      "clone": true,
+      "target": true
+    },
+    {
+      "task": "apply-coupon",
+      "rep": 2,
+      "same_outcome": true,
+      "same_trace": true,
+      "clone": true,
+      "target": true
+    },
+    {
+      "task": "cancel-at-period-end",
+      "rep": 1,
+      "same_outcome": true,
+      "same_trace": true,
+      "clone": true,
+      "target": true
+    },
+    {
+      "task": "cancel-at-period-end",
+      "rep": 2,
+      "same_outcome": true,
+      "same_trace": true,
+      "clone": true,
+      "target": true
+    },
+    {
+      "task": "quote-quantity-change",
+      "rep": 1,
+      "same_outcome": true,
+      "same_trace": false,
+      "clone": true,
+      "target": true
+    },
+    {
+      "task": "quote-quantity-change",
+      "rep": 2,
+      "same_outcome": true,
+      "same_trace": false,
+      "clone": true,
+      "target": true
+    },
+    {
+      "task": "undo-cancellation",
+      "rep": 1,
+      "same_outcome": true,
+      "same_trace": true,
+      "clone": true,
+      "target": true
+    },
+    {
+      "task": "undo-cancellation",
+      "rep": 2,
+      "same_outcome": true,
+      "same_trace": true,
+      "clone": true,
+      "target": true
+    },
+    {
+      "task": "cancel-now-with-credit",
+      "rep": 1,
+      "same_outcome": true,
+      "same_trace": false,
+      "clone": true,
+      "target": true
+    },
+    {
+      "task": "cancel-now-with-credit",
+      "rep": 2,
+      "same_outcome": true,
+      "same_trace": false,
+      "clone": true,
+      "target": true
+    },
+    {
+      "task": "downgrade-without-proration",
+      "rep": 1,
+      "same_outcome": true,
+      "same_trace": true,
+      "clone": true,
+      "target": true
+    },
+    {
+      "task": "downgrade-without-proration",
+      "rep": 2,
+      "same_outcome": true,
+      "same_trace": true,
+      "clone": true,
+      "target": true
+    },
+    {
+      "task": "period-end",
+      "rep": 1,
+      "same_outcome": true,
+      "same_trace": false,
+      "clone": true,
+      "target": true
+    },
+    {
+      "task": "period-end",
+      "rep": 2,
+      "same_outcome": true,
+      "same_trace": true,
+      "clone": true,
+      "target": true
+    }
+  ],
+  "runs": [
+    {
+      "task": "upgrade-and-quote",
+      "rep": 1,
+      "side": "clone",
+      "success": true,
+      "answer": "5000",
+      "detail": {
+        "onPro": true,
+        "expected": 5000,
+        "answer": "5000"
+      },
+      "trace": [
+        "GET /v1/subscriptions/sub#1",
+        "POST /v1/subscriptions/sub#1",
+        "GET /v1/invoices/upcoming",
+        "POST /v1/invoices/create_preview"
+      ],
+      "agent_ok": true,
+      "seconds": 13,
+      "cost_usd": 0.0504196,
+      "turns": 4
+    },
+    {
+      "task": "upgrade-and-quote",
+      "rep": 1,
+      "side": "target",
+      "success": true,
+      "answer": "5000",
+      "detail": {
+        "onPro": true,
+        "expected": 5000,
+        "answer": "5000"
+      },
+      "trace": [
+        "GET /v1/subscriptions/sub#1",
+        "POST /v1/subscriptions/sub#1",
+        "GET /v1/invoices/upcoming",
+        "GET /v1/invoices/upcoming",
+        "POST /v1/invoices/create_preview"
+      ],
+      "agent_ok": true,
+      "seconds": 14,
+      "cost_usd": 0.0496302,
+      "turns": 4
+    },
+    {
+      "task": "upgrade-and-quote",
+      "rep": 2,
+      "side": "clone",
+      "success": true,
+      "answer": "5000",
+      "detail": {
+        "onPro": true,
+        "expected": 5000,
+        "answer": "5000"
+      },
+      "trace": [
+        "GET /v1/subscriptions/sub#1",
+        "POST /v1/subscriptions/sub#1",
+        "GET /v1/invoices/upcoming",
+        "POST /v1/invoices/create_preview"
+      ],
+      "agent_ok": true,
+      "seconds": 12,
+      "cost_usd": 0.0201648,
+      "turns": 4
+    },
+    {
+      "task": "upgrade-and-quote",
+      "rep": 2,
+      "side": "target",
+      "success": true,
+      "answer": "5000",
+      "detail": {
+        "onPro": true,
+        "expected": 5000,
+        "answer": "5000"
+      },
+      "trace": [
+        "GET /v1/subscriptions/sub#1",
+        "POST /v1/subscriptions/sub#1",
+        "GET /v1/invoices/upcoming",
+        "POST /v1/invoices/create_preview"
+      ],
+      "agent_ok": true,
+      "seconds": 13,
+      "cost_usd": 0.0465396,
+      "turns": 4
+    },
+    {
+      "task": "apply-coupon",
+      "rep": 1,
+      "side": "clone",
+      "success": true,
+      "answer": "done",
+      "detail": {
+        "discounts": 1,
+        "percent": 20
+      },
+      "trace": ["GET /v1/subscriptions/sub#1", "POST /v1/coupons", "POST /v1/subscriptions/sub#1"],
+      "agent_ok": true,
+      "seconds": 10,
+      "cost_usd": 0.0357442,
+      "turns": 3
+    },
+    {
+      "task": "apply-coupon",
+      "rep": 1,
+      "side": "target",
+      "success": true,
+      "answer": "done",
+      "detail": {
+        "discounts": 1,
+        "percent": 20
+      },
+      "trace": ["GET /v1/subscriptions/sub#1", "POST /v1/coupons", "POST /v1/subscriptions/sub#1"],
+      "agent_ok": true,
+      "seconds": 10,
+      "cost_usd": 0.034050800000000006,
+      "turns": 3
+    },
+    {
+      "task": "apply-coupon",
+      "rep": 2,
+      "side": "clone",
+      "success": true,
+      "answer": "done",
+      "detail": {
+        "discounts": 1,
+        "percent": 20
+      },
+      "trace": ["GET /v1/subscriptions/sub#1", "POST /v1/coupons", "POST /v1/subscriptions/sub#1"],
+      "agent_ok": true,
+      "seconds": 9,
+      "cost_usd": 0.0158212,
+      "turns": 3
+    },
+    {
+      "task": "apply-coupon",
+      "rep": 2,
+      "side": "target",
+      "success": true,
+      "answer": "done",
+      "detail": {
+        "discounts": 1,
+        "percent": 20
+      },
+      "trace": ["GET /v1/subscriptions/sub#1", "POST /v1/coupons", "POST /v1/subscriptions/sub#1"],
+      "agent_ok": true,
+      "seconds": 10,
+      "cost_usd": 0.039252800000000004,
+      "turns": 3
+    },
+    {
+      "task": "cancel-at-period-end",
+      "rep": 1,
+      "side": "clone",
+      "success": true,
+      "answer": "done",
+      "detail": {
+        "status": "active",
+        "cancel_at_period_end": true,
+        "cancel_at": 1793836800
+      },
+      "trace": ["POST /v1/subscriptions/sub#1"],
+      "agent_ok": true,
+      "seconds": 6,
+      "cost_usd": 0.028499200000000002,
+      "turns": 2
+    },
+    {
+      "task": "cancel-at-period-end",
+      "rep": 1,
+      "side": "target",
+      "success": true,
+      "answer": "done",
+      "detail": {
+        "status": "active",
+        "cancel_at_period_end": true,
+        "cancel_at": 1793836800
+      },
+      "trace": ["POST /v1/subscriptions/sub#1"],
+      "agent_ok": true,
+      "seconds": 7,
+      "cost_usd": 0.0309744,
+      "turns": 2
+    },
+    {
+      "task": "cancel-at-period-end",
+      "rep": 2,
+      "side": "clone",
+      "success": true,
+      "answer": "done",
+      "detail": {
+        "status": "active",
+        "cancel_at_period_end": true,
+        "cancel_at": 1793836800
+      },
+      "trace": ["POST /v1/subscriptions/sub#1"],
+      "agent_ok": true,
+      "seconds": 6,
+      "cost_usd": 0.0086502,
+      "turns": 2
+    },
+    {
+      "task": "cancel-at-period-end",
+      "rep": 2,
+      "side": "target",
+      "success": true,
+      "answer": "done",
+      "detail": {
+        "status": "active",
+        "cancel_at_period_end": true,
+        "cancel_at": 1793836800
+      },
+      "trace": ["POST /v1/subscriptions/sub#1"],
+      "agent_ok": true,
+      "seconds": 6,
+      "cost_usd": 0.030812600000000002,
+      "turns": 2
+    },
+    {
+      "task": "quote-quantity-change",
+      "rep": 1,
+      "side": "clone",
+      "success": true,
+      "answer": "2000",
+      "detail": {
+        "unchanged": true,
+        "expected": 2000,
+        "answer": "2000"
+      },
+      "trace": [
+        "GET /v1/subscriptions/sub#1",
+        "GET /v1/test_helpers/test_clocks/clock#1",
+        "POST /v1/invoices/create_preview"
+      ],
+      "agent_ok": true,
+      "seconds": 10,
+      "cost_usd": 0.04435,
+      "turns": 3
+    },
+    {
+      "task": "quote-quantity-change",
+      "rep": 1,
+      "side": "target",
+      "success": true,
+      "answer": "2000",
+      "detail": {
+        "unchanged": true,
+        "expected": 2000,
+        "answer": "2000"
+      },
+      "trace": [
+        "GET /v1/subscriptions/sub#1",
+        "POST /v1/invoices/create_preview",
+        "GET /v1/test_helpers/test_clocks/clock#1"
+      ],
+      "agent_ok": true,
+      "seconds": 12,
+      "cost_usd": 0.0409194,
+      "turns": 3
+    },
+    {
+      "task": "quote-quantity-change",
+      "rep": 2,
+      "side": "clone",
+      "success": true,
+      "answer": "2000",
+      "detail": {
+        "unchanged": true,
+        "expected": 2000,
+        "answer": "2000"
+      },
+      "trace": [
+        "GET /v1/subscriptions/sub#1",
+        "GET /v1/test_helpers/test_clocks/clock#1",
+        "POST /v1/invoices/create_preview"
+      ],
+      "agent_ok": true,
+      "seconds": 10,
+      "cost_usd": 0.0290302,
+      "turns": 3
+    },
+    {
+      "task": "quote-quantity-change",
+      "rep": 2,
+      "side": "target",
+      "success": true,
+      "answer": "2000",
+      "detail": {
+        "unchanged": true,
+        "expected": 2000,
+        "answer": "2000"
+      },
+      "trace": ["GET /v1/subscriptions/sub#1", "POST /v1/invoices/create_preview"],
+      "agent_ok": true,
+      "seconds": 11,
+      "cost_usd": 0.04094980000000001,
+      "turns": 3
+    },
+    {
+      "task": "undo-cancellation",
+      "rep": 1,
+      "side": "clone",
+      "success": true,
+      "answer": "done",
+      "detail": {
+        "cancel_at_period_end": false,
+        "cancel_at": null
+      },
+      "trace": ["GET /v1/subscriptions/sub#1", "POST /v1/subscriptions/sub#1"],
+      "agent_ok": true,
+      "seconds": 9,
+      "cost_usd": 0.0335518,
+      "turns": 3
+    },
+    {
+      "task": "undo-cancellation",
+      "rep": 1,
+      "side": "target",
+      "success": true,
+      "answer": "done",
+      "detail": {
+        "cancel_at_period_end": false,
+        "cancel_at": null
+      },
+      "trace": ["GET /v1/subscriptions/sub#1", "POST /v1/subscriptions/sub#1"],
+      "agent_ok": true,
+      "seconds": 8,
+      "cost_usd": 0.0364372,
+      "turns": 3
+    },
+    {
+      "task": "undo-cancellation",
+      "rep": 2,
+      "side": "clone",
+      "success": true,
+      "answer": "done",
+      "detail": {
+        "cancel_at_period_end": false,
+        "cancel_at": null
+      },
+      "trace": ["GET /v1/subscriptions/sub#1", "POST /v1/subscriptions/sub#1"],
+      "agent_ok": true,
+      "seconds": 6,
+      "cost_usd": 0.013645000000000001,
+      "turns": 3
+    },
+    {
+      "task": "undo-cancellation",
+      "rep": 2,
+      "side": "target",
+      "success": true,
+      "answer": "done",
+      "detail": {
+        "cancel_at_period_end": false,
+        "cancel_at": null
+      },
+      "trace": ["GET /v1/subscriptions/sub#1", "POST /v1/subscriptions/sub#1"],
+      "agent_ok": true,
+      "seconds": 10,
+      "cost_usd": 0.030931399999999998,
+      "turns": 3
+    },
+    {
+      "task": "cancel-now-with-credit",
+      "rep": 1,
+      "side": "clone",
+      "success": true,
+      "answer": "done",
+      "detail": {
+        "status": "canceled"
+      },
+      "trace": [
+        "GET /v1/subscriptions/sub#1",
+        "DELETE /v1/subscriptions/sub#1",
+        "GET /v1/invoices"
+      ],
+      "agent_ok": true,
+      "seconds": 10,
+      "cost_usd": 0.0431968,
+      "turns": 4
+    },
+    {
+      "task": "cancel-now-with-credit",
+      "rep": 1,
+      "side": "target",
+      "success": true,
+      "answer": "done",
+      "detail": {
+        "status": "canceled"
+      },
+      "trace": [
+        "GET /v1/subscriptions/sub#1",
+        "DELETE /v1/subscriptions/sub#1",
+        "GET /v1/subscriptions/sub#1",
+        "GET /v1/invoices",
+        "POST /v1/invoices/in#1/finalize"
+      ],
+      "agent_ok": true,
+      "seconds": 18,
+      "cost_usd": 0.0527614,
+      "turns": 5
+    },
+    {
+      "task": "cancel-now-with-credit",
+      "rep": 2,
+      "side": "clone",
+      "success": true,
+      "answer": "done",
+      "detail": {
+        "status": "canceled"
+      },
+      "trace": [
+        "GET /v1/subscriptions/sub#1",
+        "DELETE /v1/subscriptions/sub#1",
+        "GET /v1/subscriptions/sub#1",
+        "GET /v1/invoices",
+        "POST /v1/invoices/in#1/finalize",
+        "GET /v1/invoices/in#1"
+      ],
+      "agent_ok": true,
+      "seconds": 14,
+      "cost_usd": 0.0334848,
+      "turns": 6
+    },
+    {
+      "task": "cancel-now-with-credit",
+      "rep": 2,
+      "side": "target",
+      "success": true,
+      "answer": "done",
+      "detail": {
+        "status": "canceled"
+      },
+      "trace": [
+        "GET /v1/subscriptions/sub#1",
+        "DELETE /v1/subscriptions/sub#1",
+        "GET /v1/invoices",
+        "POST /v1/invoices/in#1/finalize"
+      ],
+      "agent_ok": true,
+      "seconds": 16,
+      "cost_usd": 0.0531994,
+      "turns": 5
+    },
+    {
+      "task": "downgrade-without-proration",
+      "rep": 1,
+      "side": "clone",
+      "success": true,
+      "answer": "done",
+      "detail": {
+        "onBasic": true,
+        "pending_items": 0
+      },
+      "trace": ["GET /v1/subscriptions/sub#1", "POST /v1/subscriptions/sub#1"],
+      "agent_ok": true,
+      "seconds": 9,
+      "cost_usd": 0.0370216,
+      "turns": 3
+    },
+    {
+      "task": "downgrade-without-proration",
+      "rep": 1,
+      "side": "target",
+      "success": true,
+      "answer": "done",
+      "detail": {
+        "onBasic": true,
+        "pending_items": 0
+      },
+      "trace": ["GET /v1/subscriptions/sub#1", "POST /v1/subscriptions/sub#1"],
+      "agent_ok": true,
+      "seconds": 9,
+      "cost_usd": 0.0382642,
+      "turns": 3
+    },
+    {
+      "task": "downgrade-without-proration",
+      "rep": 2,
+      "side": "clone",
+      "success": true,
+      "answer": "done",
+      "detail": {
+        "onBasic": true,
+        "pending_items": 0
+      },
+      "trace": ["GET /v1/subscriptions/sub#1", "POST /v1/subscriptions/sub#1"],
+      "agent_ok": true,
+      "seconds": 8,
+      "cost_usd": 0.013859,
+      "turns": 3
+    },
+    {
+      "task": "downgrade-without-proration",
+      "rep": 2,
+      "side": "target",
+      "success": true,
+      "answer": "done",
+      "detail": {
+        "onBasic": true,
+        "pending_items": 0
+      },
+      "trace": ["GET /v1/subscriptions/sub#1", "POST /v1/subscriptions/sub#1"],
+      "agent_ok": true,
+      "seconds": 9,
+      "cost_usd": 0.0384112,
+      "turns": 3
+    },
+    {
+      "task": "period-end",
+      "rep": 1,
+      "side": "clone",
+      "success": true,
+      "answer": "1793836800",
+      "detail": {
+        "expected": 1793836800,
+        "answer": "1793836800"
+      },
+      "trace": ["GET /v1/subscriptions/sub#1"],
+      "agent_ok": true,
+      "seconds": 6,
+      "cost_usd": 0.0283472,
+      "turns": 2
+    },
+    {
+      "task": "period-end",
+      "rep": 1,
+      "side": "target",
+      "success": true,
+      "answer": "1793836800",
+      "detail": {
+        "expected": 1793836800,
+        "answer": "1793836800"
+      },
+      "trace": ["GET /v1/subscriptions/sub#1", "GET /v1/test_helpers/test_clocks/clock#1"],
+      "agent_ok": true,
+      "seconds": 8,
+      "cost_usd": 0.037891999999999995,
+      "turns": 3
+    },
+    {
+      "task": "period-end",
+      "rep": 2,
+      "side": "clone",
+      "success": true,
+      "answer": "1793836800",
+      "detail": {
+        "expected": 1793836800,
+        "answer": "1793836800"
+      },
+      "trace": ["GET /v1/subscriptions/sub#1"],
+      "agent_ok": true,
+      "seconds": 6,
+      "cost_usd": 0.009058,
+      "turns": 2
+    },
+    {
+      "task": "period-end",
+      "rep": 2,
+      "side": "target",
+      "success": true,
+      "answer": "1793836800",
+      "detail": {
+        "expected": 1793836800,
+        "answer": "1793836800"
+      },
+      "trace": ["GET /v1/subscriptions/sub#1"],
+      "agent_ok": true,
+      "seconds": 7,
+      "cost_usd": 0.0307604,
+      "turns": 2
+    }
+  ]
+}

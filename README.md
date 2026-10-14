@@ -111,31 +111,35 @@ distribution and decision rule were committed before it was recorded, scored onc
 - on the first distribution (1 to 3 items, monthly or yearly, 0 to 2 coupons, quantities 1 to
   10), the clone diverges on **fewer than 1 % of cases, at 99 % confidence** (473 of 473);
 - on the wider one (up to 4 items, amounts from 50 cents to $100,000, 100 % coupons, quantity
-  0), a later clone diverges on **fewer than 1 % of cases, at 95 % confidence** (472 of 473, on a
-  batch scored in three stages), and so does the next one, on a fresh batch (472 of 473 again).
+  0), the latest clone diverges on **fewer than 1 % of cases, at 99 % confidence** (473 of 473,
+  on a batch scored in three stages), after two clones that reached only 95 % (472 of 473 each).
 
 **How it got there, failures included.**
 
-| Step                                                                                             | Result                                               |
-| ------------------------------------------------------------------------------------------------ | ---------------------------------------------------- |
-| Builder agent, from an empty server, in the container                                            | 379 of 387 dev (logged on the host), 1 h, about $16  |
-| Pre-registered batch 1, single look                                                              | **448 of 473: claim rejected**                       |
-| Analysis of the 25 failures by a separate session                                                | six root causes, mostly discounts                    |
-| 379 new dev probes, one more builder pass (32 min, $7)                                           | 696 of 696 dev                                       |
-| Pre-registered batch 2 (new seed), single look                                                   | **473 of 473: claim holds**                          |
-| Breaker round, 306 new dev probes on a wider distribution, one more builder pass (30 min, $4.50) | 976 of 976 dev                                       |
-| Pre-registered batch 3, on the wider distribution, single look                                   | **466 of 473: claim rejected** (below 2.8 % at 95 %) |
-| Analysis of batch 3, agent-trace and mutation-hole probes, one more builder pass (40 min, $4.86) | 1013 of 1013 dev                                     |
-| Pre-registered batch 4 (new seed, three stages), scored sequentially                             | **472 of 473: below 1 % at 95 %**                    |
-| v4 dev probes from task validation and mutation testing, one more builder pass (35 min, $5.44)   | 1029 of 1029 dev                                     |
-| Pre-registered batch 5 (new seed, three stages), scored sequentially                             | **472 of 473: below 1 % at 95 %**                    |
+| Step                                                                                                 | Result                                               |
+| ---------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
+| Builder agent, from an empty server, in the container                                                | 379 of 387 dev (logged on the host), 1 h, about $16  |
+| Pre-registered batch 1, single look                                                                  | **448 of 473: claim rejected**                       |
+| Analysis of the 25 failures by a separate session                                                    | six root causes, mostly discounts                    |
+| 379 new dev probes, one more builder pass (32 min, $7)                                               | 696 of 696 dev                                       |
+| Pre-registered batch 2 (new seed), single look                                                       | **473 of 473: claim holds**                          |
+| Breaker round, 306 new dev probes on a wider distribution, one more builder pass (30 min, $4.50)     | 976 of 976 dev                                       |
+| Pre-registered batch 3, on the wider distribution, single look                                       | **466 of 473: claim rejected** (below 2.8 % at 95 %) |
+| Analysis of batch 3, agent-trace and mutation-hole probes, one more builder pass (40 min, $4.86)     | 1013 of 1013 dev                                     |
+| Pre-registered batch 4 (new seed, three stages), scored sequentially                                 | **472 of 473: below 1 % at 95 %**                    |
+| v4 dev probes from task validation and mutation testing, one more builder pass (35 min, $5.44)       | 1029 of 1029 dev                                     |
+| Pre-registered batch 5 (new seed, three stages), scored sequentially                                 | **472 of 473: below 1 % at 95 %**                    |
+| Analysis of batch 4, 167 dev probes on the failing area and the holes, one more pass (28 min, $4.67) | 1196 of 1196 dev                                     |
+| Pre-registered batch 6 (new seed, three stages), scored sequentially                                 | **473 of 473: below 1 % at 99 %**                    |
 
 **The wider distribution is harder.** Batch 3 draws from a distribution widened where the breaker
 found failures: the improved clone fails 7 of 473, all in classic billing mode. A separate session
 analysed the spent batch; its findings became dev probes, the next clone was measured on a fresh
-batch 4, and fails 1 of 473; the clone after it fails 1 of 473 on a fresh batch 5. The 99 %
-claim on the wider distribution is not reached: the failures left are all changes to one of
-several items under several discounts. Batch 4 was split into three stages, each scored only while the
+batch 4, and fails 1 of 473; the clone after it fails 1 of 473 on a fresh batch 5. Those
+failures were all changes to one of several items under several discounts. An analyst explained
+batch 4's; 150 dev cases drawn from that area and the analyst's seven designs went to the
+builder, and the next clone passes all 473 cases of a fresh batch 6: below 1 % at 99 % on the
+wider distribution. Batches 4 to 6 were split into three stages, each scored only while the
 failures stayed within the plan's tolerance, so a clone that fails early spends one stage, not the
 whole batch.
 
@@ -175,7 +179,7 @@ Every holdout run writes one, as Markdown and as an image
 from a pre-registered batch only, and every figure from a run or a measurement file. Today's, on the
 wider distribution:
 
-![Reliability card: level B](targets/stripe-billing/verify/reliability-card.svg)
+![Reliability card: level A](targets/stripe-billing/verify/reliability-card.svg)
 
 |                      |                                                                                                                                                                               |
 | -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

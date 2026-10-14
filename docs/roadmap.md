@@ -29,7 +29,7 @@ item says why it matters and roughly what it costs.
 - **Ablations of the factory's components** (record-first, the sandbox, holdout batches, the
   guard) and a **documentation-first baseline**, so that a component can be credited.
 - **Task validation, further** (built: `harness/src/tasks.ts`; the agent's traces became dev
-  probes, and the clone went from 10 to 14, then 16 of 16 task runs). Next: more tasks, and screens as well
+  probes, and the clone went from 10 to 14, then 16 of 16 task runs, still 16 on v5). Next: more tasks, and screens as well
   as the API.
 - **Live mode check** on a small, cheap sample, since test mode is assumed equal to live.
 - **The two last layers of screen verification.** Layer 4: an LLM triages the flagged pixel and
@@ -57,7 +57,7 @@ claims tied to evidence. Several of its contracts would strengthen this factory:
 - **Partial-order comparison** for concurrent behaviour. Portal calls are compared in total
   order; a target with parallel requests would show false divergences.
 - **Mutation testing, further.** `audit/mutate.ts` plants bugs in every clone file and replays
-  every dev fixture: 30 of 40 caught on clone v4, 6 of the survivors pointing at behaviour no
+  every dev fixture: 34 of 40 caught on clone v5, 5 of the survivors pointing at behaviour no
   fixture pins (`GAPS.md`). Next: mutants in the rendered pages themselves (templates, styles).
 - **REA as a recon tool**, to try on the next slice or target before it enters the skill. The
   orchestrator session registers REA's MCP server on its side (no dependency of this repository).

@@ -108,6 +108,8 @@ spent: it may be analysed, but no later claim rests on it.
 - **Result:** 473 of 473 pass. One-sided exact upper bound: 0.63 % at 95 %, 0.97 % at 99 %.
 - **Decision (per the plan):** all stages scored and k = 0, so **"below 1 % at 99 % confidence"**
   on `WIDE_DISTRIBUTION_V2`, for clone v5.
+- **Later looks (no claim):** two runs of `verify --split all` on 2026-10-15, same clone, to
+  regenerate the reports and the reliability card; no failure.
 
 ## Secondary uses of batch 2 (no claim)
 
