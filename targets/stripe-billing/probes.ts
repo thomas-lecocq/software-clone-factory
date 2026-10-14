@@ -606,7 +606,7 @@ export function rulesForWide(p: WideInput): string[] {
   for (const c of p.coupons)
     first =
       c.percent_off !== undefined ? first * (1 - c.percent_off / 100) : first - (c.amount_off ?? 0);
-  if (Math.round(first) > 0 && Math.round(first) < 50) r.add("INV-01");
+  if (Math.round(first) > 0 && Math.round(first) < 56) r.add("INV-01");
   if (p.items.length > 1 && p.coupons.some((c) => c.percent_off !== undefined)) r.add("DSC-01");
   if (p.coupons.length > 1) {
     r.add("DSC-06");
@@ -2093,7 +2093,54 @@ function v5Wide(): [string, WideInput][] {
       },
     },
   ]);
-  return [...area, ...percents];
+  return [...area, ...percents, ...b4Analysis()];
+}
+
+// The six designs of the batch 4 analysis (analysis/hold-b4-failures.md, section 4): a two-item
+// flexible world where one carried discount's share prorates to 0 and is dropped.
+function b4Analysis(): [string, WideInput][] {
+  const world = (
+    coupons: Coupon[],
+    offset: number,
+    over: Partial<WideInput["change"]> = {},
+  ): WideInput => ({
+    kind: "wide",
+    start: STARTS.oct,
+    billing_mode: "flexible",
+    interval: "month",
+    items: [
+      { amount: 1_000_000, quantity: 1 },
+      { amount: 100, quantity: 1 },
+    ],
+    coupons,
+    change: {
+      item: 1,
+      amount: 300,
+      interval: null,
+      quantity: null,
+      offset,
+      proration_behavior: "always_invoice",
+      discount: null,
+      ...over,
+    },
+  });
+  const off: Coupon = { amount_off: 500, duration: "forever" };
+  const half: Coupon = { percent_off: 50, duration: "forever" };
+  return [
+    ["dev-v5-b4-1-dropped", world([off, half], 2_008_800)],
+    ["dev-v5-b4-2-reversed", world([half, off], 2_008_800)],
+    ["dev-v5-b4-3-both-survive", world([off, half], 669_600)],
+    ["dev-v5-b4-4-survivor-spent", world([off, { ...half, duration: "once" }], 2_008_800)],
+    [
+      "dev-v5-b4-5-preview-coupon",
+      world([off, half], 2_008_800, { discount: { percent_off: 10, duration: "forever" } }),
+    ],
+    ["dev-v5-b4-6-default", world([off, half], 2_008_800, { proration_behavior: null })],
+    [
+      "dev-v5-b4-6-prorations",
+      world([off, half], 2_008_800, { proration_behavior: "create_prorations" }),
+    ],
+  ];
 }
 
 const MID = STARTS.oct + 15 * 86400;

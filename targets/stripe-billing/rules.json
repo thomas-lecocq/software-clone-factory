@@ -381,16 +381,16 @@
     {
       "id": "DSC-07",
       "area": "logic",
-      "statement": "In an immediate flexible invoice with no discount, proration lines list no discount. Otherwise the credit line lists the invoice's discounts at 0, unless everything it carries is a used once coupon, in which case it lists those coupons.",
+      "statement": "Flexible mode, immediate invoice: proration lines list their discounts at 0. The credit line lists nothing when the invoice has no discount. It lists the invoice's discounts when the billed line carried none. It lists nothing when no carried discount survives DSC-08. Otherwise it lists the surviving carried discounts still on the invoice, in subscription order. If there are none, it lists the invoice's discounts when a carried discount is still on the invoice, else the single surviving carried discount (a spent once coupon, or one replaced by a coupon passed to the preview), else the invoice's discounts. A non-immediate flexible preview lists the invoice's first discount, a dropped one included.",
       "provenance": {
         "kind": "observed",
-        "ref": "dev fixtures and spent holdout batch 1, analysed in analysis/batch1-failures.md (2026-10-01)"
+        "ref": "dev fixtures and spent holdout batch 1, analysed in analysis/batch1-failures.md (2026-10-01); corrected after the analysis of batch 4 (analysis/hold-b4-failures.md), to be confirmed by dev-v5-b4-*"
       }
     },
     {
       "id": "DSC-08",
       "area": "logic",
-      "statement": "Flexible mode: a discount carried by a credit line whose prorated amount rounds to 0 is not applied: it is absent from the line's description and, in an immediate invoice, from its discount list. Classic mode keeps the label.",
+      "statement": "Flexible mode: a discount carried by a credit line whose prorated amount rounds to 0 is not applied: it is absent from the line's description and, in an immediate invoice, from its discount list. Classic mode keeps the label. A dropped discount stays in the list only when DSC-07 falls back to the invoice's discounts. It also arises away from the period end: a 1-cent share at r/P < 0.5 is dropped.",
       "provenance": {
         "kind": "observed",
         "ref": "dev fixtures and spent holdout batch 1, analysed in analysis/batch1-failures.md (2026-10-01)"
