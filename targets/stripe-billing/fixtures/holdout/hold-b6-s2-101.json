@@ -1,0 +1,247 @@
+{
+  "id": "hold-b6-s2-101",
+  "rules": [
+    "DSC-07",
+    "PRO-01",
+    "PRO-02",
+    "PRO-03",
+    "PRO-04",
+    "PRO-07",
+    "PRO-08"
+  ],
+  "input": {
+    "kind": "wide",
+    "start": 1820133771,
+    "billing_mode": "flexible",
+    "interval": "month",
+    "items": [
+      {
+        "amount": 3734018,
+        "quantity": 10
+      }
+    ],
+    "coupons": [],
+    "change": {
+      "item": 0,
+      "amount": null,
+      "interval": null,
+      "quantity": 18,
+      "offset": 423502,
+      "proration_behavior": "always_invoice",
+      "discount": null
+    }
+  },
+  "observed": {
+    "preview": {
+      "id": "upcoming_in_1UQa6LAcmeAcct00wcWQANgo",
+      "object": "invoice",
+      "account_country": "FR",
+      "account_name": "environnement de test AcmeCo",
+      "account_tax_ids": null,
+      "amount_due": 24991391,
+      "amount_overpaid": 0,
+      "amount_paid": 0,
+      "amount_remaining": 24991391,
+      "amount_shipping": 0,
+      "application": null,
+      "attempt_count": 0,
+      "attempted": false,
+      "auto_advance": false,
+      "automatic_tax": {
+        "disabled_reason": null,
+        "enabled": false,
+        "liability": null,
+        "provider": null,
+        "status": null
+      },
+      "automatically_finalizes_at": null,
+      "billing_reason": "upcoming",
+      "collection_method": "charge_automatically",
+      "created": 1820133771,
+      "currency": "usd",
+      "custom_fields": null,
+      "customer": "cus_VRT2asC93klto9",
+      "customer_account": null,
+      "customer_address": null,
+      "customer_email": null,
+      "customer_name": null,
+      "customer_phone": null,
+      "customer_shipping": null,
+      "customer_tax_exempt": "none",
+      "customer_tax_ids": [],
+      "default_payment_method": null,
+      "default_source": null,
+      "default_tax_rates": [],
+      "description": null,
+      "discounts": [],
+      "due_date": null,
+      "effective_at": null,
+      "ending_balance": 0,
+      "footer": null,
+      "from_invoice": null,
+      "hosted_invoice_url": null,
+      "invoice_pdf": null,
+      "issuer": {
+        "type": "self"
+      },
+      "last_finalization_error": null,
+      "latest_revision": null,
+      "lines": {
+        "object": "list",
+        "data": [
+          {
+            "id": "il_tmp_1WKZ8hAcmeAcct00SFVnkxs4",
+            "object": "line_item",
+            "amount": -31239238,
+            "currency": "usd",
+            "description": "Unused time on 10 × Plan A after 10 Sep 2027",
+            "discount_amounts": [],
+            "discountable": false,
+            "discounts": [],
+            "invoice": "upcoming_in_1UQa6LAcmeAcct00wcWQANgo",
+            "livemode": false,
+            "metadata": {},
+            "parent": {
+              "invoice_item_details": null,
+              "subscription_item_details": {
+                "invoice_item": "ii_1UQa6LAcmeAcct00A2gr6nZS",
+                "proration": true,
+                "proration_details": {
+                  "credited_items": {
+                    "invoice": "in_1UQa6IAcmeAcct00f3xBNGeN",
+                    "invoice_line_items": [
+                      "il_1WKZ8hAcmeAcct006YL3EBuG"
+                    ]
+                  }
+                },
+                "subscription": "sub_1UQa6HAcmeAcct00OPNIt71P",
+                "subscription_item": "si_VRT2MYsQK2t5FS"
+              },
+              "type": "subscription_item_details"
+            },
+            "period": {
+              "end": 1822725771,
+              "start": 1820557273
+            },
+            "pretax_credit_amounts": [],
+            "pricing": {
+              "price_details": {
+                "price": "price_1UQa6GAcmeAcct00Y8s26S94",
+                "product": "prod_VRT2VU48LJalyP"
+              },
+              "type": "price_details",
+              "unit_amount_decimal": null
+            },
+            "quantity": 10,
+            "quantity_decimal": "10",
+            "subtotal": -31239238,
+            "taxes": []
+          },
+          {
+            "id": "il_tmp_1WKZ8iAcmeAcct009QHrxymN",
+            "object": "line_item",
+            "amount": 56230629,
+            "currency": "usd",
+            "description": "Remaining time on 18 × Plan A after 10 Sep 2027",
+            "discount_amounts": [],
+            "discountable": false,
+            "discounts": [],
+            "invoice": "upcoming_in_1UQa6LAcmeAcct00wcWQANgo",
+            "livemode": false,
+            "metadata": {},
+            "parent": {
+              "invoice_item_details": null,
+              "subscription_item_details": {
+                "invoice_item": "ii_1UQa6LAcmeAcct00iMDOJfZP",
+                "proration": true,
+                "proration_details": {
+                  "credited_items": null
+                },
+                "subscription": "sub_1UQa6HAcmeAcct00OPNIt71P",
+                "subscription_item": "si_VRT2MYsQK2t5FS"
+              },
+              "type": "subscription_item_details"
+            },
+            "period": {
+              "end": 1822725771,
+              "start": 1820557273
+            },
+            "pretax_credit_amounts": [],
+            "pricing": {
+              "price_details": {
+                "price": "price_1UQa6GAcmeAcct00Y8s26S94",
+                "product": "prod_VRT2VU48LJalyP"
+              },
+              "type": "price_details",
+              "unit_amount_decimal": null
+            },
+            "quantity": 18,
+            "quantity_decimal": "18",
+            "subtotal": 56230629,
+            "taxes": []
+          }
+        ],
+        "has_more": false,
+        "total_count": 2,
+        "url": "/v1/invoices/upcoming_in_1UQa6LAcmeAcct00wcWQANgo/lines"
+      },
+      "livemode": false,
+      "metadata": {},
+      "next_payment_attempt": null,
+      "number": null,
+      "on_behalf_of": null,
+      "parent": {
+        "quote_details": null,
+        "subscription_details": {
+          "metadata": {},
+          "subscription": "sub_1UQa6HAcmeAcct00OPNIt71P",
+          "subscription_proration_date": 1820557273
+        },
+        "type": "subscription_details"
+      },
+      "payment_settings": {
+        "default_mandate": null,
+        "payment_method_options": null,
+        "payment_method_types": null
+      },
+      "period_end": 1820133771,
+      "period_start": 1820133771,
+      "post_payment_credit_notes_amount": 0,
+      "pre_payment_credit_notes_amount": 0,
+      "receipt_number": null,
+      "rendering": null,
+      "shipping_cost": null,
+      "shipping_details": null,
+      "starting_balance": 0,
+      "statement_descriptor": null,
+      "status": "draft",
+      "status_transitions": {
+        "finalized_at": null,
+        "marked_uncollectible_at": null,
+        "paid_at": null,
+        "voided_at": null
+      },
+      "subtotal": 24991391,
+      "subtotal_excluding_tax": 24991391,
+      "test_clock": "clock_1UQa6GAcmeAcct00xgZUHwiA",
+      "total": 24991391,
+      "total_discount_amounts": [],
+      "total_excluding_tax": 24991391,
+      "total_pretax_credit_amounts": [],
+      "total_taxes": [],
+      "webhooks_delivered_at": null
+    },
+    "first_invoice": {
+      "subtotal": 37340180,
+      "total": 37340180,
+      "amount_due": 37340180,
+      "status": "paid"
+    }
+  },
+  "noise": [],
+  "recorded_at": "2026-10-14T21:52:51.347Z",
+  "recorded_with": {
+    "stripe_api_version": "2026-08-26.dahlia",
+    "stripe_node": "22.6.2"
+  }
+}
