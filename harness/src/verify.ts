@@ -91,6 +91,7 @@ export async function verify(
   port = 4599,
   expectedFile?: string,
   sequential?: Sequential,
+  only?: string[],
 ): Promise<number> {
   const started = performance.now();
   const dir = targetDir(target);
@@ -112,7 +113,9 @@ export async function verify(
             (stageOf(sequential.batch, a.id) ?? 0) - (stageOf(sequential.batch, b.id) ?? 0) ||
             a.id.localeCompare(b.id),
         )
-    : loaded;
+    : only
+      ? loaded.filter((f) => only.some((prefix) => f.id.startsWith(prefix)))
+      : loaded;
   if (sequential && fixtures.length === 0) {
     console.error(
       `no staged fixture for batch ${sequential.batch} (expected ${sequential.batch}-s1-001…)`,
@@ -168,6 +171,23 @@ export async function verify(
     );
   } finally {
     await clone.close();
+  }
+  // A partial run is a builder's quick check: it prints its failures and writes nothing, so no
+  // report or run log ever describes a subset as the whole.
+  if (only) {
+    for (const c of cases.filter((x) => !x.pass)) {
+      console.log(
+        `FAIL ${c.id}: ${c.diffs
+          .map((d) => d.path)
+          .slice(0, 8)
+          .join(", ")}`,
+      );
+    }
+    const passed = cases.filter((c) => c.pass).length;
+    console.log(
+      `${String(passed)} of ${String(cases.length)} selected dev fixtures pass (partial run)`,
+    );
+    return passed === cases.length ? 0 : 1;
   }
 
   const out = join(dir, "verify");

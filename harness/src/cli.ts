@@ -63,7 +63,12 @@ if (command === "record") {
     values.sequential === undefined
       ? undefined
       : { batch: values.sequential, maxFailures: Number(values["max-failures"]) };
-  process.exit(await verify(target, splits, port, values.expected, sequential));
+  if (values.only !== undefined && (splits.length !== 1 || splits[0] !== "dev" || sequential)) {
+    console.error("--only selects dev fixtures by ID prefix; it never applies to the holdout");
+    process.exit(64);
+  }
+  const only = values.only?.split(",");
+  process.exit(await verify(target, splits, port, values.expected, sequential, only));
 } else if (command === "new-slice") {
   for (const f of newSlice(target)) console.log(`created ${f}`);
 } else if (command === "relock") {
