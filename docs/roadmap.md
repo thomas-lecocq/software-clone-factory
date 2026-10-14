@@ -28,9 +28,9 @@ item says why it matters and roughly what it costs.
   misses the bar below 10 % needs about 29 builds (about $600 at today's cost).
 - **Ablations of the factory's components** (record-first, the sandbox, holdout batches, the
   guard) and a **documentation-first baseline**, so that a component can be credited.
-- **Task validation, further** (built: `harness/src/tasks.ts`, 10 of 16 pairs agree). Next: turn the
-  agent's call traces into dev probes for the endpoints it used and the clone lacks, rebuild, and
-  rerun the tasks; then more tasks, and screens as well as the API.
+- **Task validation, further** (built: `harness/src/tasks.ts`; the agent's traces became dev
+  probes, and the clone went from 10 to 14 of 16 task runs). Next: more tasks, and screens as well
+  as the API.
 - **Live mode check** on a small, cheap sample, since test mode is assumed equal to live.
 - **The two last layers of screen verification.** Layer 4: an LLM triages the flagged pixel and
   layout differences (never scores them); layer 5: a human reviews a sample to calibrate the
@@ -56,9 +56,9 @@ claims tied to evidence. Several of its contracts would strengthen this factory:
   masked the text. A contradiction record would keep the evidence visible.
 - **Partial-order comparison** for concurrent behaviour. Portal calls are compared in total
   order; a target with parallel requests would show false divergences.
-- **Mutation testing, further.** `audit/mutate.ts` exists for the clone's logic: 30 of 40 planted
-  bugs caught, 6 of the survivors pointing at behaviour no fixture pins (`GAPS.md`). Next: probes
-  for those six, then mutants in the screens, replayed against the UI fixtures.
+- **Mutation testing, further.** `audit/mutate.ts` plants bugs in every clone file and replays
+  every dev fixture: 30 of 40 caught on clone v3, 8 of the survivors pointing at behaviour no
+  fixture pins (`GAPS.md`). Next: mutants in the rendered pages themselves (templates, styles).
 - **REA as a recon tool**, to try on the next slice or target before it enters the skill. The
   orchestrator session registers REA's MCP server on its side (no dependency of this repository).
   At step 1 it maps what the target exposes: the hosted UI's routes, calls and scripts

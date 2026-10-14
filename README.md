@@ -104,11 +104,15 @@ All numbers come from `npm run verify` and are logged in
 [`targets/stripe-billing/measurements.md`](targets/stripe-billing/measurements.md); what they do
 not cover is in [`GAPS.md`](targets/stripe-billing/GAPS.md).
 
-**The claim.** On slice 1's widened distribution (a mid-cycle change previewed with
-`invoices.createPreview`: 1 to 3 items, monthly or yearly, 0 to 2 coupons, quantities 1 to 10, any
-second of the period), in Stripe **test mode**, the clone diverges on **fewer than 1 % of cases, at
-99 % confidence**: 473 of 473 on a holdout batch whose size, distribution and decision rule were
-committed before it was recorded, scored once.
+**The claims.** In Stripe **test mode**, on slice 1 (a mid-cycle change previewed with
+`invoices.createPreview`, at any second of the period), each on a holdout batch whose size,
+distribution and decision rule were committed before it was recorded, scored once:
+
+- on the first distribution (1 to 3 items, monthly or yearly, 0 to 2 coupons, quantities 1 to
+  10), the clone diverges on **fewer than 1 % of cases, at 99 % confidence** (473 of 473);
+- on the wider one (up to 4 items, amounts from 50 cents to $100,000, 100 % coupons, quantity
+  0), a later clone diverges on **fewer than 1 % of cases, at 95 % confidence** (472 of 473, on a
+  batch scored in three stages).
 
 **How it got there, failures included.**
 
@@ -121,14 +125,17 @@ committed before it was recorded, scored once.
 | Pre-registered batch 2 (new seed), single look                                                   | **473 of 473: claim holds**                          |
 | Breaker round, 306 new dev probes on a wider distribution, one more builder pass (30 min, $4.50) | 976 of 976 dev                                       |
 | Pre-registered batch 3, on the wider distribution, single look                                   | **466 of 473: claim rejected** (below 2.8 % at 95 %) |
+| Analysis of batch 3, agent-trace and mutation-hole probes, one more builder pass (40 min, $4.86) | 1013 of 1013 dev                                     |
+| Pre-registered batch 4 (new seed, three stages), scored sequentially                             | **472 of 473: below 1 % at 95 %**                    |
 
 **The wider distribution is harder.** Batch 3 draws from a distribution widened where the breaker
-found failures (up to 4 items, amounts from 50 cents to $100,000, 100 % coupons, quantity 0): the
-improved clone fails 7 of 473, all in classic billing mode. Batch 2's claim stands for its own
-distribution; on the wider one, the clone is below 2.8 % at 95 %, and the next iteration starts
-there.
+found failures: the improved clone fails 7 of 473, all in classic billing mode. A separate session
+analysed the spent batch; its findings became dev probes, the next clone was measured on a fresh
+batch 4, and fails 1 of 473. Batch 4 was split into three stages, each scored only while the
+failures stayed within the plan's tolerance, so a clone that fails early spends one stage, not the
+whole batch.
 
-**What the claim does not say.**
+**What the claims do not say.**
 
 - A quarter of batch 2 is easy (Stripe errors, changes that change nothing). On the 343
   substantive cases the bound is 0.87 % at 95 % and 1.33 % at 99 %: "below 1 %" holds at 95 % only.
@@ -141,10 +148,11 @@ there.
 - It is test mode only, USD only, and none of the factory's components was ablated.
 
 **An agent was given real tasks.** Eight everyday billing tasks, twice each, against the clone and
-against Stripe test mode, with every call logged: the agent succeeds 16 times in 16 on Stripe and
-10 in 16 on the clone. The failures are all subscription updates (changing a price, adding a
-coupon) that no fixture ever exercised. Fidelity on the measured slice does not make a clone a
-good environment for the calls an agent actually makes; the factory now measures both.
+against Stripe test mode, with every call logged: the agent succeeds 16 times in 16 on Stripe and,
+on the clone, 10 in 16 before the calls it made became dev probes, 14 in 16 after. The remaining
+failure is adding a coupon: the clone applies it, but does not expand the discount's coupon when
+asked to. Fidelity on the measured slice does not make a clone a good environment for the calls
+an agent actually makes; the factory now measures both.
 
 **The auditors were measured, then used.** On copies of the repository with 12 planted defects,
 the committed auditor prompt found 12 of 12 (recall at least 77.9 % at 95 %). Two more runs on the
@@ -158,24 +166,25 @@ mode; it contains no Stripe code, and no documentation text beyond short quotes.
 
 ### Reliability card
 
-Every holdout run writes one ([`verify/reliability-card.md`](targets/stripe-billing/verify/reliability-card.md)):
-its level comes from a pre-registered batch only, and every figure from a run or a measurement
-file. Today's, on the hardest batch:
+Every holdout run writes one, as Markdown and as an image
+([`verify/reliability-card.md`](targets/stripe-billing/verify/reliability-card.md)): its level comes
+from a pre-registered batch only, and every figure from a run or a measurement file. Today's, on the
+wider distribution:
 
-![reliability: level C](https://img.shields.io/badge/reliability-level%20C-dfb317?style=flat-square) ![holdout: 466/473](https://img.shields.io/badge/holdout-466%2F473-dfb317?style=flat-square) ![breaker probes: 40/40](https://img.shields.io/badge/breaker%20probes-40%2F40-blue?style=flat-square) ![mutants caught: 34/40](https://img.shields.io/badge/mutants%20caught-34%2F40-blue?style=flat-square) ![auditor recall: 12/12](https://img.shields.io/badge/auditor%20recall-12%2F12-blue?style=flat-square)
+![Reliability card: level B](targets/stripe-billing/verify/reliability-card.svg)
 
 |                      |                                                                                                                                                                               |
 | -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Level**            | **C**: measured: below 2.76 % at 95 % confidence                                                                                                                              |
-| **Measured on**      | batch `hold-b3-`, 466 of 473; plan `analysis-plan-b3.md`, committed first; 5 looks, its claim rests on the first (`measurements.md`)                                          |
-| **Bound**            | 2.76 % at 95 %, 3.35 % at 99 %                                                                                                                                                |
+| **Level**            | **B**: below 1 % of cases diverge, at 95 % confidence                                                                                                                         |
+| **Measured on**      | batch `hold-b4-`, 472 of 473; plan `analysis-plan-b4.md`, committed first; 2 looks, its claim rests on the first (`measurements.md`)                                          |
+| **Bound**            | 1.00 % at 95 %, 1.40 % at 99 %                                                                                                                                                |
 | **Breaker probes**   | 40 of 40 pass; they are dev cases the builder may have learnt, so only a new breaker round tests the clone out of distribution                                                |
-| **Dev (training)**   | 976 of 976                                                                                                                                                                    |
+| **Dev (training)**   | 1013 of 1013                                                                                                                                                                  |
 | **Determinism**      | 10 of 10 replays identical after reset                                                                                                                                        |
-| **Mutation testing** | 34 of 40 planted bugs caught by the fixtures (run 2026-10-13)                                                                                                                 |
+| **Mutation testing** | 30 of 40 planted bugs caught by the fixtures (run 2026-10-13)                                                                                                                 |
 | **Auditors**         | found 12 of 12 planted defects                                                                                                                                                |
-| **Agent tasks**      | an agent (claude-sonnet-5-5) gets the same outcome on the clone as on the original in 10 of 16 task runs; it succeeds in 10 on the clone, 16 on the original (run 2026-10-13) |
-| **Evaluator**        | lock `9f4cf489b0a8`, commit 962d7ef, clean tree                                                                                                                               |
+| **Agent tasks**      | an agent (claude-sonnet-5-5) gets the same outcome on the clone as on the original in 14 of 16 task runs; it succeeds in 14 on the clone, 16 on the original (run 2026-10-13) |
+| **Evaluator**        | lock `45520a9cdaab`, commit c1404ec, clean tree                                                                                                                               |
 
 ## Run it
 

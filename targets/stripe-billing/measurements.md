@@ -70,6 +70,8 @@ spent: it may be analysed, but no later claim rests on it.
   at 95 %, 1.40 % at 99 %.
 - **Decision (per the plan):** all stages scored and k = 1, so **"below 1 % at 95 % confidence"**
   on `WIDE_DISTRIBUTION_V2`, not at 99 %.
+- **Later looks (no claim):** three runs of `verify --split all` on 2026-10-14, same clone, to
+  regenerate the reports and the reliability card; the same single failure.
 
 ## Secondary uses of batch 2 (no claim)
 

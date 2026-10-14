@@ -16,9 +16,11 @@ Stripe Billing in **test mode**, USD, through the public API and the hosted Cust
 - **Slice 2:** cancel at period end, reactivate, cancel now, renewals and a failing card over test
   clocks; the portal's cancel and renew flow.
 
-The one claim with a pre-registered bound is on slice 1's `WIDE_DISTRIBUTION` (`probes.ts`):
-below 1 % of cases diverge, at 99 % confidence (holdout batch 2, 473 of 473). Everything else
-below is counts without a claim.
+Two claims carry a pre-registered bound, both on slice 1 (`probes.ts`): on `WIDE_DISTRIBUTION`,
+below 1 % of cases diverge at 99 % confidence (holdout batch 2, 473 of 473, clone v1); on
+`WIDE_DISTRIBUTION_V2` (up to 4 items, amounts from 50 cents to $100,000, 100 % coupons, quantity
+0), below 1 % at 95 % (batch 4, 472 of 473, clone v3, `58e4006`). Everything else below is counts
+without a claim.
 
 **A quarter of that batch is easy.** Of its 473 cases, 74 are Stripe errors (70 of them the
 `none` behaviour given a proration date) and 56 are changes that change nothing (50 with no change at all, 6 that
@@ -28,7 +30,9 @@ is descriptive only; the pre-registered claim stands as stated.
 
 ## Measured divergences
 
-None in the claim's measurement (batch 2, 473 of 473). Measured earlier and fixed through new dev
+None in batch 2's measurement (473 of 473). In batch 4's, one (`hold-b4-s1-089`), within the
+plan's tolerance and not analysed yet. Batch 3's seven failures (classic billing mode,
+`analysis/hold-b3-failures.md`) were fixed through dev probes before batch 4. Measured earlier and fixed through new dev
 probes, never by reading a holdout the clone was later scored on:
 
 | When                        | Where                 | Behaviour                                                       | Fixed by                        |
@@ -54,28 +58,38 @@ The analysis of batch 1 is `analysis/batch1-failures.md`. The clone measured bef
 
 ## Found by task validation
 
-`harness/src/tasks.ts` gave an agent (Sonnet 5.5) eight everyday billing tasks, twice each, once
+`harness/src/tasks.ts` gives an agent (Sonnet 5.5) eight everyday billing tasks, twice each, once
 against the clone and once against Stripe test mode, through a proxy that logs every call. The
-agent succeeds in 16 of 16 runs on Stripe and 10 of 16 on the clone. The six failures are the three
-tasks that change a subscription's items or discounts (moving to another price, up or down, and
-adding a coupon): the agent calls `POST /v1/subscriptions/:id` with `items` or `discounts`, or
-`POST /v1/subscription_items/:id`, which no fixture ever exercised and the clone does not
-implement. High fidelity on the measured slice says nothing about the calls an agent will make;
-the traces in `tasks/` are the design of the next dev probes.
+agent succeeds in 16 of 16 runs on Stripe. On clone v2 it succeeded in 10 of 16: the three tasks
+that change a subscription's items or discounts called `POST /v1/subscriptions/:id` with `items`
+or `discounts`, which no fixture exercised. Those traces became the `dev-ag-` and `dev-v3-`
+probes; on clone v3 the agent succeeds in 14 of 16.
+
+The remaining failure is `apply-coupon`, in both runs: the clone attaches the coupon, but when
+the subscription is retrieved with `expand: ["discounts.source.coupon"]` it returns the coupon
+unexpanded, so the task's check reads no percentage. No fixture expands a discount's coupon.
 
 ## Holes found by mutation testing
 
-`audit/mutate.ts` planted 40 one-line bugs in the clone's logic and replayed the 715 dev logic
-fixtures the unchanged clone passes: 30 were caught. Of the 10 that survived, 4 change nothing by
-construction (a loop's safety bound, two constants of the ID minter, whose IDs are compared
-canonicalised, and distributing a zero remainder). The other 6 are behaviour no fixture pins:
+`audit/mutate.ts` plants 40 one-line bugs in any clone file but its entry module and replays every
+dev fixture the unchanged clone passes (1013 on clone v3, screens included). On clone v3, 30 of
+40 were caught. Two survivors change nothing by construction: the floor of the wall-clock time
+when no test clock is attached (`state.ts:229`; every probe uses a clock) and the ID minter
+(`api.ts:599`; IDs are compared canonicalised). The other 8 are behaviour no fixture pins:
 
-- the error returned for an object that does not exist (`api.ts:44`);
-- which of two events at the same instant comes first (`life.ts:206`);
-- a once-only coupon over the subscription lifecycle (`life.ts:83`);
-- listing invoice items when several customers exist; every probe has one (`api.ts:307`);
-- the delay before the first payment retry; only the second is pinned (`life.ts:31`);
-- a routing condition for invoice items (`api.ts:431`).
+- the status of the portal page for an unknown session (`portal.ts:282`) and of a rejected plan
+  change in the portal (`portal.ts:258`);
+- listing invoice items: its routing condition (`api.ts:589`) and the customer filter, since every
+  probe has one customer (`api.ts:458`);
+- the portal's pending lines when a customer has several subscriptions (`portal.ts:58`);
+- a cancellation date exactly at the period end (`life.ts:231`);
+- a flexible interval change whose proration date falls exactly on the shortened period end
+  (`billing.ts:331`);
+- a draft invoice with `auto_advance` off during a test clock advance (`life.ts:249`).
+
+An earlier run on clone v2 (logic files only, 715 fixtures) caught 30 of 40 as well; three of its six holes (once
+coupons over the lifecycle, the payment retry delays, the error for a missing object) became the
+`dev-v2-` probes, which v3 passes.
 
 ## Compared nowhere (outside the probe space)
 
@@ -114,8 +128,8 @@ dialog, **live mode** (assumed equal to test mode).
   result on its own. The one ablation run is of the second builder pass (`measurements.md`).
 - **Guardrails are string matching**, but no longer the network's only defence: the agent
   container is on an internal network whose only way out is an egress proxy that lets through the
-  model API (and hosts a target lists) and refuses the rest. The task-validation agent and the
-  auditors still run with an open network.
+  model API (and hosts a target lists) and refuses the rest. The task-validation agent (whose
+  target calls go through a logging proxy) and the auditors still run with an open network.
 - **Auditors** found 12 of 12 planted defects (`audit/results/`); the defects and the auditor
   prompt share one author, and precision was adjudicated by that same author.
 - **Account fragment in history.** Recorded object IDs carried an account-specific fragment;
