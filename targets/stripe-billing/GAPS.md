@@ -19,8 +19,8 @@ Stripe Billing in **test mode**, USD, through the public API and the hosted Cust
 Two claims carry a pre-registered bound, both on slice 1 (`probes.ts`): on `WIDE_DISTRIBUTION`,
 below 1 % of cases diverge at 99 % confidence (holdout batch 2, 473 of 473, clone v1); on
 `WIDE_DISTRIBUTION_V2` (up to 4 items, amounts from 50 cents to $100,000, 100 % coupons, quantity
-0), below 1 % at 95 % (batch 4, 472 of 473, clone v3, `58e4006`). Everything else below is counts
-without a claim.
+0), below 1 % at 95 % (batch 4, 472 of 473, clone v3, `58e4006`; again on batch 5, 472 of 473,
+clone v4, `539349b`). Everything else below is counts without a claim.
 
 **A quarter of that batch is easy.** Of its 473 cases, 74 are Stripe errors (70 of them the
 `none` behaviour given a proration date) and 56 are changes that change nothing (50 with no change at all, 6 that
@@ -30,8 +30,11 @@ is descriptive only; the pre-registered claim stands as stated.
 
 ## Measured divergences
 
-None in batch 2's measurement (473 of 473). In batch 4's, one (`hold-b4-s1-089`), within the
-plan's tolerance and not analysed yet. Batch 3's seven failures (classic billing mode,
+None in batch 2's measurement (473 of 473). In batch 4's and batch 5's, one each
+(`hold-b4-s1-089`, `hold-b5-s1-068`), within the plans' tolerance; clone v4 still fails both,
+and the hash-split holdout case `wide3-210`. All three are changes to one of several items under
+several discounts, the area of DSC-07 below. None was analysed: two analyst runs on batch 4 were
+stopped at two hours without a report. Batch 3's seven failures (classic billing mode,
 `analysis/hold-b3-failures.md`) were fixed through dev probes before batch 4. Measured earlier and fixed through new dev
 probes, never by reading a holdout the clone was later scored on:
 
@@ -60,36 +63,44 @@ The analysis of batch 1 is `analysis/batch1-failures.md`. The clone measured bef
 
 `harness/src/tasks.ts` gives an agent (Sonnet 5.5) eight everyday billing tasks, twice each, once
 against the clone and once against Stripe test mode, through a proxy that logs every call. The
-agent succeeds in 16 of 16 runs on Stripe. On clone v2 it succeeded in 10 of 16: the three tasks
-that change a subscription's items or discounts called `POST /v1/subscriptions/:id` with `items`
-or `discounts`, which no fixture exercised. Those traces became the `dev-ag-` and `dev-v3-`
-probes; on clone v3 the agent succeeds in 14 of 16.
+agent succeeds in 16 of 16 runs on Stripe. On the clone:
 
-The remaining failure is `apply-coupon`, in both runs: the clone attaches the coupon, but when
-the subscription is retrieved with `expand: ["discounts.source.coupon"]` it returns the coupon
-unexpanded, so the task's check reads no percentage. No fixture expands a discount's coupon.
+| Clone | Agent succeeds | What failed                                                                                                                                           |
+| ----- | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| v2    | 10 of 16       | the three tasks that change a subscription's items or discounts: `POST /v1/subscriptions/:id` with `items` or `discounts`, which no fixture exercised |
+| v3    | 14 of 16       | `apply-coupon`: the coupon is attached, but not expanded when read with `expand: ["discounts.source.coupon"]`                                         |
+| v4    | 16 of 16       | nothing; same outcome as on Stripe in all 16 pairs                                                                                                    |
+
+Each row's failures became dev probes for the next clone (`dev-ag-`, `dev-v3-`, `dev-v4-expand-`).
+Eight tasks are a small sample of what an agent may call: 16 of 16 says these tasks work, not
+that the clone covers the API.
 
 ## Holes found by mutation testing
 
 `audit/mutate.ts` plants 40 one-line bugs in any clone file but its entry module and replays every
-dev fixture the unchanged clone passes (1013 on clone v3, screens included). On clone v3, 30 of
-40 were caught. Two survivors change nothing by construction: the floor of the wall-clock time
-when no test clock is attached (`state.ts:229`; every probe uses a clock) and the ID minter
-(`api.ts:599`; IDs are compared canonicalised). The other 8 are behaviour no fixture pins:
+dev fixture the unchanged clone passes, screens included. On clone v4 (1029 fixtures), 30 of 40
+were caught. Four survivors change nothing by construction: constants and rounding of the two ID
+minters (`api.ts:746`, `state.ts:221`, `224`, `225`), whose IDs are compared canonicalised. The
+other 6 are behaviour no fixture pins:
 
-- the status of the portal page for an unknown session (`portal.ts:282`) and of a rejected plan
-  change in the portal (`portal.ts:258`);
-- listing invoice items: its routing condition (`api.ts:589`) and the customer filter, since every
-  probe has one customer (`api.ts:458`);
-- the portal's pending lines when a customer has several subscriptions (`portal.ts:58`);
-- a cancellation date exactly at the period end (`life.ts:231`);
-- a flexible interval change whose proration date falls exactly on the shortened period end
-  (`billing.ts:331`);
-- a draft invoice with `auto_advance` off during a test clock advance (`life.ts:249`).
+- the status codes of three portal errors: a rejected plan change (`portal.ts:258`), an unknown
+  subscription (`portal.ts:217`) and a session for an unknown customer (`portal.ts:305`);
+- updating an invoice item by id (`api.ts:625`);
+- the guard on the credits of an immediate cancellation (`life.ts:288`);
+- rounding a coupon percentage with decimals (`billing.ts:30`); every probe uses whole percents.
 
-An earlier run on clone v2 (logic files only, 715 fixtures) caught 30 of 40 as well; three of its six holes (once
-coupons over the lifecycle, the payment retry delays, the error for a missing object) became the
-`dev-v2-` probes, which v3 passes.
+Earlier runs: on clone v3, 30 of 40 caught, with 8 holes; the `dev-v4-` probes were written for
+five of them (invoice items listed by customer, cancel_at at the period end, a draft with
+`auto_advance` off, the interval-change boundary) and pass on v4, but the mutants were not
+replayed against them. On clone v2 (logic files only), 30 of 40; three of its holes became the
+`dev-v2-` probes.
+
+## Not pinned, chosen by the builder
+
+The v4 builder reported choices no fixture checks (`clone/NOTES.md`, pass 7): a manual invoice's
+period end, `auto_advance` defaulting to false, pending one-off items not pulled into the next
+renewal (Stripe's documentation suggests they are), and no proration credit for a `cancel_at`
+before the period end. Not covered by a fixture; unverified.
 
 ## Compared nowhere (outside the probe space)
 

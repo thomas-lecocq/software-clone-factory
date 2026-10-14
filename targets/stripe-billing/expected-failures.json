@@ -2,11 +2,15 @@
   "failures": [
     {
       "id": "hold-b4-s1-089",
-      "why": "batch 4 divergence of clone v3, within the claim's tolerance (measurements.md)"
+      "why": "batch 4 divergence, within the claim's tolerance; still failing on clone v4 (measurements.md)"
+    },
+    {
+      "id": "hold-b5-s1-068",
+      "why": "batch 5 divergence of clone v4, within the claim's tolerance (measurements.md)"
     },
     {
       "id": "wide3-210",
-      "why": "hash-split holdout divergence of clone v2, still present in v3 (measurements.md)"
+      "why": "hash-split holdout divergence since clone v2 (measurements.md)"
     }
   ]
 }

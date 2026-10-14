@@ -112,7 +112,7 @@ distribution and decision rule were committed before it was recorded, scored onc
   10), the clone diverges on **fewer than 1 % of cases, at 99 % confidence** (473 of 473);
 - on the wider one (up to 4 items, amounts from 50 cents to $100,000, 100 % coupons, quantity
   0), a later clone diverges on **fewer than 1 % of cases, at 95 % confidence** (472 of 473, on a
-  batch scored in three stages).
+  batch scored in three stages), and so does the next one, on a fresh batch (472 of 473 again).
 
 **How it got there, failures included.**
 
@@ -127,11 +127,15 @@ distribution and decision rule were committed before it was recorded, scored onc
 | Pre-registered batch 3, on the wider distribution, single look                                   | **466 of 473: claim rejected** (below 2.8 % at 95 %) |
 | Analysis of batch 3, agent-trace and mutation-hole probes, one more builder pass (40 min, $4.86) | 1013 of 1013 dev                                     |
 | Pre-registered batch 4 (new seed, three stages), scored sequentially                             | **472 of 473: below 1 % at 95 %**                    |
+| v4 dev probes from task validation and mutation testing, one more builder pass (35 min, $5.44)   | 1029 of 1029 dev                                     |
+| Pre-registered batch 5 (new seed, three stages), scored sequentially                             | **472 of 473: below 1 % at 95 %**                    |
 
 **The wider distribution is harder.** Batch 3 draws from a distribution widened where the breaker
 found failures: the improved clone fails 7 of 473, all in classic billing mode. A separate session
 analysed the spent batch; its findings became dev probes, the next clone was measured on a fresh
-batch 4, and fails 1 of 473. Batch 4 was split into three stages, each scored only while the
+batch 4, and fails 1 of 473; the clone after it fails 1 of 473 on a fresh batch 5. The 99 %
+claim on the wider distribution is not reached: the failures left are all changes to one of
+several items under several discounts. Batch 4 was split into three stages, each scored only while the
 failures stayed within the plan's tolerance, so a clone that fails early spends one stage, not the
 whole batch.
 
@@ -148,11 +152,11 @@ whole batch.
 - It is test mode only, USD only, and none of the factory's components was ablated.
 
 **An agent was given real tasks.** Eight everyday billing tasks, twice each, against the clone and
-against Stripe test mode, with every call logged: the agent succeeds 16 times in 16 on Stripe and,
-on the clone, 10 in 16 before the calls it made became dev probes, 14 in 16 after. The remaining
-failure is adding a coupon: the clone applies it, but does not expand the discount's coupon when
-asked to. Fidelity on the measured slice does not make a clone a good environment for the calls
-an agent actually makes; the factory now measures both.
+against Stripe test mode, with every call logged: the agent succeeds 16 times in 16 on Stripe. On
+the clone it went from 10 in 16 to 14, then 16, as each round's failures (calls no fixture
+exercised, such as changing a subscription's items or expanding a discount's coupon) became dev
+probes. Fidelity on the measured slice does not make a clone a good environment for the calls an
+agent actually makes; the factory measures both.
 
 **The auditors were measured, then used.** On copies of the repository with 12 planted defects,
 the committed auditor prompt found 12 of 12 (recall at least 77.9 % at 95 %). Two more runs on the

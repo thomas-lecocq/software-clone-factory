@@ -1,0 +1,213 @@
+{
+  "at": "2026-10-14T11:06:03.342Z",
+  "target": "stripe-billing",
+  "fixtures": 1029,
+  "scope": "every clone file except its entry module; every dev fixture the unchanged clone passes",
+  "excluded_known_failures": [],
+  "mutants": 40,
+  "valid": 40,
+  "killed": 30,
+  "survived": 10,
+  "results": [
+    {
+      "mutant": "portal.ts:235 and to or (&&)",
+      "outcome": "killed",
+      "killed_by": "uf-back-and-forth"
+    },
+    {
+      "mutant": "api.ts:746 constant plus one (7)",
+      "outcome": "survived",
+      "killed_by": null
+    },
+    {
+      "mutant": "billing.ts:504 equal to not equal (===)",
+      "outcome": "killed",
+      "killed_by": "d-pct20-always"
+    },
+    {
+      "mutant": "api.ts:531 and to or (&&)",
+      "outcome": "killed",
+      "killed_by": "b-clamp-jan31"
+    },
+    {
+      "mutant": "portal.ts:258 constant plus one (400)",
+      "outcome": "survived",
+      "killed_by": null
+    },
+    {
+      "mutant": "portal.ts:178 equal to not equal (===)",
+      "outcome": "killed",
+      "killed_by": "uf-back-and-forth"
+    },
+    {
+      "mutant": "state.ts:224 constant plus one (62)",
+      "outcome": "survived",
+      "killed_by": null
+    },
+    {
+      "mutant": "billing.ts:316 equal to not equal (===)",
+      "outcome": "killed",
+      "killed_by": "b-year-to-month"
+    },
+    {
+      "mutant": "state.ts:221 constant plus one (7919)",
+      "outcome": "survived",
+      "killed_by": null
+    },
+    {
+      "mutant": "billing.ts:25 constant plus one (2)",
+      "outcome": "killed",
+      "killed_by": "b-clamp-jan31"
+    },
+    {
+      "mutant": "billing.ts:331 strict to loose > (>)",
+      "outcome": "killed",
+      "killed_by": "dev-brk-y2m-at-new-end"
+    },
+    {
+      "mutant": "api.ts:630 constant plus one (404)",
+      "outcome": "killed",
+      "killed_by": "dev-v4-items-two-customers"
+    },
+    {
+      "mutant": "portal.ts:303 equal to not equal (===)",
+      "outcome": "killed",
+      "killed_by": "uf-back-and-forth"
+    },
+    {
+      "mutant": "api.ts:623 equal to not equal (===)",
+      "outcome": "killed",
+      "killed_by": "dev-ag-downgrade-no-proration"
+    },
+    {
+      "mutant": "api.ts:457 equal to not equal (===)",
+      "outcome": "killed",
+      "killed_by": "dev-ag-reads"
+    },
+    {
+      "mutant": "portal.ts:165 and to or (&&)",
+      "outcome": "killed",
+      "killed_by": "uf-back-and-forth"
+    },
+    {
+      "mutant": "api.ts:625 and to or (&&)",
+      "outcome": "survived",
+      "killed_by": null
+    },
+    {
+      "mutant": "api.ts:459 equal to not equal (===)",
+      "outcome": "killed",
+      "killed_by": "dev-ag-reads"
+    },
+    {
+      "mutant": "api.ts:61 equal to not equal (===)",
+      "outcome": "killed",
+      "killed_by": "b-qty-zero"
+    },
+    {
+      "mutant": "api.ts:549 equal to not equal (===)",
+      "outcome": "killed",
+      "killed_by": "b-clamp-jan31"
+    },
+    {
+      "mutant": "portal.ts:235 equal to not equal (===)",
+      "outcome": "killed",
+      "killed_by": "uf-back-and-forth"
+    },
+    {
+      "mutant": "portal.ts:278 equal to not equal (===)",
+      "outcome": "killed",
+      "killed_by": "uf-back-and-forth"
+    },
+    {
+      "mutant": "portal.ts:217 constant plus one (404)",
+      "outcome": "survived",
+      "killed_by": null
+    },
+    {
+      "mutant": "api.ts:531 and to or (&&)",
+      "outcome": "killed",
+      "killed_by": "b-clamp-jan31"
+    },
+    {
+      "mutant": "portal.ts:240 equal to not equal (===)",
+      "outcome": "killed",
+      "killed_by": "uf-back-and-forth"
+    },
+    {
+      "mutant": "billing.ts:378 round to floor (Math.round()",
+      "outcome": "killed",
+      "killed_by": "b-clamp-jan31"
+    },
+    {
+      "mutant": "portal.ts:181 equal to not equal (===)",
+      "outcome": "killed",
+      "killed_by": "uf-back-and-forth"
+    },
+    {
+      "mutant": "billing.ts:30 round to floor (Math.round()",
+      "outcome": "survived",
+      "killed_by": null
+    },
+    {
+      "mutant": "api.ts:624 equal to not equal (===)",
+      "outcome": "killed",
+      "killed_by": "dev-v4-draft-auto-advance-off"
+    },
+    {
+      "mutant": "billing.ts:109 strict to loose > (>)",
+      "outcome": "killed",
+      "killed_by": "b-classic-pct20-downgrade"
+    },
+    {
+      "mutant": "api.ts:553 and to or (&&)",
+      "outcome": "killed",
+      "killed_by": "b-clamp-jan31"
+    },
+    {
+      "mutant": "objects.ts:119 equal to not equal (===)",
+      "outcome": "killed",
+      "killed_by": "b-clamp-jan31"
+    },
+    {
+      "mutant": "life.ts:288 and to or (&&)",
+      "outcome": "survived",
+      "killed_by": null
+    },
+    {
+      "mutant": "life.ts:237 loose to strict <= (<=)",
+      "outcome": "killed",
+      "killed_by": "dev-ag-coupon-discounts"
+    },
+    {
+      "mutant": "billing.ts:95 strict to loose > (>)",
+      "outcome": "killed",
+      "killed_by": "dev-brk-free-once"
+    },
+    {
+      "mutant": "state.ts:225 floor to ceil (Math.floor()",
+      "outcome": "survived",
+      "killed_by": null
+    },
+    {
+      "mutant": "billing.ts:506 equal to not equal (===)",
+      "outcome": "killed",
+      "killed_by": "d-pct20-always"
+    },
+    {
+      "mutant": "portal.ts:303 equal to not equal (===)",
+      "outcome": "killed",
+      "killed_by": "uf-back-and-forth"
+    },
+    {
+      "mutant": "portal.ts:305 constant plus one (404)",
+      "outcome": "survived",
+      "killed_by": null
+    },
+    {
+      "mutant": "api.ts:264 constant plus one (400)",
+      "outcome": "killed",
+      "killed_by": "b-err-none-before-start"
+    }
+  ]
+}
