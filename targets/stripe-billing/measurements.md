@@ -73,6 +73,24 @@ spent: it may be analysed, but no later claim rests on it.
 - **Later looks (no claim):** three runs of `verify --split all` on 2026-10-14, same clone, to
   regenerate the reports and the reliability card; the same single failure.
 
+## Batch 5: `hold-b5-s1-001` to `hold-b5-s3-157`, staged
+
+- **Plan:** `analysis-plan-b5.md`, committed in `42baf92` before any `hold-b5-` fixture existed:
+  473 cases in three stages, scored sequentially, at most one failure tolerated.
+- **Distribution:** `WIDE_DISTRIBUTION_V2`, as batches 3 and 4.
+- **Clone:** after a fifth builder pass in the agent container (35 min, $5.44; a first attempt was
+  cut off at two hours with nothing copied back), on the v4 dev probes (expanded discount
+  coupons, invoice items across customers, draft invoices, cancel_at at the period end, the
+  interval-change boundary); it never saw batch 5. Frozen at `539349b` (1029 of 1029 dev). Batch 4's
+  single failure was not analysed: two analyst runs were stopped at two hours without a report.
+- **Look:** `npm run verify stripe-billing -- --sequential hold-b5 --max-failures 1`,
+  2026-10-14, the only run of this batch, clean tree. Every stage was scored.
+- **Result:** 472 of 473 pass, one failure (`hold-b5-s1-068`, a multi-item change with
+  discounts, like batch 4's). One-sided exact upper bound: 0.999 % at 95 %, 1.40 % at 99 %.
+- **Decision (per the plan):** all stages scored and k = 1, so **"below 1 % at 95 % confidence"**
+  on `WIDE_DISTRIBUTION_V2` for clone v4, not at 99 %. The 99 % claim on this distribution is
+  still unsupported.
+
 ## Secondary uses of batch 2 (no claim)
 
 - **Ablation of the second builder pass:** the clone measured on batch 1 (`7238f46`) scored on
