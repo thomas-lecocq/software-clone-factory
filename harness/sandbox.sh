@@ -29,12 +29,15 @@ trap 'docker rm -f "$egress" >/dev/null 2>&1 || true; rm -rf "$sandbox"' EXIT
 # look already taken). It goes under spent/<batch>/, out of every holdout path and pattern.
 if [ -n "${SPENT_BATCH:-}" ]; then
   [[ "$SPENT_BATCH" =~ ^hold[a-z0-9-]*$ ]] || { echo "refusing: bad batch name $SPENT_BATCH" >&2; exit 2; }
-  grep -q "\`${SPENT_BATCH}-001\`" "$repo/targets/$target/measurements.md" 2>/dev/null \
+  grep -qE "\`${SPENT_BATCH}-(s1-)?001\`" "$repo/targets/$target/measurements.md" 2>/dev/null \
     || { echo "refusing: batch $SPENT_BATCH has no recorded look in measurements.md" >&2; exit 2; }
   spent="$sandbox/targets/$target/spent/$SPENT_BATCH"
   mkdir -p "$spent"
-  find "$repo/targets/$target/fixtures/holdout" -name "${SPENT_BATCH}-[0-9]*.json" -exec cp {} "$spent/" \;
-  jq --arg b "$SPENT_BATCH" '[.cases[] | select(.pass | not) | .id | select(test("^" + $b + "-[0-9]+$"))]' \
+  # A staged batch's IDs are <batch>-s<stage>-<n>; "hold" must not take "hold-b2-…".
+  find "$repo/targets/$target/fixtures/holdout" -name "${SPENT_BATCH}-*.json" \
+    | grep -E "/${SPENT_BATCH}-(s[0-9]+-)?[0-9]+\.json$" | while read -r f; do cp "$f" "$spent/"; done
+  jq --arg b "$SPENT_BATCH" \
+    '[.cases[] | select(.pass | not) | .id | select(test("^" + $b + "-(s[0-9]+-)?[0-9]+$"))]' \
     "$repo/targets/$target/verify/holdout-verdict.json" >"$spent/failures.json"
 fi
 
