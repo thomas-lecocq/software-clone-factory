@@ -93,6 +93,22 @@ spent: it may be analysed, but no later claim rests on it.
 - **Later looks (no claim):** two runs of `verify --split all` on 2026-10-14, same clone, to
   regenerate the reports and the reliability card; the same single failure.
 
+## Batch 6: `hold-b6-s1-001` to `hold-b6-s3-157`, staged
+
+- **Plan:** `analysis-plan-b6.md`, committed in `6bdbf3a` before any `hold-b6-` fixture existed:
+  473 cases in three stages, scored sequentially, at most one failure tolerated.
+- **Distribution:** `WIDE_DISTRIBUTION_V2`, as batches 3 to 5.
+- **Clone:** after a sixth builder pass in the agent container (28 min, $4.67), on the v5 dev
+  probes: 150 cases of the area batches 4 and 5 failed in (several items, two coupons), the seven
+  designs of the batch 4 analysis (`analysis/hold-b4-failures.md`, analyst 8 min, $1.94), and
+  probes for v4's mutation holes and its builder's unpinned choices; it never saw batch 6. Frozen
+  at `fdbdd0e` (1196 of 1196 dev).
+- **Look:** `npm run verify stripe-billing -- --sequential hold-b6 --max-failures 1`,
+  2026-10-15, the only run of this batch, clean tree. Every stage was scored.
+- **Result:** 473 of 473 pass. One-sided exact upper bound: 0.63 % at 95 %, 0.97 % at 99 %.
+- **Decision (per the plan):** all stages scored and k = 0, so **"below 1 % at 99 % confidence"**
+  on `WIDE_DISTRIBUTION_V2`, for clone v5.
+
 ## Secondary uses of batch 2 (no claim)
 
 - **Ablation of the second builder pass:** the clone measured on batch 1 (`7238f46`) scored on

@@ -147,7 +147,7 @@
     {
       "id": "DSC-05",
       "area": "logic",
-      "statement": "A once coupon is used up only by an invoice where it actually took something off; a subscription's once coupon that took nothing stays active (dev-brk-free-once, wide3-027, -054, -230, -249). A once coupon passed to the preview discounts the remaining-time charge and is then used up, so it no longer discounts the renewal; when the change prorates nothing it discounts the renewal and is listed; in an immediate invoice it is listed at 0.",
+      "statement": "A once coupon is used up only by an invoice where it actually took something off; a subscription's once coupon that took nothing stays active (dev-brk-free-once, wide3-027, -054, -230, -249). A once coupon passed to the preview discounts the remaining-time charge and is then used up, so it no longer discounts the renewal; when the change prorates nothing it discounts the renewal and is listed; in an immediate invoice it is listed at 0. A remaining-time charge uses a once coupon up as soon as its full-period share is above 0, even when the prorated share rounds to 0 (dev-v5-dsc-013, dev-v5-dsc-052).",
       "provenance": {
         "kind": "observed",
         "ref": "builder pass v2 notes (clone/NOTES.md), checked against the dev fixtures named"
@@ -381,10 +381,10 @@
     {
       "id": "DSC-07",
       "area": "logic",
-      "statement": "Flexible mode, immediate invoice: proration lines list their discounts at 0. The credit line lists nothing when the invoice has no discount. It lists the invoice's discounts when the billed line carried none. It lists nothing when no carried discount survives DSC-08. Otherwise it lists the surviving carried discounts still on the invoice, in subscription order. If there are none, it lists the invoice's discounts when a carried discount is still on the invoice, else the single surviving carried discount (a spent once coupon, or one replaced by a coupon passed to the preview), else the invoice's discounts. A non-immediate flexible preview lists the invoice's first discount, a dropped one included.",
+      "statement": "Flexible mode, immediate invoice: proration lines list their discounts at 0. The credit line lists nothing when the invoice has no discount. It lists the invoice's discounts when the billed line carried none. It lists nothing when no carried discount survives DSC-08. Otherwise it lists the surviving carried discounts still on the invoice, in subscription order. If there are none, it lists the invoice's discounts when a carried discount is still on the invoice, else, when the billed line carried a single discount, that discount (a spent once coupon, or one replaced by a coupon passed to the preview), else the invoice's discounts. A carried discount that took 0 counts only while it is still on the invoice. A non-immediate flexible preview lists the invoice's first discount, a dropped one included.",
       "provenance": {
         "kind": "observed",
-        "ref": "dev fixtures and spent holdout batch 1, analysed in analysis/batch1-failures.md (2026-10-01); corrected after the analysis of batch 4 (analysis/hold-b4-failures.md), to be confirmed by dev-v5-b4-*"
+        "ref": "dev fixtures and spent holdout batch 1, analysed in analysis/batch1-failures.md (2026-10-01); corrected after the analysis of batch 4 (analysis/hold-b4-failures.md), to be confirmed by dev-v5-b4-*; wording fitted by the v5 builder to dev-v5-b4-5-preview-coupon and dev-v5-dsc-116 (clone/NOTES.md pass 8); still a decision table, not a mechanism"
       }
     },
     {
