@@ -92,7 +92,7 @@ function upcoming(state: State, sub: Subscription): Json {
   const label = (l: Line): string => {
     const name = productName(state, l.price);
     if (!l.proration) return name;
-    return l.amount < 0 || l.description.startsWith("Unused")
+    return l.amount < 0 || (l.description ?? "").startsWith("Unused")
       ? `Prorated credit from ${name}`
       : `Prorated charge for ${name}`;
   };

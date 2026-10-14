@@ -312,3 +312,40 @@ Thin spots after pass 6 (no dev case pins them):
 - PRO-11 with a coupon on the subscription and a once coupon passed to the preview: pinned by the
   two dev-b3-classic-b9 cases only.
 - Contradiction with rules.json, DSC-07 wording: still as in pass 4.
+
+## Pass 7: dev-v4 (LIF-08, ITM-02, INV-02, DSC-09)
+
+Baseline: `--only dev-v4-` 7 of 16 (the six interval-end cases and expand-no-discount passed).
+Rules as read from the nine failing cases, with the cases expected to flip:
+
+- LIF-08 (dev-v4-cancel-at-period-end-exact, -no-proration, -cancel-at-then-reactivate):
+  POST subscription with `cancel_at=<t>` sets cancel_at, canceled_at = now and reason
+  cancellation_requested, and leaves cancel_at_period_end false even when t is the period end.
+  `cancel_at=""` clears the three. The clock then ends the subscription at cancel_at (existing
+  advance code), with no renewal invoice. A cancel_at before the period end with prorations is
+  not pinned (the clone creates no credit).
+- ITM-02 (dev-v4-items-two-customers): POST /v1/invoiceitems creates a pending one-off item with
+  its own new price and product, parent null, frozen_fields [], no proration details; GET by id;
+  listing filters by customer (and pending). Unknown id: 404 resource_missing, message
+  "No such Invoice Item: '<id>'(livemode=false)". A clock-less customer's item is dated with the
+  latest clock time (Stripe: wall clock, recorded as noise), to stay deterministic.
+- INV-02 (dev-v4-draft-auto-advance-on/-off): POST /v1/invoices makes a `manual` draft, parent
+  null, a `rendering` object (page_size "auto" as a draft, "letter" once finalized),
+  webhooks_delivered_at = created, period from creation to one month later (here also the
+  subscription's period end; which one it follows is not pinned).
+  `pending_invoice_items_behavior=include` takes the customer's pending items (their lines have
+  `invoice_item_details` parents). auto_advance=true: automatically_finalizes_at and
+  next_payment_attempt = created + 1 h; the clock then finalizes and pays it (auto_advance false
+  after). auto_advance=false: it stays a draft. Finalized invoices, the subscription ones
+  included, now show effective_at, status_transitions.finalized_at/paid_at, a number (noise)
+  and hosted/pdf URLs carrying one token per invoice (compared after ID canonicalisation).
+  GET /v1/invoices filters by customer. Not pinned: whether one-off pending items also go into
+  the next subscription renewal (the clone leaves them out), the default auto_advance (false
+  here) and the customer balance on manual invoices.
+- DSC-09 (dev-v4-expand-*): `expand=discounts.source.coupon`, on GET and on POST, expands the
+  discounts and puts the full coupon in `source.coupon`; times_redeemed counts the coupon's
+  discounts applied to subscriptions. POST subscription accepts `metadata[k]`.
+
+Prediction: the nine failing dev-v4 cases flip; nothing else moves (only these cases show
+finalized invoices whole). Outcome (local replay): 16 of 16 dev-v4; identical output twice after
+reset.

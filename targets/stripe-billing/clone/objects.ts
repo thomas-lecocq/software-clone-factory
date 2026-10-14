@@ -43,21 +43,34 @@ export function lineJson(
     invoice,
     livemode: false,
     metadata: {},
-    parent: {
-      invoice_item_details: null,
-      subscription_item_details: {
-        invoice_item: l.invoice_item,
-        proration: l.proration,
-        proration_details: {
-          credited_items: l.credited
-            ? { invoice: l.credited.invoice, invoice_line_items: [l.credited.line] }
-            : null,
-        },
-        subscription,
-        subscription_item: l.subscription_item,
-      },
-      type: "subscription_item_details",
-    },
+    // A line without a subscription item comes from a one-off invoice item (ITM-02, INV-02).
+    parent:
+      l.subscription_item === null
+        ? {
+            invoice_item_details: {
+              invoice_item: l.invoice_item,
+              proration: l.proration,
+              proration_details: { credited_items: null },
+              subscription,
+            },
+            subscription_item_details: null,
+            type: "invoice_item_details",
+          }
+        : {
+            invoice_item_details: null,
+            subscription_item_details: {
+              invoice_item: l.invoice_item,
+              proration: l.proration,
+              proration_details: {
+                credited_items: l.credited
+                  ? { invoice: l.credited.invoice, invoice_line_items: [l.credited.line] }
+                  : null,
+              },
+              subscription,
+              subscription_item: l.subscription_item,
+            },
+            type: "subscription_item_details",
+          },
     period: { end: l.period.end, start: l.period.start },
     pretax_credit_amounts: l.discount_amounts.map(pretax),
     pricing: {
@@ -72,8 +85,23 @@ export function lineJson(
   };
 }
 
+// The recorded account's ID as it appears in hosted invoice URLs.
+const ACCOUNT_ID = "acct_1UIrqUAcmeAcct00";
+
+// Invoice number: the customer's prefix and the rank of the invoice among its finalized ones.
+function invoiceNumber(state: State, inv: Invoice, prefix: string): string {
+  const finalized = Object.values(state.invoices).filter(
+    (i) => i.customer === inv.customer && i.finalized_at !== null,
+  );
+  const rank = finalized.findIndex((i) => i.id === inv.id) + 1;
+  return `${prefix}-${String(rank).padStart(4, "0")}`;
+}
+
 export function invoiceJson(state: State, inv: Invoice, preview: boolean): Json {
   const { subtotal, total } = totals(inv.lines, inv.total_discount_amounts);
+  // A finalized invoice gets a number, hosted URLs and an effective date (INV-02).
+  const finalized = !preview && inv.finalized_at !== null;
+  const token = `test_YWNj${inv.id.slice(inv.id.indexOf("_") + 1)}`;
   const due = amountDue(inv);
   const ending = Math.min(0, total + inv.starting_balance);
   const paid = inv.status === "paid" ? inv.amount_paid : 0;
@@ -101,7 +129,8 @@ export function invoiceJson(state: State, inv: Invoice, preview: boolean): Json 
       provider: null,
       status: null,
     },
-    automatically_finalizes_at: null,
+    automatically_finalizes_at:
+      !preview && inv.status === "draft" && inv.auto_advance ? inv.next_payment_attempt : null,
     billing_reason: inv.billing_reason,
     collection_method: "charge_automatically",
     created: inv.created,
@@ -122,12 +151,16 @@ export function invoiceJson(state: State, inv: Invoice, preview: boolean): Json 
     description: null,
     discounts: [...inv.discounts],
     due_date: null,
-    effective_at: null,
+    effective_at: finalized ? inv.finalized_at : null,
     ending_balance: preview ? ending : inv.status === "draft" ? null : ending,
     footer: null,
     from_invoice: null,
-    hosted_invoice_url: null,
-    invoice_pdf: null,
+    hosted_invoice_url: finalized
+      ? `https://invoice.stripe.com/i/${ACCOUNT_ID}/${token}?s=ap`
+      : null,
+    invoice_pdf: finalized
+      ? `https://pay.stripe.com/invoice/${ACCOUNT_ID}/${token}/pdf?s=ap`
+      : null,
     issuer: { type: "self" },
     last_finalization_error: null,
     latest_revision: null,
@@ -141,17 +174,21 @@ export function invoiceJson(state: State, inv: Invoice, preview: boolean): Json 
     livemode: false,
     metadata: {},
     next_payment_attempt: inv.next_payment_attempt,
-    number: null,
+    number: finalized ? invoiceNumber(state, inv, customer?.invoice_prefix ?? "") : null,
     on_behalf_of: null,
-    parent: {
-      quote_details: null,
-      subscription_details: {
-        metadata: {},
-        subscription: inv.subscription,
-        ...(inv.proration_date !== null ? { subscription_proration_date: inv.proration_date } : {}),
-      },
-      type: "subscription_details",
-    },
+    parent: inv.manual
+      ? null
+      : {
+          quote_details: null,
+          subscription_details: {
+            metadata: {},
+            subscription: inv.subscription,
+            ...(inv.proration_date !== null
+              ? { subscription_proration_date: inv.proration_date }
+              : {}),
+          },
+          type: "subscription_details",
+        },
     payment_settings: {
       default_mandate: null,
       payment_method_options: null,
@@ -162,16 +199,23 @@ export function invoiceJson(state: State, inv: Invoice, preview: boolean): Json 
     post_payment_credit_notes_amount: 0,
     pre_payment_credit_notes_amount: 0,
     receipt_number: null,
-    rendering: null,
+    rendering: inv.manual
+      ? {
+          amount_tax_display: null,
+          pdf: { page_size: finalized ? "letter" : "auto" },
+          template: null,
+          template_version: null,
+        }
+      : null,
     shipping_cost: null,
     shipping_details: null,
     starting_balance: inv.starting_balance,
     statement_descriptor: null,
     status: inv.status,
     status_transitions: {
-      finalized_at: null,
+      finalized_at: finalized ? inv.finalized_at : null,
       marked_uncollectible_at: null,
-      paid_at: null,
+      paid_at: finalized && inv.status === "paid" ? inv.paid_at : null,
       voided_at: null,
     },
     subtotal,
@@ -186,7 +230,7 @@ export function invoiceJson(state: State, inv: Invoice, preview: boolean): Json 
       type: "discount",
     })),
     total_taxes: [],
-    webhooks_delivered_at: null,
+    webhooks_delivered_at: preview ? null : inv.created,
   };
 }
 
@@ -278,9 +322,34 @@ export function itemJson(state: State, sub: Subscription, it: SubItem): Json {
   };
 }
 
-export function discountJson(state: State, id: string): Json {
+// The coupon object as `expand=discounts.source.coupon` shows it (DSC-09). A coupon counts one
+// redemption per discount applied to a subscription; one passed to a preview is not redeemed.
+export function fullCouponJson(state: State, c: Coupon): Json {
+  return {
+    id: c.id,
+    object: "coupon",
+    amount_off: c.amount_off,
+    created: c.created,
+    currency: c.amount_off !== null ? "usd" : null,
+    duration: c.duration,
+    duration_in_months: null,
+    livemode: false,
+    max_redemptions: null,
+    metadata: {},
+    name: null,
+    percent_off: c.percent_off,
+    redeem_by: null,
+    times_redeemed: Object.values(state.discounts).filter(
+      (d) => d.coupon === c.id && d.subscription !== null,
+    ).length,
+    valid: true,
+  };
+}
+
+export function discountJson(state: State, id: string, expandCoupon = false): Json {
   const d = get(state.discounts, id);
   if (!d) return id;
+  const coupon = expandCoupon ? get(state.coupons, d.coupon) : undefined;
   return {
     id: d.id,
     object: "discount",
@@ -291,7 +360,7 @@ export function discountJson(state: State, id: string): Json {
     invoice: null,
     invoice_item: null,
     promotion_code: null,
-    source: { coupon: d.coupon, type: "coupon" },
+    source: { coupon: coupon ? fullCouponJson(state, coupon) : d.coupon, type: "coupon" },
     start: d.start,
     subscription: d.subscription,
     subscription_item: null,
@@ -334,6 +403,38 @@ export function invoiceItemJson(state: State, ii: InvoiceItem): Json {
   const l = ii.line;
   const price = get(state.prices, l.price);
   const customer = get(state.customers, ii.customer);
+  // A one-off invoice item (POST /v1/invoiceitems) has no parent and no proration details.
+  if (ii.subscription === null) {
+    return {
+      id: ii.id,
+      object: "invoiceitem",
+      amount: l.amount,
+      currency: "usd",
+      customer: ii.customer,
+      customer_account: null,
+      date: ii.date,
+      description: l.description,
+      discountable: l.discountable,
+      discounts: [],
+      frozen_fields: [],
+      invoice: ii.invoice,
+      invoicing_rules: [],
+      livemode: false,
+      metadata: {},
+      parent: null,
+      period: { end: l.period.end, start: l.period.start },
+      pricing: {
+        price_details: { price: l.price, product: price?.product ?? null },
+        type: "price_details",
+        unit_amount_decimal: l.unit_amount_decimal,
+      },
+      proration: l.proration,
+      quantity: l.quantity,
+      quantity_decimal: String(l.quantity),
+      tax_rates: [],
+      test_clock: customer?.clock ?? null,
+    };
+  }
   const net = l.amount - l.discount_amounts.reduce((a, d) => a + d.amount, 0);
   return {
     id: ii.id,
@@ -390,6 +491,7 @@ export function subscriptionJson(
   sub: Subscription,
   expandInvoice: boolean,
   expandDiscounts = false,
+  expandCoupons = false,
 ): Json {
   const latest = sub.latest_invoice ? get(state.invoices, sub.latest_invoice) : undefined;
   const customer = get(state.customers, sub.customer);
@@ -432,7 +534,9 @@ export function subscriptionJson(
     default_source: null,
     default_tax_rates: [],
     description: null,
-    discounts: sub.discounts.map((d) => (expandDiscounts ? discountJson(state, d) : d)),
+    discounts: sub.discounts.map((d) =>
+      expandDiscounts || expandCoupons ? discountJson(state, d, expandCoupons) : d,
+    ),
     ended_at: sub.ended_at,
     invoice_settings: {
       account_tax_ids: null,
@@ -452,7 +556,7 @@ export function subscriptionJson(
       expandInvoice && latest ? invoiceJson(state, latest, false) : sub.latest_invoice,
     livemode: false,
     managed_payments: { enabled: false },
-    metadata: {},
+    metadata: { ...sub.metadata },
     next_pending_invoice_item_invoice: null,
     on_behalf_of: null,
     pause_collection: null,

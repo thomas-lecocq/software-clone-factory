@@ -1,7 +1,6 @@
 {
   "splits": [
-    "dev",
-    "holdout"
+    "dev"
   ],
   "cases": [
     {
@@ -3543,6 +3542,218 @@
       "split": "dev",
       "rules": [
         "ITM-01"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v4-cancel-at-period-end-exact-no-proration",
+      "split": "dev",
+      "rules": [
+        "LIF-08"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v4-cancel-at-period-end-exact",
+      "split": "dev",
+      "rules": [
+        "LIF-08",
+        "LIF-03"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v4-cancel-at-then-reactivate",
+      "split": "dev",
+      "rules": [
+        "LIF-08",
+        "LIF-04"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v4-draft-auto-advance-off",
+      "split": "dev",
+      "rules": [
+        "INV-02"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v4-draft-auto-advance-on",
+      "split": "dev",
+      "rules": [
+        "INV-02"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v4-expand-apply-amount-once",
+      "split": "dev",
+      "rules": [
+        "DSC-09",
+        "DSC-05"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v4-expand-apply-percent",
+      "split": "dev",
+      "rules": [
+        "DSC-09"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v4-expand-at-creation",
+      "split": "dev",
+      "rules": [
+        "DSC-09"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v4-expand-no-discount",
+      "split": "dev",
+      "rules": [
+        "DSC-09"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v4-interval-end-after-invoice",
+      "split": "dev",
+      "rules": [
+        "DSC-07",
+        "INT-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-07"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v4-interval-end-after-prorate",
+      "split": "dev",
+      "rules": [
+        "INT-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v4-interval-end-at-invoice",
+      "split": "dev",
+      "rules": [
+        "DSC-07",
+        "INT-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-07"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v4-interval-end-at-prorate",
+      "split": "dev",
+      "rules": [
+        "INT-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v4-interval-end-before-invoice",
+      "split": "dev",
+      "rules": [
+        "DSC-07",
+        "INT-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-07"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v4-interval-end-before-prorate",
+      "split": "dev",
+      "rules": [
+        "INT-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v4-items-two-customers",
+      "split": "dev",
+      "rules": [
+        "ITM-02"
       ],
       "pass": true,
       "crashed": false,
@@ -18071,39 +18282,39 @@
     }
   ],
   "holdout": {
-    "pass": 2144,
-    "total": 2146
+    "pass": 0,
+    "total": 0
   },
   "rules": [
     {
       "id": "PRO-01",
       "status": "verified",
-      "pass": 803,
-      "total": 803
-    },
-    {
-      "id": "PRO-02",
-      "status": "verified",
-      "pass": 802,
-      "total": 802
-    },
-    {
-      "id": "PRO-03",
-      "status": "verified",
-      "pass": 799,
-      "total": 799
-    },
-    {
-      "id": "PRO-04",
-      "status": "verified",
       "pass": 809,
       "total": 809
     },
     {
+      "id": "PRO-02",
+      "status": "verified",
+      "pass": 808,
+      "total": 808
+    },
+    {
+      "id": "PRO-03",
+      "status": "verified",
+      "pass": 805,
+      "total": 805
+    },
+    {
+      "id": "PRO-04",
+      "status": "verified",
+      "pass": 815,
+      "total": 815
+    },
+    {
       "id": "PRO-05",
       "status": "verified",
-      "pass": 804,
-      "total": 804
+      "pass": 807,
+      "total": 807
     },
     {
       "id": "PRO-06",
@@ -18114,8 +18325,8 @@
     {
       "id": "PRO-07",
       "status": "verified",
-      "pass": 132,
-      "total": 132
+      "pass": 135,
+      "total": 135
     },
     {
       "id": "PRO-08",
@@ -18144,8 +18355,8 @@
     {
       "id": "INT-01",
       "status": "verified",
-      "pass": 85,
-      "total": 85
+      "pass": 91,
+      "total": 91
     },
     {
       "id": "DSC-01",
@@ -18174,8 +18385,8 @@
     {
       "id": "DSC-05",
       "status": "verified",
-      "pass": 207,
-      "total": 207
+      "pass": 208,
+      "total": 208
     },
     {
       "id": "MOD-01",
@@ -18239,15 +18450,15 @@
     },
     {
       "id": "LIF-03",
-      "status": "unverified",
-      "pass": 0,
-      "total": 0
+      "status": "verified",
+      "pass": 1,
+      "total": 1
     },
     {
       "id": "LIF-04",
-      "status": "unverified",
-      "pass": 0,
-      "total": 0
+      "status": "verified",
+      "pass": 1,
+      "total": 1
     },
     {
       "id": "LIF-05",
@@ -18330,8 +18541,8 @@
     {
       "id": "DSC-07",
       "status": "verified",
-      "pass": 87,
-      "total": 87
+      "pass": 90,
+      "total": 90
     },
     {
       "id": "DSC-08",
@@ -18362,6 +18573,30 @@
       "status": "unverified",
       "pass": 0,
       "total": 0
+    },
+    {
+      "id": "DSC-09",
+      "status": "verified",
+      "pass": 4,
+      "total": 4
+    },
+    {
+      "id": "INV-02",
+      "status": "verified",
+      "pass": 2,
+      "total": 2
+    },
+    {
+      "id": "LIF-08",
+      "status": "verified",
+      "pass": 3,
+      "total": 3
+    },
+    {
+      "id": "ITM-02",
+      "status": "verified",
+      "pass": 1,
+      "total": 1
     }
   ]
 }

@@ -29,6 +29,8 @@ export interface Coupon {
   percent_off: number | null;
   amount_off: number | null;
   duration: "forever" | "once";
+  // Coupons live outside test clocks; the latest clock time (recorded as noise).
+  created: number;
 }
 
 export interface PaymentMethod {
@@ -96,6 +98,7 @@ export interface Subscription {
   trial_end: number | null;
   // cancellation_details.reason: "cancellation_requested" once a cancellation is asked for.
   cancellation_reason: string | null;
+  metadata: Record<string, string>;
 }
 
 export interface DiscountAmount {
@@ -106,7 +109,8 @@ export interface DiscountAmount {
 export interface Line {
   id: string;
   amount: number;
-  description: string;
+  // null on a line of an invoice item created without a description.
+  description: string | null;
   period: { start: number; end: number };
   price: string;
   quantity: number;
@@ -142,12 +146,18 @@ export interface Invoice {
   starting_balance: number;
   // An amount due below the minimum charge, moved to the customer balance instead (INV-01).
   deferred: number;
+  // When the invoice left draft and when it was paid (status_transitions, effective_at).
+  finalized_at: number | null;
+  paid_at: number | null;
+  // Created by POST /v1/invoices (billing_reason manual): no subscription parent, a rendering.
+  manual: boolean;
 }
 
 export interface InvoiceItem {
   id: string;
   customer: string;
-  subscription: string;
+  // null for an invoice item created by POST /v1/invoiceitems (ITM-02).
+  subscription: string | null;
   line: Line;
   invoice: string | null;
   // When the invoice item was created (clock time).

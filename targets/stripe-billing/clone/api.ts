@@ -165,12 +165,17 @@ export function billFirstInvoice(state: State, sub: Subscription, now: number): 
     retries: [],
     starting_balance: 0,
     deferred: 0,
+    finalized_at: null,
+    paid_at: null,
+    manual: false,
   };
   if (!deferSmall(state, inv)) {
     const due = amountDue(inv);
     inv.amount_paid = due;
     inv.attempt_count = due > 0 ? 1 : 0;
   }
+  inv.finalized_at = now;
+  inv.paid_at = now;
   state.invoices[id] = inv;
   sub.latest_invoice = id;
   return inv;
@@ -219,6 +224,7 @@ function createSubscription(state: State, p: Params): CloneResponse {
     trial_start: trialEnd !== null ? now : null,
     trial_end: trialEnd,
     cancellation_reason: null,
+    metadata: {},
   };
   for (const raw of arr(p.discounts)) {
     const coupon = str(obj(raw).coupon) ?? "";
@@ -289,6 +295,9 @@ function previewInvoice(state: State, p: Params): CloneResponse {
     retries: [],
     starting_balance: get(state.customers, sub.customer)?.balance ?? 0,
     deferred: 0,
+    finalized_at: null,
+    paid_at: null,
+    manual: false,
   };
   return ok(invoiceJson(state, inv, true));
 }
@@ -376,7 +385,35 @@ function updateSubscription(state: State, sub: Subscription, p: Params): CloneRe
     sub.canceled_at = on ? now : null;
     sub.cancellation_reason = on ? "cancellation_requested" : null;
   }
+  // metadata[k]=v sets a key, an empty value removes it.
+  const merged = new Map<string, string>(Object.entries(sub.metadata));
+  for (const [k, v] of Object.entries(obj(p.metadata))) merged.set(k, str(v) ?? "");
+  const kept: Record<string, string> = {};
+  for (const [k, v] of merged) if (v !== "") kept[k] = v;
+  sub.metadata = kept;
+  // LIF-08: cancel_at sets the end date (cancel_at_period_end stays false, even at the period
+  // end); an empty value clears it, like reactivating.
+  if (p.cancel_at !== undefined) {
+    const at = num(p.cancel_at);
+    sub.cancel_at_period_end = false;
+    sub.cancel_at = at;
+    sub.canceled_at = at !== null ? now : null;
+    sub.cancellation_reason = at !== null ? "cancellation_requested" : null;
+  }
   return ok(subscriptionJson(state, sub, false));
+}
+
+// `expand[0]=x` parses to a list, `expand[]=x` to a plain string. DSC-09:
+// discounts.source.coupon expands the discounts and their coupons.
+function expandedSubscription(state: State, sub: Subscription, p: Params): Json {
+  const expand = typeof p.expand === "string" ? [p.expand] : arr(p.expand).map(str);
+  return subscriptionJson(
+    state,
+    sub,
+    expand.includes("latest_invoice"),
+    expand.includes("discounts"),
+    expand.includes("discounts.source.coupon"),
+  );
 }
 
 function findItem(state: State, id: string): { sub: Subscription; it: SubItem } | null {
@@ -436,9 +473,11 @@ const UPCOMING_GONE =
 
 function listInvoices(state: State, q: Params): CloneResponse {
   const sub = str(q.subscription);
+  const customer = str(q.customer);
   const limit = num(q.limit) ?? 10;
   const all = Object.values(state.invoices)
     .filter((i) => sub === null || i.subscription === sub)
+    .filter((i) => customer === null || i.customer === customer)
     .reverse()
     .slice(0, limit);
   return ok({
@@ -503,7 +542,7 @@ export function handleApi(state: State, req: CloneRequest, p: Params): CloneResp
       unit_amount: num(p.unit_amount) ?? 0,
       currency: str(p.currency) ?? "usd",
       interval,
-      created: Math.max(0, ...Object.values(state.clocks).map((c) => c.frozen_time)),
+      created: latestClockTime(state),
     };
     return ok(priceJson(state, id));
   }
@@ -518,6 +557,7 @@ export function handleApi(state: State, req: CloneRequest, p: Params): CloneResp
       percent_off: num(p.percent_off),
       amount_off: num(p.amount_off),
       duration: str(p.duration) === "once" ? ("once" as const) : ("forever" as const),
+      created: latestClockTime(state),
     };
     state.coupons[id] = coupon;
     return ok(couponJson(coupon));
@@ -559,26 +599,19 @@ export function handleApi(state: State, req: CloneRequest, p: Params): CloneResp
     if (m === "GET" && b === undefined) return listSubscriptions(state, p);
     const sub = b !== undefined ? get(state.subscriptions, b) : undefined;
     if (!sub || b === undefined) return missing("subscription", b ?? "");
-    if (m === "GET") {
-      // `expand[0]=x` parses to a list, `expand[]=x` to a plain string.
-      const expand = typeof p.expand === "string" ? [p.expand] : arr(p.expand).map(str);
-      return ok(
-        subscriptionJson(
-          state,
-          sub,
-          expand.includes("latest_invoice"),
-          expand.includes("discounts"),
-        ),
-      );
-    }
+    if (m === "GET") return ok(expandedSubscription(state, sub, p));
     if (m === "DELETE") {
       cancelNow(state, sub, bool(p.prorate), bool(p.invoice_now));
       return ok(subscriptionJson(state, sub, false));
     }
-    if (m === "POST") return updateSubscription(state, sub, p);
+    if (m === "POST") {
+      const res = updateSubscription(state, sub, p);
+      return res.status === 200 ? ok(expandedSubscription(state, sub, p)) : res;
+    }
   }
   if (a === "invoices") {
     if (m === "POST" && b === "create_preview") return previewInvoice(state, p);
+    if (m === "POST" && b === undefined) return createInvoice(state, p);
     if (m === "GET" && b === "upcoming") return fail(400, UPCOMING_GONE);
     if (m === "GET" && b === undefined) return listInvoices(state, p);
     if (m === "GET" && b !== undefined) {
@@ -586,8 +619,122 @@ export function handleApi(state: State, req: CloneRequest, p: Params): CloneResp
       return inv ? ok(invoiceJson(state, inv, false)) : missing("invoice", b);
     }
   }
-  if (a === "invoiceitems" && m === "GET" && b === undefined) return listInvoiceItems(state, p);
+  if (a === "invoiceitems") {
+    if (m === "GET" && b === undefined) return listInvoiceItems(state, p);
+    if (m === "POST" && b === undefined) return createInvoiceItem(state, p);
+    if (m === "GET" && b !== undefined) {
+      const ii = get(state.invoice_items, b);
+      // The message names the object as "Invoice Item" and adds the mode (ITM-02).
+      return ii
+        ? ok(invoiceItemJson(state, ii))
+        : fail(404, `No such Invoice Item: '${b}'(livemode=false)`, "id", "resource_missing");
+    }
+  }
   return null;
+}
+
+// Objects outside test clocks (prices, coupons, a clock-less customer's items) are stamped with
+// wall-clock time on Stripe (recorded as noise); the clone uses the latest clock time, so that
+// the same calls after a reset give the same output.
+function latestClockTime(state: State): number {
+  return Math.max(0, ...Object.values(state.clocks).map((c) => c.frozen_time));
+}
+
+function customerNow(state: State, customer: string): number {
+  return get(state.customers, customer)?.clock ? nowFor(state, customer) : latestClockTime(state);
+}
+
+// ITM-02: a one-off invoice item, priced by a new price of a new product, pending until an invoice
+// takes it.
+function createInvoiceItem(state: State, p: Params): CloneResponse {
+  const customer = str(p.customer) ?? "";
+  if (!get(state.customers, customer)) return missing("customer", customer);
+  const amount = num(p.amount) ?? 0;
+  const now = customerNow(state, customer);
+  const product = mint(state, "prod");
+  state.products[product] = { id: product, name: "" };
+  const price = mint(state, "price");
+  state.prices[price] = {
+    id: price,
+    product,
+    unit_amount: amount,
+    currency: str(p.currency) ?? "usd",
+    interval: "month",
+    created: now,
+  };
+  const id = mint(state, "ii");
+  state.invoice_items[id] = {
+    id,
+    customer,
+    subscription: null,
+    invoice: null,
+    date: now,
+    line: {
+      id: "",
+      amount,
+      description: str(p.description),
+      period: { start: now, end: now },
+      price,
+      quantity: 1,
+      proration: false,
+      discountable: true,
+      discount_amounts: [],
+      subscription_item: null,
+      invoice_item: id,
+      credited: null,
+      unit_amount_decimal: String(amount),
+    },
+  };
+  return ok(invoiceItemJson(state, state.invoice_items[id]));
+}
+
+// INV-02: POST /v1/invoices makes a draft (billing_reason manual). With
+// pending_invoice_items_behavior=include it takes the customer's pending invoice items. With
+// auto_advance it is finalized and paid an hour after creation (next_payment_attempt); without,
+// it stays a draft.
+function createInvoice(state: State, p: Params): CloneResponse {
+  const customer = str(p.customer) ?? "";
+  const cus = get(state.customers, customer);
+  if (!cus) return missing("customer", customer);
+  const now = customerNow(state, customer);
+  const auto = bool(p.auto_advance);
+  const id = mint(state, "in");
+  const lines: Line[] = [];
+  if (str(p.pending_invoice_items_behavior) === "include") {
+    for (const ii of Object.values(state.invoice_items)) {
+      if (ii.customer !== customer || ii.invoice !== null) continue;
+      ii.invoice = id;
+      lines.push({ ...ii.line, id: mint(state, "il") });
+    }
+  }
+  const inv: Invoice = {
+    id,
+    customer,
+    subscription: null,
+    lines,
+    discounts: [],
+    total_discount_amounts: [],
+    billing_reason: "manual",
+    status: "draft",
+    created: now,
+    // Observed: from creation to one month later (dev-v4-draft-*; it is also the subscription's
+    // period end there, so which of the two it follows is not pinned).
+    period_start: now,
+    period_end: addIntervals(now, "month", 1),
+    attempt_count: 0,
+    amount_paid: 0,
+    auto_advance: auto,
+    next_payment_attempt: auto ? now + 3600 : null,
+    proration_date: null,
+    retries: [],
+    starting_balance: 0,
+    deferred: 0,
+    finalized_at: null,
+    paid_at: null,
+    manual: true,
+  };
+  state.invoices[id] = inv;
+  return ok(invoiceJson(state, inv, false));
 }
 
 // An 8-letter invoice prefix, deterministic (recorded as noise).

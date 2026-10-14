@@ -88,6 +88,9 @@ export function invoiceNow(state: State, sub: Subscription, now: number): Invoic
     retries: [],
     starting_balance: 0,
     deferred: 0,
+    finalized_at: null,
+    paid_at: null,
+    manual: false,
   };
   const cus = get(state.customers, sub.customer);
   if (cus) {
@@ -176,6 +179,9 @@ function renew(state: State, sub: Subscription): void {
     retries: [],
     starting_balance: 0,
     deferred: 0,
+    finalized_at: null,
+    paid_at: null,
+    manual: false,
   };
   // The customer balance moves onto the renewal invoice; a credit beyond its total stays.
   const cus = get(state.customers, sub.customer);
@@ -193,16 +199,21 @@ function renew(state: State, sub: Subscription): void {
 function attempt(state: State, inv: Invoice, at: number): void {
   const sub = inv.subscription ? get(state.subscriptions, inv.subscription) : undefined;
   const due = amountDue(inv);
+  inv.finalized_at ??= at;
   if (due === 0 || deferSmall(state, inv)) {
     inv.status = "paid";
+    inv.paid_at = at;
     inv.next_payment_attempt = null;
+    if (inv.manual) inv.auto_advance = false;
     return;
   }
   inv.attempt_count += 1;
   if (!failing(state, inv.customer)) {
     inv.status = "paid";
+    inv.paid_at = at;
     inv.amount_paid = due;
     inv.next_payment_attempt = null;
+    if (inv.manual) inv.auto_advance = false;
     if (sub?.status === "past_due") sub.status = "active";
     return;
   }
@@ -303,6 +314,9 @@ export function cancelNow(
         retries: [],
         starting_balance: 0,
         deferred: 0,
+        finalized_at: null,
+        paid_at: null,
+        manual: false,
       };
       sub.latest_invoice = id;
     } else {
