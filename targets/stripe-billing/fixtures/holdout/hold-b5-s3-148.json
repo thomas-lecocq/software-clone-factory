@@ -1,0 +1,458 @@
+{
+  "id": "hold-b5-s3-148",
+  "rules": [
+    "DSC-01",
+    "DSC-02",
+    "ITM-01",
+    "PRO-01",
+    "PRO-02",
+    "PRO-03",
+    "PRO-04",
+    "PRO-05",
+    "PRO-09",
+    "PRO-10"
+  ],
+  "input": {
+    "kind": "wide",
+    "start": 1806754652,
+    "billing_mode": "flexible",
+    "interval": "month",
+    "items": [
+      {
+        "amount": 1271,
+        "quantity": 7
+      },
+      {
+        "amount": 727513,
+        "quantity": 5
+      },
+      {
+        "amount": 242,
+        "quantity": 4
+      }
+    ],
+    "coupons": [],
+    "change": {
+      "item": 0,
+      "amount": 177,
+      "interval": null,
+      "quantity": null,
+      "offset": 521425,
+      "proration_behavior": "create_prorations",
+      "discount": {
+        "percent_off": 39,
+        "duration": "forever"
+      }
+    }
+  },
+  "observed": {
+    "preview": {
+      "id": "upcoming_in_1UQMg9AcmeAcct00fFkLhO8z",
+      "object": "invoice",
+      "account_country": "FR",
+      "account_name": "environnement de test AcmeCo",
+      "account_tax_ids": null,
+      "amount_due": 2212592,
+      "amount_overpaid": 0,
+      "amount_paid": 0,
+      "amount_remaining": 2212592,
+      "amount_shipping": 0,
+      "application": null,
+      "attempt_count": 0,
+      "attempted": false,
+      "auto_advance": true,
+      "automatic_tax": {
+        "disabled_reason": null,
+        "enabled": false,
+        "liability": null,
+        "provider": null,
+        "status": null
+      },
+      "automatically_finalizes_at": null,
+      "billing_reason": "upcoming",
+      "collection_method": "charge_automatically",
+      "created": 1809346652,
+      "currency": "usd",
+      "custom_fields": null,
+      "customer": "cus_VRFAesmJBN3BoQ",
+      "customer_account": null,
+      "customer_address": null,
+      "customer_email": null,
+      "customer_name": null,
+      "customer_phone": null,
+      "customer_shipping": null,
+      "customer_tax_exempt": "none",
+      "customer_tax_ids": [],
+      "default_payment_method": null,
+      "default_source": null,
+      "default_tax_rates": [],
+      "description": null,
+      "discounts": [
+        "di_1UQMg8AcmeAcct00BUROrdnz"
+      ],
+      "due_date": null,
+      "effective_at": null,
+      "ending_balance": 0,
+      "footer": null,
+      "from_invoice": null,
+      "hosted_invoice_url": null,
+      "invoice_pdf": null,
+      "issuer": {
+        "type": "self"
+      },
+      "last_finalization_error": null,
+      "latest_revision": null,
+      "lines": {
+        "object": "list",
+        "data": [
+          {
+            "id": "il_tmp_1VbIuuAcmeAcct00PvPByGLf",
+            "object": "line_item",
+            "amount": -7107,
+            "currency": "usd",
+            "description": "Unused time on 7 × Plan A after 09 Apr 2027",
+            "discount_amounts": [
+              {
+                "amount": 0,
+                "discount": "di_1UQMg8AcmeAcct00BUROrdnz"
+              }
+            ],
+            "discountable": false,
+            "discounts": [],
+            "invoice": "upcoming_in_1UQMg9AcmeAcct00fFkLhO8z",
+            "livemode": false,
+            "metadata": {},
+            "parent": {
+              "invoice_item_details": null,
+              "subscription_item_details": {
+                "invoice_item": "ii_1UQMg9AcmeAcct00TxcgvIpD",
+                "proration": true,
+                "proration_details": {
+                  "credited_items": {
+                    "invoice": "in_1UQMg4AcmeAcct00E8GDBjT5",
+                    "invoice_line_items": [
+                      "il_1VQQcSAcmeAcct00efUsbpxr"
+                    ]
+                  }
+                },
+                "subscription": "sub_1UQMg4AcmeAcct007stEvfCS",
+                "subscription_item": "si_VRFAqZl7JdhyoW"
+              },
+              "type": "subscription_item_details"
+            },
+            "period": {
+              "end": 1809346652,
+              "start": 1807276077
+            },
+            "pretax_credit_amounts": [
+              {
+                "amount": 0,
+                "discount": "di_1UQMg8AcmeAcct00BUROrdnz",
+                "type": "discount"
+              }
+            ],
+            "pricing": {
+              "price_details": {
+                "price": "price_1UQMg2AcmeAcct00S5iEflkd",
+                "product": "prod_VRFAEEiyQZPnAr"
+              },
+              "type": "price_details",
+              "unit_amount_decimal": null
+            },
+            "quantity": 7,
+            "quantity_decimal": "7",
+            "subtotal": -7107,
+            "taxes": []
+          },
+          {
+            "id": "il_tmp_1VbIuvAcmeAcct001P7FrJNH",
+            "object": "line_item",
+            "amount": 86,
+            "currency": "usd",
+            "description": "Remaining time on Plan New (with 39.0% off) after 09 Apr 2027",
+            "discount_amounts": [
+              {
+                "amount": 0,
+                "discount": "di_1UQMg8AcmeAcct00BUROrdnz"
+              }
+            ],
+            "discountable": false,
+            "discounts": [],
+            "invoice": "upcoming_in_1UQMg9AcmeAcct00fFkLhO8z",
+            "livemode": false,
+            "metadata": {},
+            "parent": {
+              "invoice_item_details": null,
+              "subscription_item_details": {
+                "invoice_item": "ii_1UQMg9AcmeAcct006Uwr4lK4",
+                "proration": true,
+                "proration_details": {
+                  "credited_items": null
+                },
+                "subscription": "sub_1UQMg4AcmeAcct007stEvfCS",
+                "subscription_item": "si_VRFAqZl7JdhyoW"
+              },
+              "type": "subscription_item_details"
+            },
+            "period": {
+              "end": 1809346652,
+              "start": 1807276077
+            },
+            "pretax_credit_amounts": [
+              {
+                "amount": 0,
+                "discount": "di_1UQMg8AcmeAcct00BUROrdnz",
+                "type": "discount"
+              }
+            ],
+            "pricing": {
+              "price_details": {
+                "price": "price_1UQMg3AcmeAcct0065DRwf63",
+                "product": "prod_VRFAeAb3dKFIjh"
+              },
+              "type": "price_details",
+              "unit_amount_decimal": null
+            },
+            "quantity": 1,
+            "quantity_decimal": "1",
+            "subtotal": 86,
+            "taxes": []
+          },
+          {
+            "id": "il_tmp_1VbIuwAcmeAcct006Cexa83v",
+            "object": "line_item",
+            "amount": 177,
+            "currency": "usd",
+            "description": "1 × Plan New (at $1.77 / month)",
+            "discount_amounts": [
+              {
+                "amount": 69,
+                "discount": "di_1UQMg8AcmeAcct00BUROrdnz"
+              }
+            ],
+            "discountable": true,
+            "discounts": [],
+            "invoice": "upcoming_in_1UQMg9AcmeAcct00fFkLhO8z",
+            "livemode": false,
+            "metadata": {},
+            "parent": {
+              "invoice_item_details": null,
+              "subscription_item_details": {
+                "invoice_item": null,
+                "proration": false,
+                "proration_details": {
+                  "credited_items": null
+                },
+                "subscription": "sub_1UQMg4AcmeAcct007stEvfCS",
+                "subscription_item": "si_VRFAqZl7JdhyoW"
+              },
+              "type": "subscription_item_details"
+            },
+            "period": {
+              "end": 1812025052,
+              "start": 1809346652
+            },
+            "pretax_credit_amounts": [
+              {
+                "amount": 69,
+                "discount": "di_1UQMg8AcmeAcct00BUROrdnz",
+                "type": "discount"
+              }
+            ],
+            "pricing": {
+              "price_details": {
+                "price": "price_1UQMg3AcmeAcct0065DRwf63",
+                "product": "prod_VRFAeAb3dKFIjh"
+              },
+              "type": "price_details",
+              "unit_amount_decimal": "177"
+            },
+            "quantity": 1,
+            "quantity_decimal": "1",
+            "subtotal": 177,
+            "taxes": []
+          },
+          {
+            "id": "il_tmp_1VbIuxAcmeAcct00k2XfrZAN",
+            "object": "line_item",
+            "amount": 3637565,
+            "currency": "usd",
+            "description": "5 × Plan B (at $7,275.13 / month)",
+            "discount_amounts": [
+              {
+                "amount": 1418650,
+                "discount": "di_1UQMg8AcmeAcct00BUROrdnz"
+              }
+            ],
+            "discountable": true,
+            "discounts": [],
+            "invoice": "upcoming_in_1UQMg9AcmeAcct00fFkLhO8z",
+            "livemode": false,
+            "metadata": {},
+            "parent": {
+              "invoice_item_details": null,
+              "subscription_item_details": {
+                "invoice_item": null,
+                "proration": false,
+                "proration_details": {
+                  "credited_items": null
+                },
+                "subscription": "sub_1UQMg4AcmeAcct007stEvfCS",
+                "subscription_item": "si_VRFA8u6aIp5ttT"
+              },
+              "type": "subscription_item_details"
+            },
+            "period": {
+              "end": 1812025052,
+              "start": 1809346652
+            },
+            "pretax_credit_amounts": [
+              {
+                "amount": 1418650,
+                "discount": "di_1UQMg8AcmeAcct00BUROrdnz",
+                "type": "discount"
+              }
+            ],
+            "pricing": {
+              "price_details": {
+                "price": "price_1UQMg2AcmeAcct00290IUWb8",
+                "product": "prod_VRFAK4VSpTwr06"
+              },
+              "type": "price_details",
+              "unit_amount_decimal": "727513"
+            },
+            "quantity": 5,
+            "quantity_decimal": "5",
+            "subtotal": 3637565,
+            "taxes": []
+          },
+          {
+            "id": "il_tmp_1VbIuyAcmeAcct00Zj51Wypq",
+            "object": "line_item",
+            "amount": 968,
+            "currency": "usd",
+            "description": "4 × Plan C (at $2.42 / month)",
+            "discount_amounts": [
+              {
+                "amount": 378,
+                "discount": "di_1UQMg8AcmeAcct00BUROrdnz"
+              }
+            ],
+            "discountable": true,
+            "discounts": [],
+            "invoice": "upcoming_in_1UQMg9AcmeAcct00fFkLhO8z",
+            "livemode": false,
+            "metadata": {},
+            "parent": {
+              "invoice_item_details": null,
+              "subscription_item_details": {
+                "invoice_item": null,
+                "proration": false,
+                "proration_details": {
+                  "credited_items": null
+                },
+                "subscription": "sub_1UQMg4AcmeAcct007stEvfCS",
+                "subscription_item": "si_VRFAIq2P0gaN65"
+              },
+              "type": "subscription_item_details"
+            },
+            "period": {
+              "end": 1812025052,
+              "start": 1809346652
+            },
+            "pretax_credit_amounts": [
+              {
+                "amount": 378,
+                "discount": "di_1UQMg8AcmeAcct00BUROrdnz",
+                "type": "discount"
+              }
+            ],
+            "pricing": {
+              "price_details": {
+                "price": "price_1UQMg3AcmeAcct00416II866",
+                "product": "prod_VRFASXaCD0KuV8"
+              },
+              "type": "price_details",
+              "unit_amount_decimal": "242"
+            },
+            "quantity": 4,
+            "quantity_decimal": "4",
+            "subtotal": 968,
+            "taxes": []
+          }
+        ],
+        "has_more": false,
+        "total_count": 5,
+        "url": "/v1/invoices/upcoming_in_1UQMg9AcmeAcct00fFkLhO8z/lines"
+      },
+      "livemode": false,
+      "metadata": {},
+      "next_payment_attempt": 1809350252,
+      "number": null,
+      "on_behalf_of": null,
+      "parent": {
+        "quote_details": null,
+        "subscription_details": {
+          "metadata": {},
+          "subscription": "sub_1UQMg4AcmeAcct007stEvfCS",
+          "subscription_proration_date": 1807276077
+        },
+        "type": "subscription_details"
+      },
+      "payment_settings": {
+        "default_mandate": null,
+        "payment_method_options": null,
+        "payment_method_types": null
+      },
+      "period_end": 1809346652,
+      "period_start": 1806754652,
+      "post_payment_credit_notes_amount": 0,
+      "pre_payment_credit_notes_amount": 0,
+      "receipt_number": null,
+      "rendering": null,
+      "shipping_cost": null,
+      "shipping_details": null,
+      "starting_balance": 0,
+      "statement_descriptor": null,
+      "status": "draft",
+      "status_transitions": {
+        "finalized_at": null,
+        "marked_uncollectible_at": null,
+        "paid_at": null,
+        "voided_at": null
+      },
+      "subtotal": 3631689,
+      "subtotal_excluding_tax": 3631689,
+      "test_clock": "clock_1UQMg1AcmeAcct001ki6OU86",
+      "total": 2212592,
+      "total_discount_amounts": [
+        {
+          "amount": 1419097,
+          "discount": "di_1UQMg8AcmeAcct00BUROrdnz"
+        }
+      ],
+      "total_excluding_tax": 2212592,
+      "total_pretax_credit_amounts": [
+        {
+          "amount": 1419097,
+          "discount": "di_1UQMg8AcmeAcct00BUROrdnz",
+          "type": "discount"
+        }
+      ],
+      "total_taxes": [],
+      "webhooks_delivered_at": null
+    },
+    "first_invoice": {
+      "subtotal": 3647430,
+      "total": 3647430,
+      "amount_due": 3647430,
+      "status": "paid"
+    }
+  },
+  "noise": [],
+  "recorded_at": "2026-10-14T07:32:57.085Z",
+  "recorded_with": {
+    "stripe_api_version": "2026-08-26.dahlia",
+    "stripe_node": "22.6.2"
+  }
+}
