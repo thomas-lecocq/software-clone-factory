@@ -1,0 +1,85 @@
+{
+  "id": "dev-v5-dsc-069",
+  "rules": [
+    "DSC-01",
+    "DSC-02",
+    "DSC-03",
+    "DSC-05",
+    "DSC-06",
+    "INT-01",
+    "ITM-01",
+    "PRO-01",
+    "PRO-02",
+    "PRO-03",
+    "PRO-04",
+    "PRO-05"
+  ],
+  "input": {
+    "kind": "wide",
+    "start": 1812802167,
+    "billing_mode": "flexible",
+    "interval": "month",
+    "items": [
+      {
+        "amount": 74941,
+        "quantity": 1
+      },
+      {
+        "amount": 2739,
+        "quantity": 10
+      },
+      {
+        "amount": 1290,
+        "quantity": 1
+      },
+      {
+        "amount": 271,
+        "quantity": 2
+      }
+    ],
+    "coupons": [
+      {
+        "percent_off": 40,
+        "duration": "forever"
+      },
+      {
+        "percent_off": 49,
+        "duration": "once"
+      }
+    ],
+    "change": {
+      "item": 2,
+      "amount": 2460085,
+      "interval": "year",
+      "quantity": null,
+      "offset": 1398890,
+      "proration_behavior": null,
+      "discount": {
+        "amount_off": 47,
+        "duration": "forever"
+      }
+    }
+  },
+  "observed": {
+    "preview": {
+      "error": {
+        "type": "StripeInvalidRequestError",
+        "code": null,
+        "param": null,
+        "message": "Subscriptions with multiple intervals only support percent_off coupons, `duration=once` amount_off coupons, and `duration=repeating` amount_off coupons."
+      }
+    },
+    "first_invoice": {
+      "subtotal": 104163,
+      "total": 31874,
+      "amount_due": 31874,
+      "status": "paid"
+    }
+  },
+  "noise": [],
+  "recorded_at": "2026-10-14T20:45:23.250Z",
+  "recorded_with": {
+    "stripe_api_version": "2026-08-26.dahlia",
+    "stripe_node": "22.6.2"
+  }
+}
