@@ -21,7 +21,8 @@ export const LifeStep = z.discriminatedUnion("do", [
   // Reads a subscription that does not exist, to pin the error a missing object returns.
   z.object({ do: z.literal("retrieve_missing"), as: z.string() }),
   // Any API call, recorded whole: replays the calls an agent made in task validation. Path and
-  // parameter values may name {subscription}, {customer}, {item}, {price}, {price2}, {coupon}.
+  // parameter values may name {subscription}, {customer}, {item}, {price}, {price2}, {coupon},
+  // {period_end} (the first period's end), and {<as>.id}, the id an earlier raw step returned.
   z.object({
     do: z.literal("raw"),
     as: z.string(),
@@ -62,6 +63,13 @@ export function invoiceView(inv: Stripe.Invoice | null): Json {
     period_end: inv.period_end,
     lines: inv.lines.data.map((l) => ({ amount: l.amount, description: l.description ?? null })),
   };
+}
+
+function refId(v: Json | undefined): string | null {
+  if (typeof v !== "object" || v === null || Array.isArray(v)) return null;
+  const body = v.body;
+  if (typeof body !== "object" || body === null || Array.isArray(body)) return null;
+  return typeof body.id === "string" ? body.id : null;
 }
 
 async function waitReady(stripe: Stripe, clock: string): Promise<void> {
@@ -148,7 +156,9 @@ export async function runLifecycle(
           .replaceAll("{item}", created.items.data[0]?.id ?? "")
           .replaceAll("{price}", price.id)
           .replaceAll("{price2}", price2 ?? "")
-          .replaceAll("{coupon}", spare ?? "");
+          .replaceAll("{coupon}", spare ?? "")
+          .replaceAll("{period_end}", String(created.items.data[0]?.current_period_end ?? ""))
+          .replace(/\{(\w+)\.id\}/g, (m, as: string) => refId(out[as]) ?? m);
       const params = Object.fromEntries(Object.entries(step.params).map(([k, v]) => [k, fill(v)]));
       try {
         // The SDK takes parameters on POST only; GET and DELETE carry them in the query string.

@@ -1863,6 +1863,206 @@ const agentTraces: [string, string[], Record<string, unknown>][] = [
   ],
 ];
 
+// v4: behaviour no fixture pinned, found by task validation on clone v3 (a discount's coupon read
+// expanded) and by mutation testing (GAPS.md): invoice items across two customers, a draft invoice
+// with auto_advance off, cancel_at exactly at the period end. Designed after seeing the gaps, so
+// they are dev.
+const expandReads = [
+  raw("expanded", "GET", "/v1/subscriptions/{subscription}", {
+    "expand[]": "discounts.source.coupon",
+  }),
+  raw("discounts", "GET", "/v1/subscriptions/{subscription}", { "expand[]": "discounts" }),
+  raw("plain", "GET", "/v1/subscriptions/{subscription}"),
+];
+const draftSteps = (autoAdvance: string) => [
+  raw("item", "POST", "/v1/invoiceitems", {
+    customer: "{customer}",
+    amount: "500",
+    currency: "usd",
+  }),
+  raw("draft", "POST", "/v1/invoices", {
+    customer: "{customer}",
+    auto_advance: autoAdvance,
+    pending_invoice_items_behavior: "include",
+  }),
+  { do: "advance", seconds: 2 * 86400 } as const,
+  raw("read", "GET", "/v1/invoices/{draft.id}"),
+  raw("list", "GET", "/v1/invoices", { customer: "{customer}" }),
+  sub("after"),
+];
+const v4Lifecycle: [string, string[], Record<string, unknown>][] = [
+  [
+    "dev-v4-expand-apply-percent",
+    ["DSC-09"],
+    {
+      amount: 1000,
+      trial_days: null,
+      spare_coupon: { percent_off: 20, duration: "forever" },
+      steps: [
+        raw("apply", "POST", "/v1/subscriptions/{subscription}", {
+          "discounts[0][coupon]": "{coupon}",
+        }),
+        ...expandReads,
+      ],
+    },
+  ],
+  [
+    "dev-v4-expand-apply-amount-once",
+    ["DSC-09", "DSC-05"],
+    {
+      amount: 1000,
+      trial_days: null,
+      spare_coupon: { amount_off: 300, duration: "once" },
+      steps: [
+        raw("apply", "POST", "/v1/subscriptions/{subscription}", {
+          "discounts[0][coupon]": "{coupon}",
+        }),
+        ...expandReads,
+      ],
+    },
+  ],
+  [
+    "dev-v4-expand-at-creation",
+    ["DSC-09"],
+    {
+      amount: 2500,
+      trial_days: null,
+      coupon: { percent_off: 50, duration: "forever" },
+      steps: [
+        ...expandReads,
+        raw("update_expanded", "POST", "/v1/subscriptions/{subscription}", {
+          "metadata[k]": "v",
+          "expand[0]": "discounts.source.coupon",
+        }),
+      ],
+    },
+  ],
+  ["dev-v4-expand-no-discount", ["DSC-09"], { amount: 1000, trial_days: null, steps: expandReads }],
+  [
+    "dev-v4-items-two-customers",
+    ["ITM-02"],
+    {
+      amount: 1000,
+      trial_days: null,
+      steps: [
+        raw("other", "POST", "/v1/customers", { "preferred_locales[0]": "en" }),
+        raw("other_item", "POST", "/v1/invoiceitems", {
+          customer: "{other.id}",
+          amount: "700",
+          currency: "usd",
+        }),
+        raw("mine", "POST", "/v1/invoiceitems", {
+          customer: "{customer}",
+          amount: "300",
+          currency: "usd",
+        }),
+        raw("list_mine", "GET", "/v1/invoiceitems", { customer: "{customer}" }),
+        raw("list_other", "GET", "/v1/invoiceitems", { customer: "{other.id}" }),
+        raw("pending_mine", "GET", "/v1/invoiceitems", {
+          customer: "{customer}",
+          pending: "true",
+        }),
+        raw("read_mine", "GET", "/v1/invoiceitems/{mine.id}"),
+        raw("read_missing", "GET", "/v1/invoiceitems/ii_Missing0000000000"),
+      ],
+    },
+  ],
+  [
+    "dev-v4-draft-auto-advance-off",
+    ["INV-02"],
+    { amount: 1000, trial_days: null, steps: draftSteps("false") },
+  ],
+  [
+    "dev-v4-draft-auto-advance-on",
+    ["INV-02"],
+    { amount: 1000, trial_days: null, steps: draftSteps("true") },
+  ],
+  [
+    "dev-v4-cancel-at-period-end-exact",
+    ["LIF-08", "LIF-03"],
+    {
+      amount: 1000,
+      trial_days: null,
+      steps: [
+        raw("set", "POST", "/v1/subscriptions/{subscription}", { cancel_at: "{period_end}" }),
+        sub("set"),
+        { do: "advance", seconds: M },
+        sub("after"),
+      ],
+    },
+  ],
+  [
+    "dev-v4-cancel-at-period-end-exact-no-proration",
+    ["LIF-08"],
+    {
+      amount: 1000,
+      trial_days: null,
+      steps: [
+        { do: "advance", seconds: 10 * 86400 },
+        raw("set", "POST", "/v1/subscriptions/{subscription}", {
+          cancel_at: "{period_end}",
+          proration_behavior: "none",
+        }),
+        sub("set"),
+        { do: "advance", seconds: M },
+        sub("after"),
+      ],
+    },
+  ],
+  [
+    "dev-v4-cancel-at-then-reactivate",
+    ["LIF-08", "LIF-04"],
+    {
+      amount: 1000,
+      trial_days: null,
+      steps: [
+        raw("set", "POST", "/v1/subscriptions/{subscription}", { cancel_at: "{period_end}" }),
+        raw("unset", "POST", "/v1/subscriptions/{subscription}", { cancel_at: "" }),
+        sub("unset"),
+        { do: "advance", seconds: M },
+        sub("after"),
+      ],
+    },
+  ],
+];
+
+// v4: a flexible interval change whose proration date falls on, just before and just after the
+// shortened period end (mutation survivor billing.ts:331).
+function v4Wide(): [string, WideInput][] {
+  const start = STARTS.oct;
+  const end = periodLength(start, "month");
+  const out: [string, WideInput][] = [];
+  for (const [name, offset] of [
+    ["at", end],
+    ["before", end - 1],
+    ["after", end + 1],
+  ] as const) {
+    for (const behaviour of ["create_prorations", "always_invoice"] as const) {
+      out.push([
+        `dev-v4-interval-end-${name}-${behaviour === "always_invoice" ? "invoice" : "prorate"}`,
+        {
+          kind: "wide",
+          start,
+          billing_mode: "flexible",
+          interval: "year",
+          items: [{ amount: 12000, quantity: 1 }],
+          coupons: [],
+          change: {
+            item: 0,
+            amount: null,
+            interval: "month",
+            quantity: null,
+            offset,
+            proration_behavior: behaviour,
+            discount: null,
+          },
+        },
+      ]);
+    }
+  }
+  return out;
+}
+
 export function probes(): Probe[] {
   const logic = [
     ...designed.map(([id, p]) => [`d-${id}`, p] as const),
@@ -1898,6 +2098,11 @@ export function probes(): Probe[] {
       rules,
       input: JsonSchema.parse({ kind: "lifecycle", start: STARTS.oct, ...rest }),
     })),
+    ...v4Lifecycle.map(([id, rules, rest]) => ({
+      id,
+      rules,
+      input: JsonSchema.parse({ kind: "lifecycle", start: STARTS.oct, ...rest }),
+    })),
     ...cancelUi.map(([id, rules, rest]) => ({
       id,
       rules,
@@ -1923,6 +2128,7 @@ export function probes(): Probe[] {
     ...targetedWide(),
     ...wideProbesV2(300, 20261013, "wide3"),
     ...batch3Probes(),
+    ...v4Wide(),
     ...holdoutBatches(),
   ].map(([id, p]) => ({
     id,

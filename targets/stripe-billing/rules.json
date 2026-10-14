@@ -431,6 +431,42 @@
         "kind": "observed",
         "ref": "spent batch 3, analysed in analysis/hold-b3-failures.md (2026-10-13), and dev fixtures"
       }
+    },
+    {
+      "id": "DSC-09",
+      "area": "logic",
+      "statement": "A subscription's discounts can be read with their coupon expanded (expand discounts.source.coupon): the discount's source then holds the full coupon object instead of its id.",
+      "provenance": {
+        "kind": "documented",
+        "ref": "Stripe API expanding responses; the apply-coupon task of task validation; to be confirmed by dev-v4-expand-*"
+      }
+    },
+    {
+      "id": "INV-02",
+      "area": "logic",
+      "statement": "A draft invoice with auto_advance false stays a draft when the clock moves on; with auto_advance true it is finalized and paid about an hour after creation.",
+      "provenance": {
+        "kind": "documented",
+        "ref": "Stripe invoice lifecycle documentation; to be confirmed by dev-v4-draft-*"
+      }
+    },
+    {
+      "id": "LIF-08",
+      "area": "logic",
+      "statement": "cancel_at set to exactly the current period end behaves like cancel_at_period_end: the subscription ends at the period end with no renewal invoice.",
+      "provenance": {
+        "kind": "inferred",
+        "ref": "mutation survivor life.ts:231 (GAPS.md); to be confirmed by dev-v4-cancel-at-*"
+      }
+    },
+    {
+      "id": "ITM-02",
+      "area": "logic",
+      "statement": "Listing invoice items filtered by customer returns only that customer's items; reading an invoice item by id returns it, and an unknown id is resource_missing.",
+      "provenance": {
+        "kind": "documented",
+        "ref": "Stripe API invoice items; mutation survivors api.ts:458 and api.ts:589 (GAPS.md); to be confirmed by dev-v4-items-*"
+      }
     }
   ]
 }
