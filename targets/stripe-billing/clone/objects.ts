@@ -43,15 +43,23 @@ export function lineJson(
     invoice,
     livemode: false,
     metadata: {},
-    // A line without a subscription item comes from a one-off invoice item (ITM-02, INV-02).
+    // A line without a subscription item comes from a one-off invoice item (ITM-02, INV-02); it
+    // names the item's own subscription. A detached proration (LIF-09) is shown the same way.
     parent:
-      l.subscription_item === null
+      l.subscription_item === null || l.detached === true
         ? {
             invoice_item_details: {
               invoice_item: l.invoice_item,
               proration: l.proration,
-              proration_details: { credited_items: null },
-              subscription,
+              proration_details: {
+                credited_items: l.credited
+                  ? { invoice: l.credited.invoice, invoice_line_items: [l.credited.line] }
+                  : null,
+              },
+              subscription:
+                l.invoice_item !== null
+                  ? (get(state.invoice_items, l.invoice_item)?.subscription ?? null)
+                  : null,
             },
             subscription_item_details: null,
             type: "invoice_item_details",
@@ -120,7 +128,8 @@ export function invoiceJson(state: State, inv: Invoice, preview: boolean): Json 
     amount_shipping: 0,
     application: null,
     attempt_count: inv.attempt_count,
-    attempted: inv.attempt_count > 0,
+    // A paid invoice counts as attempted even when nothing was charged (dev-v5-cancel-at-mid-prorate).
+    attempted: inv.attempt_count > 0 || (!preview && inv.status === "paid"),
     auto_advance: inv.auto_advance,
     automatic_tax: {
       disabled_reason: null,
@@ -403,8 +412,9 @@ export function invoiceItemJson(state: State, ii: InvoiceItem): Json {
   const l = ii.line;
   const price = get(state.prices, l.price);
   const customer = get(state.customers, ii.customer);
-  // A one-off invoice item (POST /v1/invoiceitems) has no parent and no proration details.
-  if (ii.subscription === null) {
+  // A one-off invoice item (POST /v1/invoiceitems) has no proration details, and a parent only
+  // when it was created for a subscription.
+  if (ii.oneoff) {
     return {
       id: ii.id,
       object: "invoiceitem",
@@ -421,7 +431,13 @@ export function invoiceItemJson(state: State, ii: InvoiceItem): Json {
       invoicing_rules: [],
       livemode: false,
       metadata: {},
-      parent: null,
+      parent:
+        ii.subscription !== null
+          ? {
+              subscription_details: { subscription: ii.subscription },
+              type: "subscription_details",
+            }
+          : null,
       period: { end: l.period.end, start: l.period.start },
       pricing: {
         price_details: { price: l.price, product: price?.product ?? null },

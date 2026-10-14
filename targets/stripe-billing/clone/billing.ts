@@ -157,8 +157,8 @@ export interface Plan {
   prorations: Omit<Line, "id" | "invoice_item">[];
   // The discounts each proration line actually carries (for its discount list).
   own: DiscSpec[][];
-  // Per proration line: how many discounts a credit line carried (null for a charge).
-  carried: (number | null)[];
+  // Per proration line: what a credit line carried (null for a charge), for DSC-07.
+  carried: (CarriedIds | null)[];
   items: PlannedItem[];
   // Per planned item: its interval and the end of its current (possibly new) period.
   intervals: Interval[];
@@ -199,6 +199,13 @@ interface Carried {
   amount: number;
 }
 
+// The discounts on the billed line a credit comes from: all of them, and those that took more
+// than 0 there.
+export interface CarriedIds {
+  all: string[];
+  nonzero: string[];
+}
+
 // Every discount on the line that billed the period, those it got nothing from included.
 function billedDiscounts(state: State, billed: Billed | null): Carried[] {
   if (!billed) return [];
@@ -214,7 +221,7 @@ export function creditLine(
   sub: Subscription,
   it: SubItem,
   prd: number,
-): { line: Omit<Line, "id" | "invoice_item">; own: DiscSpec[]; carried: number } {
+): { line: Omit<Line, "id" | "invoice_item">; own: DiscSpec[]; carried: CarriedIds } {
   const oldPrice = priceOf(state, it.price);
   const P = sub.period_end - sub.period_start;
   const r = sub.period_end - prd;
@@ -255,7 +262,7 @@ export function creditLine(
     },
     own: applied,
     // Discounts on the billed line, those it got nothing from included (DSC-07).
-    carried: all.length,
+    carried: { all: all.map((c) => c.spec.id), nonzero: carried.map((c) => c.spec.id) },
   };
 }
 
@@ -340,7 +347,7 @@ export function planChange(state: State, sub: Subscription, input: PlanInput): P
 
   const prorations: Plan["prorations"] = [];
   const own: DiscSpec[][] = [];
-  const carried: (number | null)[] = [];
+  const carried: (CarriedIds | null)[] = [];
   const spent = new Set<string>();
   const changed = sub.items
     .filter((it, i) => {
@@ -391,7 +398,11 @@ export function planChange(state: State, sub: Subscription, input: PlanInput): P
         return d;
       });
       const applied = chargeSpecs.filter((_, k) => (prorated[k] ?? 0) !== 0);
-      for (const s of applied) if (s.once) spent.add(s.id);
+      // A once coupon is spent by the charge when its full-period share is above 0, even if the
+      // prorated share rounds to 0 (pass 8: dev-v5-dsc-013, -052).
+      chargeSpecs.forEach((s, k) => {
+        if (s.once && (D2[k] ?? 0) > 0) spent.add(s.id);
+      });
       prorations.push({
         amount: left,
         description: `Remaining time on ${qtyPrefix(next.quantity)}${productName(state, next.price)}${withDiscounts(applied)} after ${shortDate(prd)}`,
@@ -499,13 +510,7 @@ export function draftFromPlan(
     let list: string[];
     if (mode === "classic") list = top;
     else if (plan.immediate) {
-      if (carried === null) list = mine;
-      // DSC-07, as the dev cases pin it: see NOTES.md, pass 4.
-      else if (top.length === 0) list = [];
-      else if (carried === 0) list = top;
-      else if (mine.length === 0) list = [];
-      else if (carried === 1) list = mine;
-      else list = top;
+      list = carried === null ? mine : immediateCreditList(top, carried, mine);
     } else if (top.length > 0) list = top.slice(0, 1);
     else list = mine;
     l.discount_amounts = list.map((discount) => ({ discount, amount: 0 }));
@@ -530,6 +535,22 @@ export function draftFromPlan(
     period_end: immediate ? plan.now : plan.period_end,
     immediate,
   };
+}
+
+// DSC-07, flexible immediate invoice: the discounts a credit line lists, at 0 (NOTES.md, pass 8).
+// `survivors` are the carried discounts whose prorated share is not 0 (DSC-08).
+function immediateCreditList(top: string[], carried: CarriedIds, survivors: string[]): string[] {
+  if (top.length === 0) return [];
+  // A carried discount that took 0 counts only while it is still on the invoice
+  // (dev-brk-off1-zero-share-always lists nothing, dev-v5-dsc-116 the invoice's discounts).
+  const counted = carried.all.filter((id) => carried.nonzero.includes(id) || top.includes(id));
+  if (counted.length === 0) return top;
+  if (survivors.length === 0) return [];
+  const onInvoice = top.filter((id) => survivors.includes(id));
+  if (onInvoice.length > 0) return onInvoice;
+  if (carried.all.some((id) => top.includes(id))) return top;
+  if (carried.all.length === 1) return survivors;
+  return top;
 }
 
 export function recurringLine(

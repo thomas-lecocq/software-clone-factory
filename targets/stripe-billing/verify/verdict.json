@@ -1,7 +1,6 @@
 {
   "splits": [
-    "dev",
-    "holdout"
+    "dev"
   ],
   "cases": [
     {
@@ -3266,6 +3265,7 @@
         "DSC-02",
         "DSC-03",
         "DSC-05",
+        "INV-01",
         "PRO-01",
         "PRO-02",
         "PRO-03",
@@ -3284,6 +3284,7 @@
         "DSC-02",
         "DSC-03",
         "DSC-05",
+        "INV-01",
         "PRO-01",
         "PRO-02",
         "PRO-03",
@@ -3302,6 +3303,7 @@
         "DSC-02",
         "DSC-03",
         "DSC-05",
+        "INV-01",
         "PRO-01",
         "PRO-02",
         "PRO-03",
@@ -3320,6 +3322,7 @@
         "DSC-02",
         "DSC-03",
         "DSC-05",
+        "INV-01",
         "PRO-01",
         "PRO-02",
         "PRO-03",
@@ -3755,6 +3758,3620 @@
       "split": "dev",
       "rules": [
         "ITM-02"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-b4-1-dropped",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-03",
+        "DSC-06",
+        "DSC-07",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-07"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-b4-2-reversed",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-03",
+        "DSC-06",
+        "DSC-07",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-07"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-b4-3-both-survive",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-03",
+        "DSC-06",
+        "DSC-07",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-07"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-b4-4-survivor-spent",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-03",
+        "DSC-05",
+        "DSC-06",
+        "DSC-07",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-07"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-b4-5-preview-coupon",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-03",
+        "DSC-06",
+        "DSC-07",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-07"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-b4-6-default",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-03",
+        "DSC-06",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-b4-6-prorations",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-03",
+        "DSC-06",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-cancel-at-mid-none",
+      "split": "dev",
+      "rules": [
+        "LIF-09"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-cancel-at-mid-prorate",
+      "split": "dev",
+      "rules": [
+        "LIF-09"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-cancel-now-no-prorate-invoice",
+      "split": "dev",
+      "rules": [
+        "LIF-05"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-001",
+      "split": "dev",
+      "rules": [
+        "DSC-02",
+        "DSC-03",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08",
+        "PRO-09"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-002",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-03",
+        "DSC-05",
+        "DSC-06",
+        "DSC-07",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-07",
+        "PRO-08"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-003",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-05",
+        "DSC-06",
+        "INT-01",
+        "ITM-01",
+        "PRO-05",
+        "PRO-06"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-004",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-05",
+        "DSC-06",
+        "DSC-07",
+        "ITM-01",
+        "PER-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-07",
+        "PRO-08"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-005",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-03",
+        "DSC-05",
+        "DSC-06",
+        "DSC-08",
+        "INT-01",
+        "INT-02",
+        "ITM-01",
+        "PER-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-006",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-03",
+        "DSC-06",
+        "ITM-01",
+        "PER-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-09",
+        "PRO-10"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-007",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-03",
+        "DSC-04",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "MOD-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08",
+        "PRO-09"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-008",
+      "split": "dev",
+      "rules": [
+        "DSC-02",
+        "DSC-03",
+        "DSC-06",
+        "DSC-07",
+        "ITM-01",
+        "PER-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-07",
+        "PRO-08"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-009",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-03",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08",
+        "PRO-09"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-010",
+      "split": "dev",
+      "rules": [
+        "DSC-03",
+        "DSC-04",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "MOD-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-10"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-011",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-06",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-10"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-012",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-04",
+        "DSC-06",
+        "ITM-01",
+        "MOD-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08",
+        "PRO-09"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-013",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-03",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-014",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-03",
+        "DSC-04",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "MOD-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-09",
+        "PRO-10"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-015",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-03",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-016",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-03",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08",
+        "PRO-09"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-017",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08",
+        "PRO-09"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-018",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-03",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "PER-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08",
+        "PRO-09"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-019",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-03",
+        "DSC-04",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "MOD-01",
+        "PER-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-020",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-03",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-09",
+        "PRO-10"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-021",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-06",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-022",
+      "split": "dev",
+      "rules": [
+        "DSC-03",
+        "DSC-04",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "MOD-01",
+        "PER-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08",
+        "PRO-09"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-023",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-03",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-10"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-024",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "PRO-05"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-025",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-03",
+        "DSC-05",
+        "DSC-06",
+        "INT-01",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08",
+        "PRO-09"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-026",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-06",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-027",
+      "split": "dev",
+      "rules": [
+        "DSC-02",
+        "DSC-03",
+        "DSC-06",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08",
+        "PRO-09"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-028",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-03",
+        "DSC-06",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-029",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-03",
+        "DSC-06",
+        "DSC-07",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-07",
+        "PRO-08",
+        "PRO-09"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-030",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-03",
+        "DSC-04",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "MOD-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-031",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-03",
+        "DSC-05",
+        "DSC-06",
+        "DSC-08",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08",
+        "PRO-09"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-032",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-03",
+        "DSC-04",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "MOD-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08",
+        "PRO-09"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-033",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-03",
+        "DSC-05",
+        "DSC-06",
+        "INT-01",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-034",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-03",
+        "DSC-05",
+        "DSC-06",
+        "DSC-07",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-07",
+        "PRO-08",
+        "PRO-09"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-035",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-03",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-036",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-03",
+        "DSC-04",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "MOD-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-037",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-03",
+        "DSC-06",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-038",
+      "split": "dev",
+      "rules": [
+        "DSC-02",
+        "DSC-03",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-10"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-039",
+      "split": "dev",
+      "rules": [
+        "DSC-03",
+        "DSC-04",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "MOD-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-040",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-03",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-10"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-041",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-03",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-10"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-042",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-03",
+        "DSC-06",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-043",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-03",
+        "DSC-04",
+        "DSC-05",
+        "DSC-06",
+        "INT-01",
+        "ITM-01",
+        "MOD-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-044",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-03",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08",
+        "PRO-09"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-045",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-03",
+        "DSC-04",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "MOD-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08",
+        "PRO-09"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-046",
+      "split": "dev",
+      "rules": [
+        "DSC-02",
+        "DSC-03",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-10"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-047",
+      "split": "dev",
+      "rules": [
+        "DSC-02",
+        "DSC-03",
+        "DSC-05",
+        "DSC-06",
+        "INT-01",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-09",
+        "PRO-10"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-048",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-03",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-049",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-04",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "MOD-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-050",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-03",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-051",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-05",
+        "DSC-06",
+        "DSC-07",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-07",
+        "PRO-10"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-052",
+      "split": "dev",
+      "rules": [
+        "DSC-02",
+        "DSC-03",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-053",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-04",
+        "DSC-05",
+        "DSC-06",
+        "INT-01",
+        "ITM-01",
+        "MOD-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-10"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-054",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-03",
+        "DSC-05",
+        "DSC-06",
+        "INT-01",
+        "ITM-01",
+        "PER-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-09",
+        "PRO-10"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-055",
+      "split": "dev",
+      "rules": [
+        "DSC-03",
+        "DSC-04",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "MOD-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-056",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-03",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "PER-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08",
+        "PRO-09"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-057",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-03",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "MOD-01",
+        "PER-01",
+        "PRO-05",
+        "PRO-06",
+        "PRO-08"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-058",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-03",
+        "DSC-05",
+        "DSC-06",
+        "DSC-08",
+        "INT-01",
+        "INT-02",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-10"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-059",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-03",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-060",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-03",
+        "DSC-04",
+        "DSC-06",
+        "ITM-01",
+        "MOD-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-09",
+        "PRO-10"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-061",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-03",
+        "DSC-06",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-09",
+        "PRO-10"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-062",
+      "split": "dev",
+      "rules": [
+        "DSC-03",
+        "DSC-04",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "MOD-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08",
+        "PRO-09"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-063",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-03",
+        "DSC-04",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "MOD-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-10"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-064",
+      "split": "dev",
+      "rules": [
+        "DSC-03",
+        "DSC-04",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "MOD-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-07",
+        "PRO-09",
+        "PRO-10"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-065",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-05",
+        "DSC-06",
+        "DSC-07",
+        "DSC-08",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-07",
+        "PRO-08"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-066",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-10"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-067",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-03",
+        "DSC-04",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "MOD-01",
+        "PER-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08",
+        "PRO-09"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-068",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-09",
+        "PRO-10"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-069",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-03",
+        "DSC-05",
+        "DSC-06",
+        "INT-01",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-070",
+      "split": "dev",
+      "rules": [
+        "DSC-02",
+        "DSC-03",
+        "DSC-05",
+        "DSC-06",
+        "INT-01",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-071",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-03",
+        "DSC-04",
+        "DSC-06",
+        "ITM-01",
+        "MOD-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-07",
+        "PRO-09",
+        "PRO-10"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-072",
+      "split": "dev",
+      "rules": [
+        "DSC-02",
+        "DSC-03",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-073",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-074",
+      "split": "dev",
+      "rules": [
+        "DSC-03",
+        "DSC-04",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "MOD-01",
+        "PER-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-09",
+        "PRO-10"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-075",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-03",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-09"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-076",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-04",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "MOD-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-07",
+        "PRO-08",
+        "PRO-09"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-077",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-03",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-078",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-03",
+        "DSC-05",
+        "DSC-06",
+        "DSC-07",
+        "INT-01",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-07",
+        "PRO-08"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-079",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08",
+        "PRO-09"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-080",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-09",
+        "PRO-10"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-081",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-03",
+        "DSC-06",
+        "INT-01",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-09",
+        "PRO-10"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-082",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-083",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-03",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-084",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-06",
+        "INT-01",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-085",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-03",
+        "DSC-05",
+        "DSC-06",
+        "DSC-07",
+        "INT-01",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-07",
+        "PRO-10"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-086",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08",
+        "PRO-09"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-087",
+      "split": "dev",
+      "rules": [
+        "DSC-02",
+        "DSC-03",
+        "DSC-05",
+        "DSC-06",
+        "INT-01",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-088",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-03",
+        "DSC-06",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-09",
+        "PRO-10"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-089",
+      "split": "dev",
+      "rules": [
+        "DSC-02",
+        "DSC-03",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "PER-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-09"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-090",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-04",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "MOD-01",
+        "PER-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-10"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-091",
+      "split": "dev",
+      "rules": [
+        "DSC-03",
+        "DSC-04",
+        "DSC-06",
+        "INT-01",
+        "ITM-01",
+        "MOD-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-092",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-03",
+        "DSC-06",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-093",
+      "split": "dev",
+      "rules": [
+        "DSC-03",
+        "DSC-04",
+        "DSC-06",
+        "INT-01",
+        "ITM-01",
+        "MOD-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-094",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "PER-01",
+        "PRO-07"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-095",
+      "split": "dev",
+      "rules": [
+        "DSC-02",
+        "DSC-03",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08",
+        "PRO-09"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-096",
+      "split": "dev",
+      "rules": [
+        "DSC-03",
+        "DSC-04",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "MOD-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-097",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-03",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-098",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-03",
+        "DSC-04",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "MOD-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-099",
+      "split": "dev",
+      "rules": [
+        "DSC-03",
+        "DSC-04",
+        "DSC-06",
+        "ITM-01",
+        "MOD-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-07",
+        "PRO-09",
+        "PRO-10"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-100",
+      "split": "dev",
+      "rules": [
+        "DSC-03",
+        "DSC-04",
+        "DSC-06",
+        "ITM-01",
+        "MOD-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-101",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-04",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "MOD-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-102",
+      "split": "dev",
+      "rules": [
+        "DSC-02",
+        "DSC-03",
+        "DSC-05",
+        "DSC-06",
+        "INT-01",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08",
+        "PRO-09"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-103",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-03",
+        "DSC-04",
+        "DSC-06",
+        "ITM-01",
+        "MOD-01",
+        "PER-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-104",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-04",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "MOD-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-07",
+        "PRO-09",
+        "PRO-10"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-105",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-03",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-106",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-03",
+        "DSC-06",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-107",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-04",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "MOD-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-108",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-03",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-10"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-109",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-03",
+        "DSC-05",
+        "DSC-06",
+        "DSC-08",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-110",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-03",
+        "DSC-05",
+        "DSC-06",
+        "INT-01",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-111",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-03",
+        "DSC-06",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-09",
+        "PRO-10"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-112",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-04",
+        "DSC-06",
+        "ITM-01",
+        "MOD-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-10"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-113",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-05",
+        "DSC-06",
+        "INT-01",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-10"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-114",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-03",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-10"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-115",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "PER-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-116",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-03",
+        "DSC-05",
+        "DSC-06",
+        "DSC-07",
+        "INT-01",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-07",
+        "PRO-10"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-117",
+      "split": "dev",
+      "rules": [
+        "DSC-03",
+        "DSC-04",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "MOD-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-118",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-03",
+        "DSC-05",
+        "DSC-06",
+        "DSC-08",
+        "ITM-01",
+        "PRO-05",
+        "PRO-06",
+        "PRO-08"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-119",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-03",
+        "DSC-05",
+        "DSC-06",
+        "DSC-07",
+        "ITM-01",
+        "PER-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-07",
+        "PRO-08",
+        "PRO-09"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-120",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-03",
+        "DSC-04",
+        "DSC-06",
+        "ITM-01",
+        "MOD-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-07",
+        "PRO-08"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-121",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-03",
+        "DSC-05",
+        "DSC-06",
+        "DSC-07",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-07",
+        "PRO-10"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-122",
+      "split": "dev",
+      "rules": [
+        "DSC-02",
+        "DSC-03",
+        "DSC-05",
+        "DSC-06",
+        "DSC-07",
+        "INT-01",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-07",
+        "PRO-10"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-123",
+      "split": "dev",
+      "rules": [
+        "DSC-02",
+        "DSC-03",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-10"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-124",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-03",
+        "DSC-05",
+        "DSC-06",
+        "DSC-07",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-07",
+        "PRO-09",
+        "PRO-10"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-125",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-03",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "PER-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-126",
+      "split": "dev",
+      "rules": [
+        "DSC-02",
+        "DSC-03",
+        "DSC-06",
+        "INT-01",
+        "ITM-01",
+        "PER-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-10"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-127",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-03",
+        "DSC-06",
+        "INT-01",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-10"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-128",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-03",
+        "DSC-06",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-129",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-03",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-10"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-130",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-09",
+        "PRO-10"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-131",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "PER-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-132",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-04",
+        "DSC-06",
+        "ITM-01",
+        "MOD-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08",
+        "PRO-09"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-133",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-04",
+        "DSC-06",
+        "ITM-01",
+        "MOD-01",
+        "PER-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-134",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-03",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "PER-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-135",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-136",
+      "split": "dev",
+      "rules": [
+        "DSC-02",
+        "DSC-03",
+        "DSC-06",
+        "DSC-07",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-07",
+        "PRO-08",
+        "PRO-09"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-137",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-03",
+        "DSC-05",
+        "DSC-06",
+        "DSC-07",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-07",
+        "PRO-08",
+        "PRO-09"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-138",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-03",
+        "DSC-05",
+        "DSC-06",
+        "DSC-07",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-07",
+        "PRO-10"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-139",
+      "split": "dev",
+      "rules": [
+        "DSC-03",
+        "DSC-04",
+        "DSC-06",
+        "ITM-01",
+        "MOD-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-09",
+        "PRO-10"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-140",
+      "split": "dev",
+      "rules": [
+        "DSC-02",
+        "DSC-03",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-09",
+        "PRO-10"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-141",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-06",
+        "INT-01",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-10"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-142",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-03",
+        "DSC-04",
+        "DSC-06",
+        "ITM-01",
+        "MOD-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-143",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-09",
+        "PRO-10"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-144",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-03",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08",
+        "PRO-09"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-145",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-03",
+        "DSC-05",
+        "DSC-06",
+        "INT-01",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-146",
+      "split": "dev",
+      "rules": [
+        "DSC-02",
+        "DSC-03",
+        "DSC-06",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-147",
+      "split": "dev",
+      "rules": [
+        "DSC-03",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "PRO-05",
+        "PRO-06",
+        "PRO-08"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-148",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-03",
+        "DSC-04",
+        "DSC-05",
+        "DSC-06",
+        "INT-01",
+        "ITM-01",
+        "MOD-01",
+        "PER-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-07",
+        "PRO-08"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-149",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-09"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-dsc-150",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-03",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-invoiceitem-update",
+      "split": "dev",
+      "rules": [
+        "ITM-02"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-manual-invoice-mid-period",
+      "split": "dev",
+      "rules": [
+        "INV-02"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-pending-item-renewal",
+      "split": "dev",
+      "rules": [
+        "INV-03",
+        "LIF-01"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-pending-item-subscription-renewal",
+      "split": "dev",
+      "rules": [
+        "INV-03",
+        "LIF-01"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-percent-1",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-07",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-07",
+        "PRO-09",
+        "PRO-10"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-percent-2",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-07",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-07",
+        "PRO-09",
+        "PRO-10"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v5-percent-3",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-02",
+        "DSC-07",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-07",
+        "PRO-09",
+        "PRO-10"
       ],
       "pass": true,
       "crashed": false,
@@ -18283,117 +21900,117 @@
     }
   ],
   "holdout": {
-    "pass": 2616,
-    "total": 2619
+    "pass": 0,
+    "total": 0
   },
   "rules": [
     {
       "id": "PRO-01",
       "status": "verified",
-      "pass": 809,
-      "total": 809
+      "pass": 963,
+      "total": 963
     },
     {
       "id": "PRO-02",
       "status": "verified",
-      "pass": 808,
-      "total": 808
+      "pass": 962,
+      "total": 962
     },
     {
       "id": "PRO-03",
       "status": "verified",
-      "pass": 805,
-      "total": 805
+      "pass": 959,
+      "total": 959
     },
     {
       "id": "PRO-04",
       "status": "verified",
-      "pass": 815,
-      "total": 815
+      "pass": 969,
+      "total": 969
     },
     {
       "id": "PRO-05",
       "status": "verified",
-      "pass": 807,
-      "total": 807
+      "pass": 934,
+      "total": 934
     },
     {
       "id": "PRO-06",
       "status": "verified",
-      "pass": 70,
-      "total": 70
+      "pass": 74,
+      "total": 74
     },
     {
       "id": "PRO-07",
       "status": "verified",
-      "pass": 135,
-      "total": 135
+      "pass": 168,
+      "total": 168
     },
     {
       "id": "PRO-08",
       "status": "verified",
-      "pass": 363,
-      "total": 363
+      "pass": 451,
+      "total": 451
     },
     {
       "id": "PRO-09",
       "status": "verified",
-      "pass": 398,
-      "total": 398
+      "pass": 455,
+      "total": 455
     },
     {
       "id": "PRO-10",
+      "status": "verified",
+      "pass": 374,
+      "total": 374
+    },
+    {
+      "id": "PER-01",
+      "status": "verified",
+      "pass": 182,
+      "total": 182
+    },
+    {
+      "id": "INT-01",
+      "status": "verified",
+      "pass": 119,
+      "total": 119
+    },
+    {
+      "id": "DSC-01",
+      "status": "verified",
+      "pass": 445,
+      "total": 445
+    },
+    {
+      "id": "DSC-02",
+      "status": "verified",
+      "pass": 458,
+      "total": 458
+    },
+    {
+      "id": "DSC-03",
+      "status": "verified",
+      "pass": 444,
+      "total": 444
+    },
+    {
+      "id": "DSC-04",
+      "status": "verified",
+      "pass": 191,
+      "total": 191
+    },
+    {
+      "id": "DSC-05",
       "status": "verified",
       "pass": 322,
       "total": 322
     },
     {
-      "id": "PER-01",
-      "status": "verified",
-      "pass": 158,
-      "total": 158
-    },
-    {
-      "id": "INT-01",
-      "status": "verified",
-      "pass": 91,
-      "total": 91
-    },
-    {
-      "id": "DSC-01",
-      "status": "verified",
-      "pass": 319,
-      "total": 319
-    },
-    {
-      "id": "DSC-02",
-      "status": "verified",
-      "pass": 344,
-      "total": 344
-    },
-    {
-      "id": "DSC-03",
-      "status": "verified",
-      "pass": 324,
-      "total": 324
-    },
-    {
-      "id": "DSC-04",
-      "status": "verified",
-      "pass": 149,
-      "total": 149
-    },
-    {
-      "id": "DSC-05",
-      "status": "verified",
-      "pass": 208,
-      "total": 208
-    },
-    {
       "id": "MOD-01",
       "status": "verified",
-      "pass": 291,
-      "total": 291
+      "pass": 334,
+      "total": 334
     },
     {
       "id": "ERR-01",
@@ -18440,8 +22057,8 @@
     {
       "id": "LIF-01",
       "status": "verified",
-      "pass": 4,
-      "total": 4
+      "pass": 6,
+      "total": 6
     },
     {
       "id": "LIF-02",
@@ -18464,8 +22081,8 @@
     {
       "id": "LIF-05",
       "status": "verified",
-      "pass": 6,
-      "total": 6
+      "pass": 7,
+      "total": 7
     },
     {
       "id": "LIF-06",
@@ -18530,38 +22147,38 @@
     {
       "id": "ITM-01",
       "status": "verified",
-      "pass": 329,
-      "total": 329
+      "pass": 486,
+      "total": 486
     },
     {
       "id": "DSC-06",
       "status": "verified",
-      "pass": 112,
-      "total": 112
+      "pass": 269,
+      "total": 269
     },
     {
       "id": "DSC-07",
       "status": "verified",
-      "pass": 90,
-      "total": 90
+      "pass": 115,
+      "total": 115
     },
     {
       "id": "DSC-08",
       "status": "verified",
-      "pass": 23,
-      "total": 23
+      "pass": 29,
+      "total": 29
     },
     {
       "id": "INT-02",
       "status": "verified",
-      "pass": 11,
-      "total": 11
+      "pass": 13,
+      "total": 13
     },
     {
       "id": "INV-01",
       "status": "verified",
-      "pass": 6,
-      "total": 6
+      "pass": 10,
+      "total": 10
     },
     {
       "id": "ERR-02",
@@ -18584,8 +22201,8 @@
     {
       "id": "INV-02",
       "status": "verified",
-      "pass": 2,
-      "total": 2
+      "pass": 3,
+      "total": 3
     },
     {
       "id": "LIF-08",
@@ -18596,8 +22213,26 @@
     {
       "id": "ITM-02",
       "status": "verified",
-      "pass": 1,
-      "total": 1
+      "pass": 2,
+      "total": 2
+    },
+    {
+      "id": "INV-03",
+      "status": "verified",
+      "pass": 2,
+      "total": 2
+    },
+    {
+      "id": "LIF-09",
+      "status": "verified",
+      "pass": 2,
+      "total": 2
+    },
+    {
+      "id": "DSC-10",
+      "status": "unverified",
+      "pass": 0,
+      "total": 0
     }
   ]
 }

@@ -349,3 +349,60 @@ Rules as read from the nine failing cases, with the cases expected to flip:
 Prediction: the nine failing dev-v4 cases flip; nothing else moves (only these cases show
 finalized invoices whole). Outcome (local replay): 16 of 16 dev-v4; identical output twice after
 reset.
+
+## Pass 8: dev-v5 (DSC-07, DSC-05, LIF-09, INV-03, INV-02, ITM-02)
+
+Baseline: `--only dev-v5-` 156 of 167. Rules as read from the 11 failing cases, with the cases
+expected to flip:
+
+- DSC-07, immediate flexible credit list (dev-v5-b4-1-dropped, -b4-2-reversed, dev-v5-dsc-116).
+  "Carried" = every discount on the billed line; "non-zero" = those that took more than 0 there;
+  "survivors" = non-zero ones whose prorated share is not 0 (DSC-08).
+  1. the invoice has no discount: nothing;
+  2. no carried discount counts: the invoice's discounts. A carried discount counts when it took
+     more than 0, or, if it took 0, while it is still on the invoice (dsc-116: two spent once
+     coupons that got 0 on a 480 line, so the passed coupon is listed; dev-brk-off1-zero-share-
+     always: a $0.01 forever coupon that got 0 and is still on the invoice, so step 3 lists
+     nothing). First attempt used "took more than 0" only and broke dev-brk-off1.
+  3. no survivor: nothing;
+  4. survivors on the invoice, if any, in invoice order (b4-1, b4-2, b4-3);
+  5. some carried discount (a dropped or a zero one included) is on the invoice: the invoice's
+     discounts (b4-4, wide2-157);
+  6. the line carried exactly one discount: that survivor (dev-t2-c-\*);
+  7. otherwise the invoice's discounts (b4-5: two carried, both replaced by a passed coupon).
+
+  Still a decision table fitted to cases rather than a mechanism. The rules.json wording "else the single surviving carried discount" disagrees with b4-5 when
+  read as "exactly one survivor": there two discounts were carried, one survives, and Stripe
+  lists the passed coupon. Read as "the line carried a single discount", it fits every dev case.
+
+- DSC-05, once coupons on a remaining-time charge (dev-v5-dsc-013, dev-v5-dsc-052): a once coupon
+  is spent by the charge when its full-period share of the charge is above 0, even when the
+  prorated share rounds to 0 (then it is neither in the description nor in the line's list). It
+  is then off the invoice and off the renewal. wide3-230 (share 0 because another coupon took
+  everything) keeps it active, as before.
+- LIF-09 (dev-v5-cancel-at-mid-none, -prorate): cancel_at before the period end shortens the
+  current period to cancel_at at once (period_end shows it). Unless proration_behavior is none, a
+  credit for cancel_at..old period end is created at once as a pending invoice item; its invoice
+  line is an `invoice_item_details` line (with credited_items), not a subscription item line. At
+  cancel_at the subscription ends and the pending items go on a `subscription_cycle` invoice
+  (period from the period start to cancel_at), finalized and paid an hour later (amount_due 0,
+  attempt_count 0, the credit to the customer balance).
+- INV-03 (dev-v5-pending-item-*): a renewal takes the customer's pending one-off items (with or
+  without `subscription`), before the recurring lines. A one-off item's line names the item's
+  subscription (null when none). An invoice item created with `subscription` shows
+  `parent.subscription_details.subscription`. A paid automatic invoice shows auto_advance false.
+- INV-02 (dev-v5-manual-invoice-mid-period): a manual invoice's period is the current period of
+  the customer's subscription, when it has one; else creation to one month later.
+- ITM-02 (dev-v5-invoiceitem-update): DELETE /v1/invoiceitems/:id removes a pending item and
+  returns `{id, object: "invoiceitem", deleted: true}`.
+
+Outcome, pass 8: first attempt, `--only dev-v5-` 166 of 167. The miss was cancel-at-mid-prorate
+on `attempted`: a paid invoice with 0 attempts is still `attempted: true` (fixed). The full
+verify then gave 1195 of 1196: dev-brk-off1-zero-share-always broke on DSC-07 step 2 (see
+above), fixed by counting a zero-share carried discount while it is still on the invoice.
+
+Thin spots after pass 8 (no dev case pins them): clearing cancel_at after a mid-period cancel_at
+with prorations (the clone restores the period end and leaves the credit pending); whether
+cancel_at_period_end also puts pending items on a last invoice; whether always_invoice and
+create_preview take the customer's one-off pending items (the clone takes them, like a renewal);
+the once-coupon spend rule of DSC-05 in classic mode (applied the same way as in flexible).

@@ -94,6 +94,8 @@ export interface Subscription {
   cancel_at: number | null;
   canceled_at: number | null;
   ended_at: number | null;
+  // The period end before a cancel_at inside the period shortened it (LIF-09), to restore it.
+  natural_end: number | null;
   trial_start: number | null;
   trial_end: number | null;
   // cancellation_details.reason: "cancellation_requested" once a cancellation is asked for.
@@ -121,6 +123,9 @@ export interface Line {
   invoice_item: string | null;
   credited: { invoice: string; line: string } | null;
   unit_amount_decimal: string | null;
+  // A proration not tied to the subscription item on the invoice (the credit of a cancel_at
+  // before the period end, LIF-09): shown as an invoice item line.
+  detached?: boolean;
 }
 
 export interface Invoice {
@@ -156,7 +161,9 @@ export interface Invoice {
 export interface InvoiceItem {
   id: string;
   customer: string;
-  // null for an invoice item created by POST /v1/invoiceitems (ITM-02).
+  // Created by POST /v1/invoiceitems (ITM-02), not by a subscription change.
+  oneoff: boolean;
+  // The subscription of a proration, or the one named when a one-off item was created (or null).
   subscription: string | null;
   line: Line;
   invoice: string | null;

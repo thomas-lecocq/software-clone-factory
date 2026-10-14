@@ -5,6 +5,7 @@ import {
   allocate,
   spendOnce,
   amountDue,
+  creditLine,
   deferSmall,
   draftFromPlan,
   isPlanError,
@@ -16,7 +17,7 @@ import {
   type Behavior,
   type ItemChange,
 } from "./billing.ts";
-import { addPending, advanceClock, cancelNow, invoiceNow } from "./life.ts";
+import { addPending, advanceClock, cancelNow, invoiceNow, pendingFor } from "./life.ts";
 import {
   couponJson,
   customerJson,
@@ -32,6 +33,7 @@ import {
   nowFor,
   type Discount,
   type Invoice,
+  type InvoiceItem,
   type Line,
   type State,
   type Subscription,
@@ -221,6 +223,7 @@ function createSubscription(state: State, p: Params): CloneResponse {
     cancel_at: null,
     canceled_at: null,
     ended_at: null,
+    natural_end: null,
     trial_start: trialEnd !== null ? now : null,
     trial_end: trialEnd,
     cancellation_reason: null,
@@ -302,11 +305,7 @@ function previewInvoice(state: State, p: Params): CloneResponse {
   return ok(invoiceJson(state, inv, true));
 }
 
-function pendingItems(state: State, sub: Subscription) {
-  return Object.values(state.invoice_items).filter(
-    (ii) => ii.subscription === sub.id && ii.invoice === null,
-  );
-}
+const pendingItems = pendingFor;
 
 const BEHAVIORS = ["create_prorations", "none", "always_invoice"];
 
@@ -395,12 +394,40 @@ function updateSubscription(state: State, sub: Subscription, p: Params): CloneRe
   // end); an empty value clears it, like reactivating.
   if (p.cancel_at !== undefined) {
     const at = num(p.cancel_at);
+    cancelInsidePeriod(state, sub, at, p, now);
     sub.cancel_at_period_end = false;
     sub.cancel_at = at;
     sub.canceled_at = at !== null ? now : null;
     sub.cancellation_reason = at !== null ? "cancellation_requested" : null;
   }
   return ok(subscriptionJson(state, sub, false));
+}
+
+// LIF-09: a cancel_at inside the current period ends the period there at once; unless
+// proration_behavior is none, the unused time after it is credited now, as a pending item. Clearing
+// cancel_at restores the period end (the credit, if any, is left as is: not pinned).
+function cancelInsidePeriod(
+  state: State,
+  sub: Subscription,
+  at: number | null,
+  p: Params,
+  now: number,
+): void {
+  if (at === null) {
+    if (sub.natural_end !== null) sub.period_end = sub.natural_end;
+    sub.natural_end = null;
+    return;
+  }
+  if (at >= sub.period_end || at < now) return;
+  if (str(p.proration_behavior) !== "none") {
+    for (const it of sub.items) {
+      if (priceOf(state, it.price).unit_amount * it.quantity === 0) continue;
+      const credit = creditLine(state, sub, it, at).line;
+      addPending(state, sub, { ...credit, detached: true }, now);
+    }
+  }
+  sub.natural_end ??= sub.period_end;
+  sub.period_end = at;
 }
 
 // `expand[0]=x` parses to a list, `expand[]=x` to a plain string. DSC-09:
@@ -622,12 +649,20 @@ export function handleApi(state: State, req: CloneRequest, p: Params): CloneResp
   if (a === "invoiceitems") {
     if (m === "GET" && b === undefined) return listInvoiceItems(state, p);
     if (m === "POST" && b === undefined) return createInvoiceItem(state, p);
-    if (m === "GET" && b !== undefined) {
+    if (b !== undefined) {
       const ii = get(state.invoice_items, b);
       // The message names the object as "Invoice Item" and adds the mode (ITM-02).
-      return ii
-        ? ok(invoiceItemJson(state, ii))
-        : fail(404, `No such Invoice Item: '${b}'(livemode=false)`, "id", "resource_missing");
+      if (!ii) {
+        return fail(404, `No such Invoice Item: '${b}'(livemode=false)`, "id", "resource_missing");
+      }
+      if (m === "GET") return ok(invoiceItemJson(state, ii));
+      if (m === "POST") return ok(invoiceItemJson(state, updateInvoiceItem(state, ii, p)));
+      if (m === "DELETE") {
+        state.invoice_items = Object.fromEntries(
+          Object.entries(state.invoice_items).filter(([id]) => id !== b),
+        );
+        return ok({ id: b, object: "invoiceitem", deleted: true });
+      }
     }
   }
   return null;
@@ -662,11 +697,16 @@ function createInvoiceItem(state: State, p: Params): CloneResponse {
     interval: "month",
     created: now,
   };
+  const subscription = str(p.subscription);
+  if (subscription !== null && !get(state.subscriptions, subscription)) {
+    return missing("subscription", subscription);
+  }
   const id = mint(state, "ii");
   state.invoice_items[id] = {
     id,
     customer,
-    subscription: null,
+    oneoff: true,
+    subscription,
     invoice: null,
     date: now,
     line: {
@@ -688,6 +728,20 @@ function createInvoiceItem(state: State, p: Params): CloneResponse {
   return ok(invoiceItemJson(state, state.invoice_items[id]));
 }
 
+// ITM-02: a new amount is priced by a new price of the same product; a description replaces the
+// old one.
+function updateInvoiceItem(state: State, ii: InvoiceItem, p: Params): InvoiceItem {
+  const amount = num(p.amount);
+  if (amount !== null) {
+    const old = priceOf(state, ii.line.price);
+    const price = mint(state, "price");
+    state.prices[price] = { ...old, id: price, unit_amount: amount };
+    ii.line = { ...ii.line, amount, price, unit_amount_decimal: String(amount) };
+  }
+  if (p.description !== undefined) ii.line = { ...ii.line, description: str(p.description) };
+  return ii;
+}
+
 // INV-02: POST /v1/invoices makes a draft (billing_reason manual). With
 // pending_invoice_items_behavior=include it takes the customer's pending invoice items. With
 // auto_advance it is finalized and paid an hour after creation (next_payment_attempt); without,
@@ -698,6 +752,9 @@ function createInvoice(state: State, p: Params): CloneResponse {
   if (!cus) return missing("customer", customer);
   const now = customerNow(state, customer);
   const auto = bool(p.auto_advance);
+  const current = Object.values(state.subscriptions)
+    .filter((s) => s.customer === customer && s.status !== "canceled")
+    .at(-1);
   const id = mint(state, "in");
   const lines: Line[] = [];
   if (str(p.pending_invoice_items_behavior) === "include") {
@@ -717,10 +774,10 @@ function createInvoice(state: State, p: Params): CloneResponse {
     billing_reason: "manual",
     status: "draft",
     created: now,
-    // Observed: from creation to one month later (dev-v4-draft-*; it is also the subscription's
-    // period end there, so which of the two it follows is not pinned).
-    period_start: now,
-    period_end: addIntervals(now, "month", 1),
+    // The current period of the customer's subscription (dev-v5-manual-invoice-mid-period);
+    // without one, creation to one month later.
+    period_start: current ? current.period_start : now,
+    period_end: current ? current.period_end : addIntervals(now, "month", 1),
     attempt_count: 0,
     amount_paid: 0,
     auto_advance: auto,

@@ -19,6 +19,7 @@ import {
   nowFor,
   type Clock,
   type Invoice,
+  type InvoiceItem,
   type Line,
   type State,
   type Subscription,
@@ -56,6 +57,7 @@ export function addPending(
   state.invoice_items[id] = {
     id,
     customer: sub.customer,
+    oneoff: false,
     subscription: sub.id,
     line: { ...line, id: "", invoice_item: id },
     invoice: null,
@@ -103,11 +105,21 @@ export function invoiceNow(state: State, sub: Subscription, now: number): Invoic
   return inv;
 }
 
-// Pending invoice items (prorations) of a subscription, moved onto an invoice.
+// Pending invoice items a subscription's next invoice takes: its prorations and one-off items
+// created for it, and the customer's one-off items not tied to a subscription (INV-03).
+export function pendingFor(state: State, sub: Subscription): InvoiceItem[] {
+  return Object.values(state.invoice_items).filter(
+    (ii) =>
+      ii.invoice === null &&
+      (ii.subscription === sub.id ||
+        (ii.oneoff && ii.subscription === null && ii.customer === sub.customer)),
+  );
+}
+
+// Pending invoice items of a subscription, moved onto an invoice.
 export function takePending(state: State, sub: Subscription, invoice: string): Line[] {
   const out: Line[] = [];
-  for (const ii of Object.values(state.invoice_items)) {
-    if (ii.subscription !== sub.id || ii.invoice !== null) continue;
+  for (const ii of pendingFor(state, sub)) {
     ii.invoice = invoice;
     out.push({ ...ii.line, id: mint(state, "il") });
   }
@@ -204,7 +216,7 @@ function attempt(state: State, inv: Invoice, at: number): void {
     inv.status = "paid";
     inv.paid_at = at;
     inv.next_payment_attempt = null;
-    if (inv.manual) inv.auto_advance = false;
+    inv.auto_advance = false;
     return;
   }
   inv.attempt_count += 1;
@@ -213,7 +225,7 @@ function attempt(state: State, inv: Invoice, at: number): void {
     inv.paid_at = at;
     inv.amount_paid = due;
     inv.next_payment_attempt = null;
-    if (inv.manual) inv.auto_advance = false;
+    inv.auto_advance = false;
     if (sub?.status === "past_due") sub.status = "active";
     return;
   }
@@ -243,6 +255,7 @@ export function advanceClock(state: State, clock: Clock, to: number): void {
         consider(cancelAt, () => {
           sub.status = "canceled";
           sub.ended_at = cancelAt;
+          finalInvoice(state, sub, cancelAt);
         });
         continue;
       }
@@ -276,6 +289,44 @@ export function advanceClock(state: State, clock: Clock, to: number): void {
     chosen.run();
   }
   clock.frozen_time = to;
+}
+
+// LIF-09: when a subscription ends at cancel_at, its pending items (the credit for the unused time
+// included) go on a last subscription_cycle invoice, finalized and paid an hour later.
+function finalInvoice(state: State, sub: Subscription, at: number): void {
+  if (pendingFor(state, sub).length === 0) return;
+  const id = mint(state, "in");
+  const inv: Invoice = {
+    id,
+    customer: sub.customer,
+    subscription: sub.id,
+    lines: takePending(state, sub, id),
+    discounts: [],
+    total_discount_amounts: [],
+    billing_reason: "subscription_cycle",
+    status: "draft",
+    created: at,
+    period_start: sub.period_start,
+    period_end: at,
+    attempt_count: 0,
+    amount_paid: 0,
+    auto_advance: true,
+    next_payment_attempt: at + HOUR,
+    proration_date: null,
+    retries: [],
+    starting_balance: 0,
+    deferred: 0,
+    finalized_at: null,
+    paid_at: null,
+    manual: false,
+  };
+  const cus = get(state.customers, sub.customer);
+  if (cus) {
+    inv.starting_balance = cus.balance;
+    cus.balance = Math.min(0, invoiceTotal(inv) + cus.balance);
+  }
+  state.invoices[id] = inv;
+  sub.latest_invoice = id;
 }
 
 export function cancelNow(
