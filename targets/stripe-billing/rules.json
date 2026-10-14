@@ -467,6 +467,33 @@
         "kind": "documented",
         "ref": "Stripe API invoice items; mutation survivors api.ts:458 and api.ts:589 (GAPS.md); to be confirmed by dev-v4-items-*"
       }
+    },
+    {
+      "id": "INV-03",
+      "area": "logic",
+      "statement": "Pending one-off invoice items of a subscription's customer are included in the subscription's next renewal invoice.",
+      "provenance": {
+        "kind": "documented",
+        "ref": "Stripe invoice items documentation; builder v4 choice (clone/NOTES.md pass 7); to be confirmed by dev-v5-pending-*"
+      }
+    },
+    {
+      "id": "LIF-09",
+      "area": "logic",
+      "statement": "cancel_at before the period end ends the subscription at that time and, unless proration_behavior is none, credits the unused time.",
+      "provenance": {
+        "kind": "documented",
+        "ref": "Stripe subscriptions cancel_at documentation; builder v4 choice; to be confirmed by dev-v5-cancel-at-*"
+      }
+    },
+    {
+      "id": "DSC-10",
+      "area": "logic",
+      "statement": "A percent coupon with decimals (two places) discounts by the exact percentage, rounded once on the discounted amount.",
+      "provenance": {
+        "kind": "inferred",
+        "ref": "mutation survivor billing.ts:30 (GAPS.md); to be confirmed by dev-v5-percent-*"
+      }
     }
   ]
 }

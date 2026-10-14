@@ -2063,6 +2063,161 @@ function v4Wide(): [string, WideInput][] {
   return out;
 }
 
+// v5: the area batches 4 and 5 still fail in (one of several items changed under two coupons,
+// DSC-07), drawn from WIDE_DISTRIBUTION_V2 and kept only inside that area; and behaviour no
+// fixture pinned on clone v4, from mutation testing and the v4 builder's own choices (GAPS.md).
+// Designed after seeing those gaps, so they are dev.
+function v5Wide(): [string, WideInput][] {
+  const area = wideProbesV2(3000, 20261015, "x")
+    .map(([, p]) => p)
+    .filter((p) => p.items.length >= 2 && p.coupons.length === 2)
+    .slice(0, 150)
+    .map((p, i): [string, WideInput] => [`dev-v5-dsc-${String(i + 1).padStart(3, "0")}`, p]);
+  const percents = [10.29, 11.37, 33.33].map((percent, i): [string, WideInput] => [
+    `dev-v5-percent-${String(i + 1)}`,
+    {
+      kind: "wide",
+      start: STARTS.oct,
+      billing_mode: "flexible",
+      interval: "month",
+      items: [{ amount: 10_000_000, quantity: 10 }],
+      coupons: [{ percent_off: percent, duration: "forever" }],
+      change: {
+        item: 0,
+        amount: 9_000_000,
+        interval: null,
+        quantity: null,
+        offset: 10 * 86400,
+        proration_behavior: "always_invoice",
+        discount: null,
+      },
+    },
+  ]);
+  return [...area, ...percents];
+}
+
+const MID = STARTS.oct + 15 * 86400;
+const v5Lifecycle: [string, string[], Record<string, unknown>][] = [
+  [
+    "dev-v5-invoiceitem-update",
+    ["ITM-02"],
+    {
+      amount: 1000,
+      trial_days: null,
+      steps: [
+        raw("mine", "POST", "/v1/invoiceitems", {
+          customer: "{customer}",
+          amount: "300",
+          currency: "usd",
+        }),
+        raw("update", "POST", "/v1/invoiceitems/{mine.id}", {
+          amount: "900",
+          description: "Setup fee",
+        }),
+        raw("read", "GET", "/v1/invoiceitems/{mine.id}"),
+        raw("delete", "DELETE", "/v1/invoiceitems/{mine.id}"),
+        raw("list", "GET", "/v1/invoiceitems", { customer: "{customer}" }),
+      ],
+    },
+  ],
+  [
+    "dev-v5-cancel-now-no-prorate-invoice",
+    ["LIF-05"],
+    {
+      amount: 1000,
+      trial_days: null,
+      steps: [
+        { do: "advance", seconds: 10 * 86400 },
+        { do: "cancel_now", prorate: false, invoice_now: true },
+        sub("canceled"),
+        raw("pending", "GET", "/v1/invoiceitems", { customer: "{customer}", pending: "true" }),
+      ],
+    },
+  ],
+  [
+    "dev-v5-pending-item-renewal",
+    ["INV-03", "LIF-01"],
+    {
+      amount: 1000,
+      trial_days: null,
+      steps: [
+        { do: "advance", seconds: 10 * 86400 },
+        raw("item", "POST", "/v1/invoiceitems", {
+          customer: "{customer}",
+          amount: "400",
+          currency: "usd",
+          description: "One-off",
+        }),
+        { do: "advance", seconds: M },
+        sub("renewed"),
+        raw("invoices", "GET", "/v1/invoices", { customer: "{customer}" }),
+      ],
+    },
+  ],
+  [
+    "dev-v5-pending-item-subscription-renewal",
+    ["INV-03", "LIF-01"],
+    {
+      amount: 1000,
+      trial_days: null,
+      steps: [
+        raw("item", "POST", "/v1/invoiceitems", {
+          customer: "{customer}",
+          subscription: "{subscription}",
+          amount: "400",
+          currency: "usd",
+        }),
+        { do: "advance", seconds: M },
+        sub("renewed"),
+        raw("invoices", "GET", "/v1/invoices", { customer: "{customer}" }),
+      ],
+    },
+  ],
+  ...(["create_prorations", "none"] as const).map(
+    (behaviour): [string, string[], Record<string, unknown>] => [
+      `dev-v5-cancel-at-mid-${behaviour === "none" ? "none" : "prorate"}`,
+      ["LIF-09"],
+      {
+        amount: 1000,
+        trial_days: null,
+        steps: [
+          raw("set", "POST", "/v1/subscriptions/{subscription}", {
+            cancel_at: String(MID),
+            proration_behavior: behaviour,
+          }),
+          sub("set"),
+          { do: "advance", seconds: 16 * 86400 },
+          sub("ended"),
+          raw("pending", "GET", "/v1/invoiceitems", { customer: "{customer}", pending: "true" }),
+          raw("invoices", "GET", "/v1/invoices", { customer: "{customer}" }),
+        ],
+      },
+    ],
+  ),
+  [
+    "dev-v5-manual-invoice-mid-period",
+    ["INV-02"],
+    {
+      amount: 1000,
+      trial_days: null,
+      steps: [
+        { do: "advance", seconds: 10 * 86400 },
+        raw("item", "POST", "/v1/invoiceitems", {
+          customer: "{customer}",
+          amount: "500",
+          currency: "usd",
+        }),
+        raw("draft", "POST", "/v1/invoices", {
+          customer: "{customer}",
+          pending_invoice_items_behavior: "include",
+        }),
+        { do: "advance", seconds: 2 * 86400 },
+        raw("read", "GET", "/v1/invoices/{draft.id}"),
+      ],
+    },
+  ],
+];
+
 export function probes(): Probe[] {
   const logic = [
     ...designed.map(([id, p]) => [`d-${id}`, p] as const),
@@ -2098,6 +2253,11 @@ export function probes(): Probe[] {
       rules,
       input: JsonSchema.parse({ kind: "lifecycle", start: STARTS.oct, ...rest }),
     })),
+    ...v5Lifecycle.map(([id, rules, rest]) => ({
+      id,
+      rules,
+      input: JsonSchema.parse({ kind: "lifecycle", start: STARTS.oct, ...rest }),
+    })),
     ...v4Lifecycle.map(([id, rules, rest]) => ({
       id,
       rules,
@@ -2129,6 +2289,7 @@ export function probes(): Probe[] {
     ...wideProbesV2(300, 20261013, "wide3"),
     ...batch3Probes(),
     ...v4Wide(),
+    ...v5Wide(),
     ...holdoutBatches(),
   ].map(([id, p]) => ({
     id,
