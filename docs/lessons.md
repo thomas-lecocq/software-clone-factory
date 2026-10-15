@@ -53,3 +53,21 @@ One line per lesson, read at step 1 of the `replicate-slice` skill: where, sympt
   on different days disagreed for identical inputs. Mask such text in the policy, with its reason.
 - **Fresh copies.** A lock that hashed macOS hidden files broke `verify` on every fresh checkout.
   Run the deliverable from a fresh clone before calling it done.
+- **Background limits.** A build and an analysis launched as background tasks of the orchestrating
+  session were killed at its two-hour limit; the sandbox went with them and nothing came back.
+  Launch long agent runs detached from the session, and watch the container instead.
+- **Tools for every role.** The analyst had no way to replay a spent batch, which lies outside
+  `fixtures/` where `verify` looks: two runs spent two hours each rebuilding a replay script and
+  wrote no report. With `harness/src/replay.ts` the same analysis took 8 minutes. Give each role
+  the tool its task needs, and say in its prompt not to write its own.
+- **Naming changes reach every check.** Staged batches renamed cases `<batch>-s1-001`; the analyst
+  sandbox still matched `<batch>-001` in three places and refused, or would have copied nothing.
+  When an ID scheme changes, grep for every pattern that parses it.
+- **A hung daemon looks like a slow agent.** Docker stopped answering mid-session, and a run waited
+  an hour with an empty log. Check that the daemon answers (`docker info`) before blaming the agent.
+- **A builder's guesses are probes to write.** The v4 builder listed four behaviours it chose
+  without a fixture; recording them showed one was wrong (pending one-off items do go into the
+  next renewal). Turn every "not pinned, my choice" in a builder's notes into a dev probe.
+- **Mutation testing finds what a claim cannot.** A clone at "below 1 % at 99 %" still failed 7 of
+  69 dev probes written for its mutation survivors, all outside the claim's distribution. A claim
+  speaks for its distribution only; mutation survivors point at what lies outside it.
