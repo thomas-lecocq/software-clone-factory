@@ -28,7 +28,7 @@ import {
   type BatchPlan,
   type Tally,
 } from "./fidelity.ts";
-import { auditFacts, reliabilityCard, reliabilitySvg, taskFacts } from "./card.ts";
+import { auditFacts, breakerFacts, reliabilityCard, reliabilitySvg, taskFacts } from "./card.ts";
 import { loadLedger, ruleStatuses, type RuleResult } from "./ledger.ts";
 import { logTiming, secondsSince } from "./timings.ts";
 import {
@@ -320,7 +320,7 @@ export async function verify(
       plans,
       looks,
       dev: tally(dev),
-      adversarial: tally(dev.filter((c) => c.id.startsWith("dev-brk-"))),
+      ...breakerFacts(dir, dev),
       determinism,
       lockHash: run.lock,
       commit: run.commit,

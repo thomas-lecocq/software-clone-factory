@@ -12,6 +12,7 @@ const base: CardInput = {
   looks: { hold: 3, "hold-b2": 1 },
   dev: { pass: 733, total: 748 },
   adversarial: { pass: 28, total: 40 },
+  unseenRound: null,
   determinism: { identical: 10, total: 10 },
   lockHash: "abc",
   commit: "c1",
@@ -83,5 +84,17 @@ describe("reliability card", () => {
     expect(svg).toContain(">473/473</text>");
     expect(svg).toContain(">10/16</text>");
     expect(svg).not.toContain("a<b");
+  });
+  it("puts an unseen breaker round first, as the out-of-distribution figure", () => {
+    const card = reliabilityCard({
+      ...base,
+      unseenRound: { file: "breaker-round2.json", tally: { pass: 7, total: 41 } },
+    });
+    expect(card).toContain("breaker%2C%20unseen-7%2F41");
+    expect(card).toContain("proposed against this clone: 7 of 41 pass");
+    expect(card).toContain("earlier rounds: 28 of 40");
+    expect(
+      reliabilitySvg({ ...base, unseenRound: { file: "r", tally: { pass: 7, total: 41 } } }),
+    ).toContain(">7/41</text>");
   });
 });

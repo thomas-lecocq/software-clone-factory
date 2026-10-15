@@ -4,6 +4,7 @@
  * C: measured, with its bound), and every figure comes from a run or a measurement file, so the
  * card can be read at a glance without saying more than the report.
  */
+import { execFileSync } from "node:child_process";
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { z } from "zod";
@@ -19,6 +20,9 @@ export interface CardInput {
   // Dev cases a breaker chose to make the clone fail (`dev-brk-` probes). Once the builder has
   // learnt them they say nothing about generalisation; only a new round tests the clone again.
   adversarial: Tally;
+  // The latest breaker round when it was proposed against the clone being scored: the one figure
+  // on the card from outside the measured distribution.
+  unseenRound: { file: string; tally: Tally } | null;
   determinism: { identical: number; total: number };
   lockHash: string;
   commit: string | null;
@@ -136,7 +140,17 @@ export function reliabilityCard(c: CardInput): string {
     t
       ? badge("holdout", `${String(t.pass)}/${String(t.total)}`, k === 0 ? "2ea44f" : "dfb317")
       : "",
-    badge("breaker probes", `${String(c.adversarial.pass)}/${String(c.adversarial.total)}`, "blue"),
+    c.unseenRound
+      ? badge(
+          "breaker, unseen",
+          `${String(c.unseenRound.tally.pass)}/${String(c.unseenRound.tally.total)}`,
+          shareColor(c.unseenRound.tally),
+        )
+      : badge(
+          "breaker probes",
+          `${String(c.adversarial.pass)}/${String(c.adversarial.total)}`,
+          "blue",
+        ),
     c.mutation
       ? badge("mutants caught", `${String(c.mutation.killed)}/${String(c.mutation.valid)}`, "blue")
       : "",
@@ -169,9 +183,11 @@ export function reliabilityCard(c: CardInput): string {
     ),
     row(
       "Breaker probes",
-      c.adversarial.total === 0
-        ? "no breaker round yet"
-        : `${String(c.adversarial.pass)} of ${String(c.adversarial.total)} pass; they are dev cases the builder may have learnt, so only a new breaker round tests the clone out of distribution`,
+      c.unseenRound
+        ? `\`${c.unseenRound.file}\`, proposed against this clone: ${String(c.unseenRound.tally.pass)} of ${String(c.unseenRound.tally.total)} pass, outside the measured distribution; earlier rounds: ${String(c.adversarial.pass)} of ${String(c.adversarial.total)}, dev cases the builder may have learnt`
+        : c.adversarial.total === 0
+          ? "no breaker round yet"
+          : `${String(c.adversarial.pass)} of ${String(c.adversarial.total)} pass; they are dev cases the builder may have learnt, so only a new breaker round tests the clone out of distribution`,
     ),
     row("Dev (training)", `${String(c.dev.pass)} of ${String(c.dev.total)}`),
     row(
@@ -265,13 +281,19 @@ export function reliabilitySvg(c: CardInput): string {
       ? ([["Auditor recall", c.auditors.found, c.auditors.planted]] as [string, number, number][])
       : []),
     ["Determinism", c.determinism.identical, c.determinism.total],
-    ...(c.adversarial.total > 0
-      ? ([["Breaker probes (dev)", c.adversarial.pass, c.adversarial.total]] as [
+    ...(c.unseenRound
+      ? ([["Breaker, unseen", c.unseenRound.tally.pass, c.unseenRound.tally.total]] as [
           string,
           number,
           number,
         ][])
-      : []),
+      : c.adversarial.total > 0
+        ? ([["Breaker probes (dev)", c.adversarial.pass, c.adversarial.total]] as [
+            string,
+            number,
+            number,
+          ][])
+        : []),
   ];
   const width = 680;
   const top = 92;
@@ -325,4 +347,51 @@ export function reliabilitySvg(c: CardInput): string {
   <text x="28" y="${String(height - 22)}" class="foot">${xml(footer)}</text>
 </svg>
 `;
+}
+
+const shareColor = (t: Tally): string =>
+  t.pass === t.total ? "2ea44f" : t.pass * 2 >= t.total ? "dfb317" : "e05d44";
+
+const RoundFile = z.object({ probes: z.array(z.object({ id: z.string() })) });
+
+const commitTime = (cwd: string, args: string[]): number | null => {
+  try {
+    const out = execFileSync("git", ["log", "-1", "--format=%ct", ...args], {
+      cwd,
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"],
+    }).trim();
+    return out === "" ? null : Number(out);
+  } catch {
+    return null;
+  }
+};
+
+// Breaker probes split by round. The latest round counts as unseen when it was first committed
+// after the clone last changed: no builder pass could have learnt it.
+export function breakerFacts(
+  dir: string,
+  dev: { id: string; pass: boolean }[],
+): { adversarial: Tally; unseenRound: { file: string; tally: Tally } | null } {
+  const rounds = readdirSync(dir)
+    .filter((f) => /^breaker-round\d+\.json$/.test(f))
+    .sort((a, b) => Number(/\d+/.exec(a)?.[0]) - Number(/\d+/.exec(b)?.[0]));
+  const ids = (f: string): Set<string> =>
+    new Set(
+      RoundFile.parse(JSON.parse(readFileSync(join(dir, f), "utf8"))).probes.map((p) => p.id),
+    );
+  const tallyOf = (set: Set<string>): Tally => {
+    const cs = dev.filter((c) => set.has(c.id));
+    return { pass: cs.filter((c) => c.pass).length, total: cs.length };
+  };
+  const latest = rounds.at(-1);
+  const added = latest ? commitTime(dir, ["--diff-filter=A", "--", latest]) : null;
+  const cloneChanged = commitTime(dir, ["--", "clone"]);
+  const unseen =
+    latest !== undefined && added !== null && cloneChanged !== null && added > cloneChanged;
+  const earlier = new Set((unseen ? rounds.slice(0, -1) : rounds).flatMap((f) => [...ids(f)]));
+  return {
+    adversarial: tallyOf(earlier),
+    unseenRound: unseen && latest ? { file: latest, tally: tallyOf(ids(latest)) } : null,
+  };
 }
