@@ -7380,6 +7380,6658 @@
       "reported": []
     },
     {
+      "id": "dev-v6-cancel-at-mid-cleared",
+      "split": "dev",
+      "rules": [
+        "LIF-09",
+        "LIF-04"
+      ],
+      "pass": false,
+      "crashed": false,
+      "diffs": [
+        {
+          "path": "after.latest_invoice.amount_due",
+          "expected": 1000,
+          "actual": 484
+        },
+        {
+          "path": "after.latest_invoice.amount_paid",
+          "expected": 1000,
+          "actual": 484
+        },
+        {
+          "path": "after.latest_invoice.lines[0].amount",
+          "expected": 516,
+          "actual": -516
+        },
+        {
+          "path": "after.latest_invoice.lines[0].description",
+          "expected": "Remaining time on Basic after 20 Oct 2026",
+          "actual": "Unused time on Basic after 20 Oct 2026"
+        },
+        {
+          "path": "after.latest_invoice.lines[1].amount",
+          "expected": -516,
+          "actual": 1000
+        },
+        {
+          "path": "after.latest_invoice.lines[1].description",
+          "expected": "Unused time on Basic after 20 Oct 2026",
+          "actual": "1 × Basic (at $10.00 / month)"
+        },
+        {
+          "path": "after.latest_invoice.lines[2].amount",
+          "expected": 1000
+        },
+        {
+          "path": "after.latest_invoice.lines[2].description",
+          "expected": "1 × Basic (at $10.00 / month)"
+        },
+        {
+          "path": "after.latest_invoice.subtotal",
+          "expected": 1000,
+          "actual": 484
+        },
+        {
+          "path": "after.latest_invoice.total",
+          "expected": 1000,
+          "actual": 484
+        },
+        {
+          "path": "invoices.body.data[0].amount_due",
+          "expected": 1000,
+          "actual": 484
+        },
+        {
+          "path": "invoices.body.data[0].amount_paid",
+          "expected": 1000,
+          "actual": 484
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[0].amount",
+          "expected": 516,
+          "actual": -516
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[0].description",
+          "expected": "Remaining time on Basic after 20 Oct 2026",
+          "actual": "Unused time on Basic after 20 Oct 2026"
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[0].parent.invoice_item_details",
+          "expected": null
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[0].parent.invoice_item_details.invoice_item",
+          "actual": "ii#1"
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[0].parent.invoice_item_details.proration",
+          "actual": true
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[0].parent.invoice_item_details.proration_details.credited_items.invoice",
+          "actual": "in#2"
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[0].parent.invoice_item_details.proration_details.credited_items.invoice_line_items[0]",
+          "actual": "il#2"
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[0].parent.invoice_item_details.subscription",
+          "actual": "sub#1"
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[0].parent.subscription_item_details",
+          "actual": null
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[0].parent.subscription_item_details.invoice_item",
+          "expected": "ii#1"
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[0].parent.subscription_item_details.proration",
+          "expected": true
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[0].parent.subscription_item_details.proration_details.credited_items",
+          "expected": null
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[0].parent.subscription_item_details.subscription",
+          "expected": "sub#1"
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[0].parent.subscription_item_details.subscription_item",
+          "expected": "si#1"
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[0].parent.type",
+          "expected": "subscription_item_details",
+          "actual": "invoice_item_details"
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[0].subtotal",
+          "expected": 516,
+          "actual": -516
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[1].amount",
+          "expected": -516,
+          "actual": 1000
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[1].description",
+          "expected": "Unused time on Basic after 20 Oct 2026",
+          "actual": "1 × Basic (at $10.00 / month)"
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[1].discountable",
+          "expected": false,
+          "actual": true
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[1].id",
+          "expected": "il#2",
+          "actual": "il#3"
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[1].parent.subscription_item_details.invoice_item",
+          "expected": "ii#2",
+          "actual": null
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[1].parent.subscription_item_details.proration",
+          "expected": true,
+          "actual": false
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[1].parent.subscription_item_details.proration_details.credited_items",
+          "actual": null
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[1].parent.subscription_item_details.proration_details.credited_items.invoice",
+          "expected": "in#2"
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[1].parent.subscription_item_details.proration_details.credited_items.invoice_line_items[0]",
+          "expected": "il#3"
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[1].period.end",
+          "expected": 1793836800,
+          "actual": 1796428800
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[1].period.start",
+          "expected": 1792454400,
+          "actual": 1793836800
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[1].pricing.unit_amount_decimal",
+          "expected": null,
+          "actual": "1000"
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[1].subtotal",
+          "expected": -516,
+          "actual": 1000
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[2].amount",
+          "expected": 1000
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[2].currency",
+          "expected": "usd"
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[2].description",
+          "expected": "1 × Basic (at $10.00 / month)"
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[2].discount_amounts",
+          "expected": []
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[2].discountable",
+          "expected": true
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[2].discounts",
+          "expected": []
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[2].id",
+          "expected": "il#4"
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[2].invoice",
+          "expected": "in#1"
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[2].livemode",
+          "expected": false
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[2].metadata",
+          "expected": {}
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[2].object",
+          "expected": "line_item"
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[2].parent.invoice_item_details",
+          "expected": null
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[2].parent.subscription_item_details.invoice_item",
+          "expected": null
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[2].parent.subscription_item_details.proration",
+          "expected": false
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[2].parent.subscription_item_details.proration_details.credited_items",
+          "expected": null
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[2].parent.subscription_item_details.subscription",
+          "expected": "sub#1"
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[2].parent.subscription_item_details.subscription_item",
+          "expected": "si#1"
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[2].parent.type",
+          "expected": "subscription_item_details"
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[2].period.end",
+          "expected": 1796428800
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[2].period.start",
+          "expected": 1793836800
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[2].pretax_credit_amounts",
+          "expected": []
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[2].pricing.price_details.price",
+          "expected": "price#1"
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[2].pricing.price_details.product",
+          "expected": "prod#1"
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[2].pricing.type",
+          "expected": "price_details"
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[2].pricing.unit_amount_decimal",
+          "expected": "1000"
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[2].quantity",
+          "expected": 1
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[2].quantity_decimal",
+          "expected": "1"
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[2].subtotal",
+          "expected": 1000
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[2].taxes",
+          "expected": []
+        },
+        {
+          "path": "invoices.body.data[0].lines.total_count",
+          "expected": 3,
+          "actual": 2
+        },
+        {
+          "path": "invoices.body.data[0].subtotal",
+          "expected": 1000,
+          "actual": 484
+        },
+        {
+          "path": "invoices.body.data[0].subtotal_excluding_tax",
+          "expected": 1000,
+          "actual": 484
+        },
+        {
+          "path": "invoices.body.data[0].total",
+          "expected": 1000,
+          "actual": 484
+        },
+        {
+          "path": "invoices.body.data[0].total_excluding_tax",
+          "expected": 1000,
+          "actual": 484
+        },
+        {
+          "path": "invoices.body.data[1].lines.data[0].id",
+          "expected": "il#3",
+          "actual": "il#2"
+        },
+        {
+          "path": "pending_set.body.data[0].id",
+          "expected": "ii#2",
+          "actual": "ii#1"
+        },
+        {
+          "path": "pending_set.body.data[0].proration_details.credited_items.invoice_line_item_details.invoice_line_items[0]",
+          "expected": "il#3",
+          "actual": "il#2"
+        },
+        {
+          "path": "pending_unset.body.data[0].amount",
+          "expected": 516,
+          "actual": -516
+        },
+        {
+          "path": "pending_unset.body.data[0].description",
+          "expected": "Remaining time on Basic after 20 Oct 2026",
+          "actual": "Unused time on Basic after 20 Oct 2026"
+        },
+        {
+          "path": "pending_unset.body.data[0].net_amount",
+          "expected": 516,
+          "actual": -516
+        },
+        {
+          "path": "pending_unset.body.data[0].proration_details.credited_items",
+          "expected": null
+        },
+        {
+          "path": "pending_unset.body.data[0].proration_details.credited_items.invoice_line_item_details.invoice",
+          "actual": "in#2"
+        },
+        {
+          "path": "pending_unset.body.data[0].proration_details.credited_items.invoice_line_item_details.invoice_line_items[0]",
+          "actual": "il#2"
+        },
+        {
+          "path": "pending_unset.body.data[0].proration_details.credited_items.type",
+          "actual": "invoice_line_items"
+        },
+        {
+          "path": "pending_unset.body.data[1].amount",
+          "expected": -516
+        },
+        {
+          "path": "pending_unset.body.data[1].currency",
+          "expected": "usd"
+        },
+        {
+          "path": "pending_unset.body.data[1].customer",
+          "expected": "cus#1"
+        },
+        {
+          "path": "pending_unset.body.data[1].customer_account",
+          "expected": null
+        },
+        {
+          "path": "pending_unset.body.data[1].date",
+          "expected": 1791158400
+        },
+        {
+          "path": "pending_unset.body.data[1].description",
+          "expected": "Unused time on Basic after 20 Oct 2026"
+        },
+        {
+          "path": "pending_unset.body.data[1].discountable",
+          "expected": false
+        },
+        {
+          "path": "pending_unset.body.data[1].discounts",
+          "expected": []
+        },
+        {
+          "path": "pending_unset.body.data[1].frozen_fields[0]",
+          "expected": "pricing"
+        },
+        {
+          "path": "pending_unset.body.data[1].frozen_fields[1]",
+          "expected": "quantity"
+        },
+        {
+          "path": "pending_unset.body.data[1].frozen_fields[2]",
+          "expected": "discounts"
+        },
+        {
+          "path": "pending_unset.body.data[1].id",
+          "expected": "ii#2"
+        },
+        {
+          "path": "pending_unset.body.data[1].invoice",
+          "expected": null
+        },
+        {
+          "path": "pending_unset.body.data[1].invoicing_rules",
+          "expected": []
+        },
+        {
+          "path": "pending_unset.body.data[1].livemode",
+          "expected": false
+        },
+        {
+          "path": "pending_unset.body.data[1].metadata",
+          "expected": {}
+        },
+        {
+          "path": "pending_unset.body.data[1].net_amount",
+          "expected": -516
+        },
+        {
+          "path": "pending_unset.body.data[1].object",
+          "expected": "invoiceitem"
+        },
+        {
+          "path": "pending_unset.body.data[1].parent.subscription_details.subscription",
+          "expected": "sub#1"
+        },
+        {
+          "path": "pending_unset.body.data[1].parent.subscription_details.subscription_item",
+          "expected": "si#1"
+        },
+        {
+          "path": "pending_unset.body.data[1].parent.type",
+          "expected": "subscription_details"
+        },
+        {
+          "path": "pending_unset.body.data[1].period.end",
+          "expected": 1793836800
+        },
+        {
+          "path": "pending_unset.body.data[1].period.start",
+          "expected": 1792454400
+        },
+        {
+          "path": "pending_unset.body.data[1].pricing.price_details.price",
+          "expected": "price#1"
+        },
+        {
+          "path": "pending_unset.body.data[1].pricing.price_details.product",
+          "expected": "prod#1"
+        },
+        {
+          "path": "pending_unset.body.data[1].pricing.type",
+          "expected": "price_details"
+        },
+        {
+          "path": "pending_unset.body.data[1].pricing.unit_amount_decimal",
+          "expected": null
+        },
+        {
+          "path": "pending_unset.body.data[1].proration",
+          "expected": true
+        },
+        {
+          "path": "pending_unset.body.data[1].proration_details.credited_items.invoice_line_item_details.invoice",
+          "expected": "in#2"
+        },
+        {
+          "path": "pending_unset.body.data[1].proration_details.credited_items.invoice_line_item_details.invoice_line_items[0]",
+          "expected": "il#3"
+        },
+        {
+          "path": "pending_unset.body.data[1].proration_details.credited_items.type",
+          "expected": "invoice_line_items"
+        },
+        {
+          "path": "pending_unset.body.data[1].proration_details.discount_amounts",
+          "expected": []
+        },
+        {
+          "path": "pending_unset.body.data[1].quantity",
+          "expected": 1
+        },
+        {
+          "path": "pending_unset.body.data[1].quantity_decimal",
+          "expected": "1"
+        },
+        {
+          "path": "pending_unset.body.data[1].tax_rates",
+          "expected": []
+        },
+        {
+          "path": "pending_unset.body.data[1].test_clock",
+          "expected": "clock#1"
+        }
+      ],
+      "reported": []
+    },
+    {
+      "id": "dev-v6-classic-once-001",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-03",
+        "DSC-04",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "MOD-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-09",
+        "PRO-10"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v6-classic-once-002",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-04",
+        "DSC-05",
+        "ITM-01",
+        "MOD-01",
+        "PER-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-10"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v6-classic-once-003",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-04",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "MOD-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v6-classic-once-004",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-04",
+        "DSC-05",
+        "INT-01",
+        "ITM-01",
+        "MOD-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08",
+        "PRO-09"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v6-classic-once-005",
+      "split": "dev",
+      "rules": [
+        "DSC-03",
+        "DSC-04",
+        "DSC-05",
+        "ITM-01",
+        "MOD-01",
+        "PER-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v6-classic-once-006",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-04",
+        "DSC-05",
+        "INT-01",
+        "ITM-01",
+        "MOD-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-09",
+        "PRO-10"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v6-classic-once-007",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-03",
+        "DSC-04",
+        "DSC-05",
+        "ITM-01",
+        "MOD-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-09",
+        "PRO-10"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v6-classic-once-008",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-04",
+        "DSC-05",
+        "ITM-01",
+        "MOD-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-07",
+        "PRO-09",
+        "PRO-10"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v6-classic-once-009",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-03",
+        "DSC-04",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "MOD-01",
+        "PER-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v6-classic-once-010",
+      "split": "dev",
+      "rules": [
+        "DSC-03",
+        "DSC-04",
+        "DSC-05",
+        "ITM-01",
+        "MOD-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v6-classic-once-011",
+      "split": "dev",
+      "rules": [
+        "DSC-03",
+        "DSC-04",
+        "DSC-05",
+        "ITM-01",
+        "MOD-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v6-classic-once-012",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-04",
+        "DSC-05",
+        "ITM-01",
+        "MOD-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08",
+        "PRO-09"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v6-classic-once-013",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-03",
+        "DSC-04",
+        "DSC-05",
+        "DSC-06",
+        "INT-01",
+        "ITM-01",
+        "MOD-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-10"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v6-classic-once-014",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-03",
+        "DSC-04",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "MOD-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08",
+        "PRO-09"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v6-classic-once-015",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-04",
+        "DSC-05",
+        "ITM-01",
+        "MOD-01",
+        "PER-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08",
+        "PRO-09"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v6-classic-once-016",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-04",
+        "DSC-05",
+        "ITM-01",
+        "MOD-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-07",
+        "PRO-08"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v6-classic-once-017",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-03",
+        "DSC-04",
+        "DSC-05",
+        "ITM-01",
+        "MOD-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v6-classic-once-018",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-04",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "MOD-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v6-classic-once-019",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-04",
+        "DSC-05",
+        "ITM-01",
+        "MOD-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v6-classic-once-020",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-04",
+        "DSC-05",
+        "ITM-01",
+        "MOD-01",
+        "PER-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v6-classic-once-021",
+      "split": "dev",
+      "rules": [
+        "DSC-03",
+        "DSC-04",
+        "DSC-05",
+        "ITM-01",
+        "MOD-01",
+        "PER-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-09",
+        "PRO-10"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v6-classic-once-022",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-03",
+        "DSC-04",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "MOD-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-07",
+        "PRO-10"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v6-classic-once-023",
+      "split": "dev",
+      "rules": [
+        "DSC-03",
+        "DSC-05",
+        "INT-01",
+        "ITM-01",
+        "MOD-01",
+        "PRO-05",
+        "PRO-06",
+        "PRO-09",
+        "PRO-10"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v6-classic-once-024",
+      "split": "dev",
+      "rules": [
+        "DSC-03",
+        "DSC-04",
+        "DSC-05",
+        "ITM-01",
+        "MOD-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-09",
+        "PRO-10"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v6-classic-once-025",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-04",
+        "DSC-05",
+        "ITM-01",
+        "MOD-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v6-classic-once-026",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-04",
+        "DSC-05",
+        "INT-01",
+        "ITM-01",
+        "MOD-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-10"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v6-classic-once-027",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-04",
+        "DSC-05",
+        "ITM-01",
+        "MOD-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-09",
+        "PRO-10"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v6-classic-once-028",
+      "split": "dev",
+      "rules": [
+        "DSC-03",
+        "DSC-04",
+        "DSC-05",
+        "ITM-01",
+        "MOD-01",
+        "PER-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v6-classic-once-029",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-04",
+        "DSC-05",
+        "ITM-01",
+        "MOD-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-07",
+        "PRO-08",
+        "PRO-09"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v6-classic-once-030",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-03",
+        "DSC-04",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "MOD-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-09"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v6-classic-once-031",
+      "split": "dev",
+      "rules": [
+        "DSC-03",
+        "DSC-04",
+        "DSC-05",
+        "ITM-01",
+        "MOD-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v6-classic-once-032",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-04",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "MOD-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08",
+        "PRO-09"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v6-classic-once-033",
+      "split": "dev",
+      "rules": [
+        "DSC-03",
+        "DSC-04",
+        "DSC-05",
+        "ITM-01",
+        "MOD-01",
+        "PRO-05"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v6-classic-once-034",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "MOD-01",
+        "PRO-05",
+        "PRO-06",
+        "PRO-08"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v6-classic-once-035",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-05",
+        "ITM-01",
+        "MOD-01",
+        "PRO-05",
+        "PRO-06",
+        "PRO-10"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v6-classic-once-036",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-03",
+        "DSC-04",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "MOD-01",
+        "PER-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-10"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v6-classic-once-037",
+      "split": "dev",
+      "rules": [
+        "DSC-03",
+        "DSC-04",
+        "DSC-05",
+        "ITM-01",
+        "MOD-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-10"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v6-classic-once-038",
+      "split": "dev",
+      "rules": [
+        "DSC-03",
+        "DSC-04",
+        "DSC-05",
+        "ITM-01",
+        "MOD-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-09",
+        "PRO-10"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v6-classic-once-039",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-04",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "MOD-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-10"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v6-classic-once-040",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-03",
+        "DSC-04",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "MOD-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-07",
+        "PRO-09",
+        "PRO-10"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v6-classic-once-041",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-04",
+        "DSC-05",
+        "ITM-01",
+        "MOD-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-09",
+        "PRO-10"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v6-classic-once-042",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-03",
+        "DSC-04",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "MOD-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-10"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v6-classic-once-043",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-04",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "MOD-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v6-classic-once-044",
+      "split": "dev",
+      "rules": [
+        "DSC-03",
+        "DSC-04",
+        "DSC-05",
+        "ITM-01",
+        "MOD-01",
+        "PER-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-09",
+        "PRO-10"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v6-classic-once-045",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-04",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "MOD-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-10"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v6-classic-once-046",
+      "split": "dev",
+      "rules": [
+        "DSC-03",
+        "DSC-04",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "MOD-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08",
+        "PRO-09"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v6-classic-once-047",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-03",
+        "DSC-04",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "MOD-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-09",
+        "PRO-10"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v6-classic-once-048",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-03",
+        "DSC-04",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "MOD-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v6-classic-once-049",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-03",
+        "DSC-04",
+        "DSC-05",
+        "ITM-01",
+        "MOD-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08",
+        "PRO-09"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v6-classic-once-050",
+      "split": "dev",
+      "rules": [
+        "DSC-03",
+        "DSC-04",
+        "DSC-05",
+        "ITM-01",
+        "MOD-01",
+        "PER-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v6-classic-once-051",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-03",
+        "DSC-04",
+        "DSC-05",
+        "ITM-01",
+        "MOD-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08",
+        "PRO-09"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v6-classic-once-052",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-04",
+        "DSC-05",
+        "ITM-01",
+        "MOD-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-09",
+        "PRO-10"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v6-classic-once-053",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-03",
+        "DSC-04",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "MOD-01",
+        "PER-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-10"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v6-classic-once-054",
+      "split": "dev",
+      "rules": [
+        "DSC-03",
+        "DSC-04",
+        "DSC-05",
+        "ITM-01",
+        "MOD-01",
+        "PER-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v6-classic-once-055",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-04",
+        "DSC-05",
+        "ITM-01",
+        "MOD-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v6-classic-once-056",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-04",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "MOD-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08",
+        "PRO-09"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v6-classic-once-057",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-03",
+        "DSC-04",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "MOD-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-07",
+        "PRO-10"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v6-classic-once-058",
+      "split": "dev",
+      "rules": [
+        "DSC-03",
+        "DSC-04",
+        "DSC-05",
+        "INT-01",
+        "ITM-01",
+        "MOD-01",
+        "PER-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-09",
+        "PRO-10"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v6-classic-once-059",
+      "split": "dev",
+      "rules": [
+        "DSC-01",
+        "DSC-04",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "MOD-01",
+        "PER-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-09",
+        "PRO-10"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v6-classic-once-060",
+      "split": "dev",
+      "rules": [
+        "DSC-03",
+        "DSC-04",
+        "DSC-05",
+        "DSC-06",
+        "ITM-01",
+        "MOD-01",
+        "PRO-01",
+        "PRO-02",
+        "PRO-03",
+        "PRO-04",
+        "PRO-05",
+        "PRO-08"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v6-invalid-proration-behavior",
+      "split": "dev",
+      "rules": [
+        "ERR-03"
+      ],
+      "pass": false,
+      "crashed": false,
+      "diffs": [
+        {
+          "path": "preview.body.account_country",
+          "actual": "FR"
+        },
+        {
+          "path": "preview.body.account_name",
+          "actual": "environnement de test AcmeCo"
+        },
+        {
+          "path": "preview.body.account_tax_ids",
+          "actual": null
+        },
+        {
+          "path": "preview.body.amount_due",
+          "actual": 5000
+        },
+        {
+          "path": "preview.body.amount_overpaid",
+          "actual": 0
+        },
+        {
+          "path": "preview.body.amount_paid",
+          "actual": 0
+        },
+        {
+          "path": "preview.body.amount_remaining",
+          "actual": 5000
+        },
+        {
+          "path": "preview.body.amount_shipping",
+          "actual": 0
+        },
+        {
+          "path": "preview.body.application",
+          "actual": null
+        },
+        {
+          "path": "preview.body.attempt_count",
+          "actual": 0
+        },
+        {
+          "path": "preview.body.attempted",
+          "actual": false
+        },
+        {
+          "path": "preview.body.auto_advance",
+          "actual": true
+        },
+        {
+          "path": "preview.body.automatic_tax.disabled_reason",
+          "actual": null
+        },
+        {
+          "path": "preview.body.automatic_tax.enabled",
+          "actual": false
+        },
+        {
+          "path": "preview.body.automatic_tax.liability",
+          "actual": null
+        },
+        {
+          "path": "preview.body.automatic_tax.provider",
+          "actual": null
+        },
+        {
+          "path": "preview.body.automatic_tax.status",
+          "actual": null
+        },
+        {
+          "path": "preview.body.automatically_finalizes_at",
+          "actual": null
+        },
+        {
+          "path": "preview.body.billing_reason",
+          "actual": "upcoming"
+        },
+        {
+          "path": "preview.body.collection_method",
+          "actual": "charge_automatically"
+        },
+        {
+          "path": "preview.body.created",
+          "actual": 1793836800
+        },
+        {
+          "path": "preview.body.currency",
+          "actual": "usd"
+        },
+        {
+          "path": "preview.body.custom_fields",
+          "actual": null
+        },
+        {
+          "path": "preview.body.customer",
+          "actual": "cus#1"
+        },
+        {
+          "path": "preview.body.customer_account",
+          "actual": null
+        },
+        {
+          "path": "preview.body.customer_address",
+          "actual": null
+        },
+        {
+          "path": "preview.body.customer_email",
+          "actual": null
+        },
+        {
+          "path": "preview.body.customer_name",
+          "actual": null
+        },
+        {
+          "path": "preview.body.customer_phone",
+          "actual": null
+        },
+        {
+          "path": "preview.body.customer_shipping",
+          "actual": null
+        },
+        {
+          "path": "preview.body.customer_tax_exempt",
+          "actual": "none"
+        },
+        {
+          "path": "preview.body.customer_tax_ids",
+          "actual": []
+        },
+        {
+          "path": "preview.body.default_payment_method",
+          "actual": null
+        },
+        {
+          "path": "preview.body.default_source",
+          "actual": null
+        },
+        {
+          "path": "preview.body.default_tax_rates",
+          "actual": []
+        },
+        {
+          "path": "preview.body.description",
+          "actual": null
+        },
+        {
+          "path": "preview.body.discounts",
+          "actual": []
+        },
+        {
+          "path": "preview.body.due_date",
+          "actual": null
+        },
+        {
+          "path": "preview.body.effective_at",
+          "actual": null
+        },
+        {
+          "path": "preview.body.ending_balance",
+          "actual": 0
+        },
+        {
+          "path": "preview.body.footer",
+          "actual": null
+        },
+        {
+          "path": "preview.body.from_invoice",
+          "actual": null
+        },
+        {
+          "path": "preview.body.hosted_invoice_url",
+          "actual": null
+        },
+        {
+          "path": "preview.body.id",
+          "actual": "upcoming_in#1"
+        },
+        {
+          "path": "preview.body.invoice_pdf",
+          "actual": null
+        },
+        {
+          "path": "preview.body.issuer.type",
+          "actual": "self"
+        },
+        {
+          "path": "preview.body.last_finalization_error",
+          "actual": null
+        },
+        {
+          "path": "preview.body.latest_revision",
+          "actual": null
+        },
+        {
+          "path": "preview.body.lines.data[0].amount",
+          "actual": -1000
+        },
+        {
+          "path": "preview.body.lines.data[0].currency",
+          "actual": "usd"
+        },
+        {
+          "path": "preview.body.lines.data[0].description",
+          "actual": "Unused time on Basic after 05 Oct 2026"
+        },
+        {
+          "path": "preview.body.lines.data[0].discount_amounts",
+          "actual": []
+        },
+        {
+          "path": "preview.body.lines.data[0].discountable",
+          "actual": false
+        },
+        {
+          "path": "preview.body.lines.data[0].discounts",
+          "actual": []
+        },
+        {
+          "path": "preview.body.lines.data[0].id",
+          "actual": "il_tmp#1"
+        },
+        {
+          "path": "preview.body.lines.data[0].invoice",
+          "actual": "upcoming_in#1"
+        },
+        {
+          "path": "preview.body.lines.data[0].livemode",
+          "actual": false
+        },
+        {
+          "path": "preview.body.lines.data[0].metadata",
+          "actual": {}
+        },
+        {
+          "path": "preview.body.lines.data[0].object",
+          "actual": "line_item"
+        },
+        {
+          "path": "preview.body.lines.data[0].parent.invoice_item_details",
+          "actual": null
+        },
+        {
+          "path": "preview.body.lines.data[0].parent.subscription_item_details.invoice_item",
+          "actual": "ii#1"
+        },
+        {
+          "path": "preview.body.lines.data[0].parent.subscription_item_details.proration",
+          "actual": true
+        },
+        {
+          "path": "preview.body.lines.data[0].parent.subscription_item_details.proration_details.credited_items.invoice",
+          "actual": "in#1"
+        },
+        {
+          "path": "preview.body.lines.data[0].parent.subscription_item_details.proration_details.credited_items.invoice_line_items[0]",
+          "actual": "il#1"
+        },
+        {
+          "path": "preview.body.lines.data[0].parent.subscription_item_details.subscription",
+          "actual": "sub#1"
+        },
+        {
+          "path": "preview.body.lines.data[0].parent.subscription_item_details.subscription_item",
+          "actual": "si#1"
+        },
+        {
+          "path": "preview.body.lines.data[0].parent.type",
+          "actual": "subscription_item_details"
+        },
+        {
+          "path": "preview.body.lines.data[0].period.end",
+          "actual": 1793836800
+        },
+        {
+          "path": "preview.body.lines.data[0].period.start",
+          "actual": 1791158400
+        },
+        {
+          "path": "preview.body.lines.data[0].pretax_credit_amounts",
+          "actual": []
+        },
+        {
+          "path": "preview.body.lines.data[0].pricing.price_details.price",
+          "actual": "price#1"
+        },
+        {
+          "path": "preview.body.lines.data[0].pricing.price_details.product",
+          "actual": "prod#1"
+        },
+        {
+          "path": "preview.body.lines.data[0].pricing.type",
+          "actual": "price_details"
+        },
+        {
+          "path": "preview.body.lines.data[0].pricing.unit_amount_decimal",
+          "actual": null
+        },
+        {
+          "path": "preview.body.lines.data[0].quantity",
+          "actual": 1
+        },
+        {
+          "path": "preview.body.lines.data[0].quantity_decimal",
+          "actual": "1"
+        },
+        {
+          "path": "preview.body.lines.data[0].subtotal",
+          "actual": -1000
+        },
+        {
+          "path": "preview.body.lines.data[0].taxes",
+          "actual": []
+        },
+        {
+          "path": "preview.body.lines.data[1].amount",
+          "actual": 3000
+        },
+        {
+          "path": "preview.body.lines.data[1].currency",
+          "actual": "usd"
+        },
+        {
+          "path": "preview.body.lines.data[1].description",
+          "actual": "Remaining time on Pro after 05 Oct 2026"
+        },
+        {
+          "path": "preview.body.lines.data[1].discount_amounts",
+          "actual": []
+        },
+        {
+          "path": "preview.body.lines.data[1].discountable",
+          "actual": false
+        },
+        {
+          "path": "preview.body.lines.data[1].discounts",
+          "actual": []
+        },
+        {
+          "path": "preview.body.lines.data[1].id",
+          "actual": "il_tmp#2"
+        },
+        {
+          "path": "preview.body.lines.data[1].invoice",
+          "actual": "upcoming_in#1"
+        },
+        {
+          "path": "preview.body.lines.data[1].livemode",
+          "actual": false
+        },
+        {
+          "path": "preview.body.lines.data[1].metadata",
+          "actual": {}
+        },
+        {
+          "path": "preview.body.lines.data[1].object",
+          "actual": "line_item"
+        },
+        {
+          "path": "preview.body.lines.data[1].parent.invoice_item_details",
+          "actual": null
+        },
+        {
+          "path": "preview.body.lines.data[1].parent.subscription_item_details.invoice_item",
+          "actual": "ii#2"
+        },
+        {
+          "path": "preview.body.lines.data[1].parent.subscription_item_details.proration",
+          "actual": true
+        },
+        {
+          "path": "preview.body.lines.data[1].parent.subscription_item_details.proration_details.credited_items",
+          "actual": null
+        },
+        {
+          "path": "preview.body.lines.data[1].parent.subscription_item_details.subscription",
+          "actual": "sub#1"
+        },
+        {
+          "path": "preview.body.lines.data[1].parent.subscription_item_details.subscription_item",
+          "actual": "si#1"
+        },
+        {
+          "path": "preview.body.lines.data[1].parent.type",
+          "actual": "subscription_item_details"
+        },
+        {
+          "path": "preview.body.lines.data[1].period.end",
+          "actual": 1793836800
+        },
+        {
+          "path": "preview.body.lines.data[1].period.start",
+          "actual": 1791158400
+        },
+        {
+          "path": "preview.body.lines.data[1].pretax_credit_amounts",
+          "actual": []
+        },
+        {
+          "path": "preview.body.lines.data[1].pricing.price_details.price",
+          "actual": "price#2"
+        },
+        {
+          "path": "preview.body.lines.data[1].pricing.price_details.product",
+          "actual": "prod#2"
+        },
+        {
+          "path": "preview.body.lines.data[1].pricing.type",
+          "actual": "price_details"
+        },
+        {
+          "path": "preview.body.lines.data[1].pricing.unit_amount_decimal",
+          "actual": null
+        },
+        {
+          "path": "preview.body.lines.data[1].quantity",
+          "actual": 1
+        },
+        {
+          "path": "preview.body.lines.data[1].quantity_decimal",
+          "actual": "1"
+        },
+        {
+          "path": "preview.body.lines.data[1].subtotal",
+          "actual": 3000
+        },
+        {
+          "path": "preview.body.lines.data[1].taxes",
+          "actual": []
+        },
+        {
+          "path": "preview.body.lines.data[2].amount",
+          "actual": 3000
+        },
+        {
+          "path": "preview.body.lines.data[2].currency",
+          "actual": "usd"
+        },
+        {
+          "path": "preview.body.lines.data[2].description",
+          "actual": "1 × Pro (at $30.00 / month)"
+        },
+        {
+          "path": "preview.body.lines.data[2].discount_amounts",
+          "actual": []
+        },
+        {
+          "path": "preview.body.lines.data[2].discountable",
+          "actual": true
+        },
+        {
+          "path": "preview.body.lines.data[2].discounts",
+          "actual": []
+        },
+        {
+          "path": "preview.body.lines.data[2].id",
+          "actual": "il_tmp#3"
+        },
+        {
+          "path": "preview.body.lines.data[2].invoice",
+          "actual": "upcoming_in#1"
+        },
+        {
+          "path": "preview.body.lines.data[2].livemode",
+          "actual": false
+        },
+        {
+          "path": "preview.body.lines.data[2].metadata",
+          "actual": {}
+        },
+        {
+          "path": "preview.body.lines.data[2].object",
+          "actual": "line_item"
+        },
+        {
+          "path": "preview.body.lines.data[2].parent.invoice_item_details",
+          "actual": null
+        },
+        {
+          "path": "preview.body.lines.data[2].parent.subscription_item_details.invoice_item",
+          "actual": null
+        },
+        {
+          "path": "preview.body.lines.data[2].parent.subscription_item_details.proration",
+          "actual": false
+        },
+        {
+          "path": "preview.body.lines.data[2].parent.subscription_item_details.proration_details.credited_items",
+          "actual": null
+        },
+        {
+          "path": "preview.body.lines.data[2].parent.subscription_item_details.subscription",
+          "actual": "sub#1"
+        },
+        {
+          "path": "preview.body.lines.data[2].parent.subscription_item_details.subscription_item",
+          "actual": "si#1"
+        },
+        {
+          "path": "preview.body.lines.data[2].parent.type",
+          "actual": "subscription_item_details"
+        },
+        {
+          "path": "preview.body.lines.data[2].period.end",
+          "actual": 1796428800
+        },
+        {
+          "path": "preview.body.lines.data[2].period.start",
+          "actual": 1793836800
+        },
+        {
+          "path": "preview.body.lines.data[2].pretax_credit_amounts",
+          "actual": []
+        },
+        {
+          "path": "preview.body.lines.data[2].pricing.price_details.price",
+          "actual": "price#2"
+        },
+        {
+          "path": "preview.body.lines.data[2].pricing.price_details.product",
+          "actual": "prod#2"
+        },
+        {
+          "path": "preview.body.lines.data[2].pricing.type",
+          "actual": "price_details"
+        },
+        {
+          "path": "preview.body.lines.data[2].pricing.unit_amount_decimal",
+          "actual": "3000"
+        },
+        {
+          "path": "preview.body.lines.data[2].quantity",
+          "actual": 1
+        },
+        {
+          "path": "preview.body.lines.data[2].quantity_decimal",
+          "actual": "1"
+        },
+        {
+          "path": "preview.body.lines.data[2].subtotal",
+          "actual": 3000
+        },
+        {
+          "path": "preview.body.lines.data[2].taxes",
+          "actual": []
+        },
+        {
+          "path": "preview.body.lines.has_more",
+          "actual": false
+        },
+        {
+          "path": "preview.body.lines.object",
+          "actual": "list"
+        },
+        {
+          "path": "preview.body.lines.total_count",
+          "actual": 3
+        },
+        {
+          "path": "preview.body.lines.url",
+          "actual": "/v1/invoices/upcoming_in#1/lines"
+        },
+        {
+          "path": "preview.body.livemode",
+          "actual": false
+        },
+        {
+          "path": "preview.body.metadata",
+          "actual": {}
+        },
+        {
+          "path": "preview.body.next_payment_attempt",
+          "actual": 1793840400
+        },
+        {
+          "path": "preview.body.number",
+          "actual": null
+        },
+        {
+          "path": "preview.body.object",
+          "actual": "invoice"
+        },
+        {
+          "path": "preview.body.on_behalf_of",
+          "actual": null
+        },
+        {
+          "path": "preview.body.parent.quote_details",
+          "actual": null
+        },
+        {
+          "path": "preview.body.parent.subscription_details.metadata",
+          "actual": {}
+        },
+        {
+          "path": "preview.body.parent.subscription_details.subscription",
+          "actual": "sub#1"
+        },
+        {
+          "path": "preview.body.parent.type",
+          "actual": "subscription_details"
+        },
+        {
+          "path": "preview.body.payment_settings.default_mandate",
+          "actual": null
+        },
+        {
+          "path": "preview.body.payment_settings.payment_method_options",
+          "actual": null
+        },
+        {
+          "path": "preview.body.payment_settings.payment_method_types",
+          "actual": null
+        },
+        {
+          "path": "preview.body.period_end",
+          "actual": 1793836800
+        },
+        {
+          "path": "preview.body.period_start",
+          "actual": 1791158400
+        },
+        {
+          "path": "preview.body.post_payment_credit_notes_amount",
+          "actual": 0
+        },
+        {
+          "path": "preview.body.pre_payment_credit_notes_amount",
+          "actual": 0
+        },
+        {
+          "path": "preview.body.receipt_number",
+          "actual": null
+        },
+        {
+          "path": "preview.body.rendering",
+          "actual": null
+        },
+        {
+          "path": "preview.body.shipping_cost",
+          "actual": null
+        },
+        {
+          "path": "preview.body.shipping_details",
+          "actual": null
+        },
+        {
+          "path": "preview.body.starting_balance",
+          "actual": 0
+        },
+        {
+          "path": "preview.body.statement_descriptor",
+          "actual": null
+        },
+        {
+          "path": "preview.body.status",
+          "actual": "draft"
+        },
+        {
+          "path": "preview.body.status_transitions.finalized_at",
+          "actual": null
+        },
+        {
+          "path": "preview.body.status_transitions.marked_uncollectible_at",
+          "actual": null
+        },
+        {
+          "path": "preview.body.status_transitions.paid_at",
+          "actual": null
+        },
+        {
+          "path": "preview.body.status_transitions.voided_at",
+          "actual": null
+        },
+        {
+          "path": "preview.body.subtotal",
+          "actual": 5000
+        },
+        {
+          "path": "preview.body.subtotal_excluding_tax",
+          "actual": 5000
+        },
+        {
+          "path": "preview.body.test_clock",
+          "actual": "clock#1"
+        },
+        {
+          "path": "preview.body.total",
+          "actual": 5000
+        },
+        {
+          "path": "preview.body.total_discount_amounts",
+          "actual": []
+        },
+        {
+          "path": "preview.body.total_excluding_tax",
+          "actual": 5000
+        },
+        {
+          "path": "preview.body.total_pretax_credit_amounts",
+          "actual": []
+        },
+        {
+          "path": "preview.body.total_taxes",
+          "actual": []
+        },
+        {
+          "path": "preview.body.webhooks_delivered_at",
+          "actual": null
+        },
+        {
+          "path": "preview.error.code",
+          "expected": null
+        },
+        {
+          "path": "preview.error.message",
+          "expected": "Invalid subscription_details[proration_behavior]: must be one of create_prorations, none, or always_invoice"
+        },
+        {
+          "path": "preview.error.param",
+          "expected": "subscription_details[proration_behavior]"
+        },
+        {
+          "path": "preview.error.type",
+          "expected": "StripeInvalidRequestError"
+        },
+        {
+          "path": "preview.ok",
+          "expected": false,
+          "actual": true
+        },
+        {
+          "path": "update.body.application",
+          "actual": null
+        },
+        {
+          "path": "update.body.application_fee_percent",
+          "actual": null
+        },
+        {
+          "path": "update.body.automatic_tax.disabled_reason",
+          "actual": null
+        },
+        {
+          "path": "update.body.automatic_tax.enabled",
+          "actual": false
+        },
+        {
+          "path": "update.body.automatic_tax.liability",
+          "actual": null
+        },
+        {
+          "path": "update.body.billing_cycle_anchor",
+          "actual": 1791158400
+        },
+        {
+          "path": "update.body.billing_cycle_anchor_config",
+          "actual": null
+        },
+        {
+          "path": "update.body.billing_mode.flexible.proration_discounts",
+          "actual": "included"
+        },
+        {
+          "path": "update.body.billing_mode.type",
+          "actual": "flexible"
+        },
+        {
+          "path": "update.body.billing_mode.updated_at",
+          "actual": 1791158400
+        },
+        {
+          "path": "update.body.billing_schedules",
+          "actual": []
+        },
+        {
+          "path": "update.body.billing_thresholds",
+          "actual": null
+        },
+        {
+          "path": "update.body.cancel_at",
+          "actual": null
+        },
+        {
+          "path": "update.body.cancel_at_period_end",
+          "actual": false
+        },
+        {
+          "path": "update.body.canceled_at",
+          "actual": null
+        },
+        {
+          "path": "update.body.cancellation_details.comment",
+          "actual": null
+        },
+        {
+          "path": "update.body.cancellation_details.feedback",
+          "actual": null
+        },
+        {
+          "path": "update.body.cancellation_details.feedback_option",
+          "actual": null
+        },
+        {
+          "path": "update.body.cancellation_details.reason",
+          "actual": null
+        },
+        {
+          "path": "update.body.collection_method",
+          "actual": "charge_automatically"
+        },
+        {
+          "path": "update.body.created",
+          "actual": 1791158400
+        },
+        {
+          "path": "update.body.currency",
+          "actual": "usd"
+        },
+        {
+          "path": "update.body.customer",
+          "actual": "cus#1"
+        },
+        {
+          "path": "update.body.customer_account",
+          "actual": null
+        },
+        {
+          "path": "update.body.days_until_due",
+          "actual": null
+        },
+        {
+          "path": "update.body.default_payment_method",
+          "actual": null
+        },
+        {
+          "path": "update.body.default_source",
+          "actual": null
+        },
+        {
+          "path": "update.body.default_tax_rates",
+          "actual": []
+        },
+        {
+          "path": "update.body.description",
+          "actual": null
+        },
+        {
+          "path": "update.body.discounts",
+          "actual": []
+        },
+        {
+          "path": "update.body.ended_at",
+          "actual": null
+        },
+        {
+          "path": "update.body.id",
+          "actual": "sub#1"
+        },
+        {
+          "path": "update.body.invoice_settings.account_tax_ids",
+          "actual": null
+        },
+        {
+          "path": "update.body.invoice_settings.custom_fields",
+          "actual": null
+        },
+        {
+          "path": "update.body.invoice_settings.description",
+          "actual": null
+        },
+        {
+          "path": "update.body.invoice_settings.footer",
+          "actual": null
+        },
+        {
+          "path": "update.body.invoice_settings.issuer.type",
+          "actual": "self"
+        },
+        {
+          "path": "update.body.items.data[0].billing_thresholds",
+          "actual": null
+        },
+        {
+          "path": "update.body.items.data[0].created",
+          "actual": 1791158400
+        },
+        {
+          "path": "update.body.items.data[0].current_period_end",
+          "actual": 1793836800
+        },
+        {
+          "path": "update.body.items.data[0].current_period_start",
+          "actual": 1791158400
+        },
+        {
+          "path": "update.body.items.data[0].current_trial",
+          "actual": null
+        },
+        {
+          "path": "update.body.items.data[0].discounts",
+          "actual": []
+        },
+        {
+          "path": "update.body.items.data[0].id",
+          "actual": "si#1"
+        },
+        {
+          "path": "update.body.items.data[0].metadata",
+          "actual": {}
+        },
+        {
+          "path": "update.body.items.data[0].object",
+          "actual": "subscription_item"
+        },
+        {
+          "path": "update.body.items.data[0].plan.active",
+          "actual": true
+        },
+        {
+          "path": "update.body.items.data[0].plan.amount",
+          "actual": 3000
+        },
+        {
+          "path": "update.body.items.data[0].plan.amount_decimal",
+          "actual": "3000"
+        },
+        {
+          "path": "update.body.items.data[0].plan.billing_scheme",
+          "actual": "per_unit"
+        },
+        {
+          "path": "update.body.items.data[0].plan.created",
+          "actual": 1791158400
+        },
+        {
+          "path": "update.body.items.data[0].plan.currency",
+          "actual": "usd"
+        },
+        {
+          "path": "update.body.items.data[0].plan.id",
+          "actual": "price#2"
+        },
+        {
+          "path": "update.body.items.data[0].plan.interval",
+          "actual": "month"
+        },
+        {
+          "path": "update.body.items.data[0].plan.interval_count",
+          "actual": 1
+        },
+        {
+          "path": "update.body.items.data[0].plan.livemode",
+          "actual": false
+        },
+        {
+          "path": "update.body.items.data[0].plan.metadata",
+          "actual": {}
+        },
+        {
+          "path": "update.body.items.data[0].plan.meter",
+          "actual": null
+        },
+        {
+          "path": "update.body.items.data[0].plan.nickname",
+          "actual": null
+        },
+        {
+          "path": "update.body.items.data[0].plan.object",
+          "actual": "plan"
+        },
+        {
+          "path": "update.body.items.data[0].plan.product",
+          "actual": "prod#2"
+        },
+        {
+          "path": "update.body.items.data[0].plan.tiers_mode",
+          "actual": null
+        },
+        {
+          "path": "update.body.items.data[0].plan.transform_usage",
+          "actual": null
+        },
+        {
+          "path": "update.body.items.data[0].plan.trial_period_days",
+          "actual": null
+        },
+        {
+          "path": "update.body.items.data[0].plan.usage_type",
+          "actual": "licensed"
+        },
+        {
+          "path": "update.body.items.data[0].price.active",
+          "actual": true
+        },
+        {
+          "path": "update.body.items.data[0].price.billing_scheme",
+          "actual": "per_unit"
+        },
+        {
+          "path": "update.body.items.data[0].price.created",
+          "actual": 1791158400
+        },
+        {
+          "path": "update.body.items.data[0].price.currency",
+          "actual": "usd"
+        },
+        {
+          "path": "update.body.items.data[0].price.custom_unit_amount",
+          "actual": null
+        },
+        {
+          "path": "update.body.items.data[0].price.id",
+          "actual": "price#2"
+        },
+        {
+          "path": "update.body.items.data[0].price.livemode",
+          "actual": false
+        },
+        {
+          "path": "update.body.items.data[0].price.lookup_key",
+          "actual": null
+        },
+        {
+          "path": "update.body.items.data[0].price.metadata",
+          "actual": {}
+        },
+        {
+          "path": "update.body.items.data[0].price.nickname",
+          "actual": null
+        },
+        {
+          "path": "update.body.items.data[0].price.object",
+          "actual": "price"
+        },
+        {
+          "path": "update.body.items.data[0].price.product",
+          "actual": "prod#2"
+        },
+        {
+          "path": "update.body.items.data[0].price.recurring.interval",
+          "actual": "month"
+        },
+        {
+          "path": "update.body.items.data[0].price.recurring.interval_count",
+          "actual": 1
+        },
+        {
+          "path": "update.body.items.data[0].price.recurring.meter",
+          "actual": null
+        },
+        {
+          "path": "update.body.items.data[0].price.recurring.trial_period_days",
+          "actual": null
+        },
+        {
+          "path": "update.body.items.data[0].price.recurring.usage_type",
+          "actual": "licensed"
+        },
+        {
+          "path": "update.body.items.data[0].price.tax_behavior",
+          "actual": "unspecified"
+        },
+        {
+          "path": "update.body.items.data[0].price.tiers_mode",
+          "actual": null
+        },
+        {
+          "path": "update.body.items.data[0].price.transform_quantity",
+          "actual": null
+        },
+        {
+          "path": "update.body.items.data[0].price.type",
+          "actual": "recurring"
+        },
+        {
+          "path": "update.body.items.data[0].price.unit_amount",
+          "actual": 3000
+        },
+        {
+          "path": "update.body.items.data[0].price.unit_amount_decimal",
+          "actual": "3000"
+        },
+        {
+          "path": "update.body.items.data[0].quantity",
+          "actual": 1
+        },
+        {
+          "path": "update.body.items.data[0].subscription",
+          "actual": "sub#1"
+        },
+        {
+          "path": "update.body.items.data[0].tax_rates",
+          "actual": []
+        },
+        {
+          "path": "update.body.items.has_more",
+          "actual": false
+        },
+        {
+          "path": "update.body.items.object",
+          "actual": "list"
+        },
+        {
+          "path": "update.body.items.total_count",
+          "actual": 1
+        },
+        {
+          "path": "update.body.items.url",
+          "actual": "/v1/subscription_items?subscription=sub#1"
+        },
+        {
+          "path": "update.body.latest_invoice",
+          "actual": "in#1"
+        },
+        {
+          "path": "update.body.livemode",
+          "actual": false
+        },
+        {
+          "path": "update.body.managed_payments.enabled",
+          "actual": false
+        },
+        {
+          "path": "update.body.metadata",
+          "actual": {}
+        },
+        {
+          "path": "update.body.next_pending_invoice_item_invoice",
+          "actual": null
+        },
+        {
+          "path": "update.body.object",
+          "actual": "subscription"
+        },
+        {
+          "path": "update.body.on_behalf_of",
+          "actual": null
+        },
+        {
+          "path": "update.body.pause_collection",
+          "actual": null
+        },
+        {
+          "path": "update.body.payment_settings.payment_method_options",
+          "actual": null
+        },
+        {
+          "path": "update.body.payment_settings.payment_method_types",
+          "actual": null
+        },
+        {
+          "path": "update.body.payment_settings.save_default_payment_method",
+          "actual": "off"
+        },
+        {
+          "path": "update.body.pending_invoice_item_interval",
+          "actual": null
+        },
+        {
+          "path": "update.body.pending_setup_intent",
+          "actual": null
+        },
+        {
+          "path": "update.body.pending_update",
+          "actual": null
+        },
+        {
+          "path": "update.body.plan.active",
+          "actual": true
+        },
+        {
+          "path": "update.body.plan.amount",
+          "actual": 3000
+        },
+        {
+          "path": "update.body.plan.amount_decimal",
+          "actual": "3000"
+        },
+        {
+          "path": "update.body.plan.billing_scheme",
+          "actual": "per_unit"
+        },
+        {
+          "path": "update.body.plan.created",
+          "actual": 1791158400
+        },
+        {
+          "path": "update.body.plan.currency",
+          "actual": "usd"
+        },
+        {
+          "path": "update.body.plan.id",
+          "actual": "price#2"
+        },
+        {
+          "path": "update.body.plan.interval",
+          "actual": "month"
+        },
+        {
+          "path": "update.body.plan.interval_count",
+          "actual": 1
+        },
+        {
+          "path": "update.body.plan.livemode",
+          "actual": false
+        },
+        {
+          "path": "update.body.plan.metadata",
+          "actual": {}
+        },
+        {
+          "path": "update.body.plan.meter",
+          "actual": null
+        },
+        {
+          "path": "update.body.plan.nickname",
+          "actual": null
+        },
+        {
+          "path": "update.body.plan.object",
+          "actual": "plan"
+        },
+        {
+          "path": "update.body.plan.product",
+          "actual": "prod#2"
+        },
+        {
+          "path": "update.body.plan.tiers_mode",
+          "actual": null
+        },
+        {
+          "path": "update.body.plan.transform_usage",
+          "actual": null
+        },
+        {
+          "path": "update.body.plan.trial_period_days",
+          "actual": null
+        },
+        {
+          "path": "update.body.plan.usage_type",
+          "actual": "licensed"
+        },
+        {
+          "path": "update.body.quantity",
+          "actual": 1
+        },
+        {
+          "path": "update.body.schedule",
+          "actual": null
+        },
+        {
+          "path": "update.body.start_date",
+          "actual": 1791158400
+        },
+        {
+          "path": "update.body.status",
+          "actual": "active"
+        },
+        {
+          "path": "update.body.test_clock",
+          "actual": "clock#1"
+        },
+        {
+          "path": "update.body.transfer_data",
+          "actual": null
+        },
+        {
+          "path": "update.body.trial_end",
+          "actual": null
+        },
+        {
+          "path": "update.body.trial_settings.end_behavior.billing_cycle_anchor",
+          "actual": "now"
+        },
+        {
+          "path": "update.body.trial_settings.end_behavior.missing_payment_method",
+          "actual": "create_invoice"
+        },
+        {
+          "path": "update.body.trial_start",
+          "actual": null
+        },
+        {
+          "path": "update.error.code",
+          "expected": null
+        },
+        {
+          "path": "update.error.message",
+          "expected": "Invalid proration_behavior: must be one of create_prorations, none, or always_invoice"
+        },
+        {
+          "path": "update.error.param",
+          "expected": "proration_behavior"
+        },
+        {
+          "path": "update.error.type",
+          "expected": "StripeInvalidRequestError"
+        },
+        {
+          "path": "update.ok",
+          "expected": false,
+          "actual": true
+        }
+      ],
+      "reported": []
+    },
+    {
+      "id": "dev-v6-invoice-routing",
+      "split": "dev",
+      "rules": [
+        "INV-02"
+      ],
+      "pass": false,
+      "crashed": false,
+      "diffs": [
+        {
+          "path": "finalize.body.account_country",
+          "expected": "FR"
+        },
+        {
+          "path": "finalize.body.account_name",
+          "expected": "environnement de test AcmeCo"
+        },
+        {
+          "path": "finalize.body.account_tax_ids",
+          "expected": null
+        },
+        {
+          "path": "finalize.body.amount_due",
+          "expected": 400
+        },
+        {
+          "path": "finalize.body.amount_overpaid",
+          "expected": 0
+        },
+        {
+          "path": "finalize.body.amount_paid",
+          "expected": 0
+        },
+        {
+          "path": "finalize.body.amount_remaining",
+          "expected": 400
+        },
+        {
+          "path": "finalize.body.amount_shipping",
+          "expected": 0
+        },
+        {
+          "path": "finalize.body.application",
+          "expected": null
+        },
+        {
+          "path": "finalize.body.attempt_count",
+          "expected": 0
+        },
+        {
+          "path": "finalize.body.attempted",
+          "expected": false
+        },
+        {
+          "path": "finalize.body.auto_advance",
+          "expected": false
+        },
+        {
+          "path": "finalize.body.automatic_tax.disabled_reason",
+          "expected": null
+        },
+        {
+          "path": "finalize.body.automatic_tax.enabled",
+          "expected": false
+        },
+        {
+          "path": "finalize.body.automatic_tax.liability",
+          "expected": null
+        },
+        {
+          "path": "finalize.body.automatic_tax.provider",
+          "expected": null
+        },
+        {
+          "path": "finalize.body.automatic_tax.status",
+          "expected": null
+        },
+        {
+          "path": "finalize.body.automatically_finalizes_at",
+          "expected": null
+        },
+        {
+          "path": "finalize.body.billing_reason",
+          "expected": "manual"
+        },
+        {
+          "path": "finalize.body.collection_method",
+          "expected": "charge_automatically"
+        },
+        {
+          "path": "finalize.body.created",
+          "expected": 1791158400
+        },
+        {
+          "path": "finalize.body.currency",
+          "expected": "usd"
+        },
+        {
+          "path": "finalize.body.custom_fields",
+          "expected": null
+        },
+        {
+          "path": "finalize.body.customer",
+          "expected": "cus#1"
+        },
+        {
+          "path": "finalize.body.customer_account",
+          "expected": null
+        },
+        {
+          "path": "finalize.body.customer_address",
+          "expected": null
+        },
+        {
+          "path": "finalize.body.customer_email",
+          "expected": null
+        },
+        {
+          "path": "finalize.body.customer_name",
+          "expected": null
+        },
+        {
+          "path": "finalize.body.customer_phone",
+          "expected": null
+        },
+        {
+          "path": "finalize.body.customer_shipping",
+          "expected": null
+        },
+        {
+          "path": "finalize.body.customer_tax_exempt",
+          "expected": "none"
+        },
+        {
+          "path": "finalize.body.customer_tax_ids",
+          "expected": []
+        },
+        {
+          "path": "finalize.body.default_payment_method",
+          "expected": null
+        },
+        {
+          "path": "finalize.body.default_source",
+          "expected": null
+        },
+        {
+          "path": "finalize.body.default_tax_rates",
+          "expected": []
+        },
+        {
+          "path": "finalize.body.description",
+          "expected": "Manual"
+        },
+        {
+          "path": "finalize.body.discounts",
+          "expected": []
+        },
+        {
+          "path": "finalize.body.due_date",
+          "expected": null
+        },
+        {
+          "path": "finalize.body.effective_at",
+          "expected": 1791158400
+        },
+        {
+          "path": "finalize.body.ending_balance",
+          "expected": 0
+        },
+        {
+          "path": "finalize.body.footer",
+          "expected": null
+        },
+        {
+          "path": "finalize.body.from_invoice",
+          "expected": null
+        },
+        {
+          "path": "finalize.body.hosted_invoice_url",
+          "expected": "https://invoice.stripe.com/i/acct#1/test#1?s=ap"
+        },
+        {
+          "path": "finalize.body.id",
+          "expected": "in#1"
+        },
+        {
+          "path": "finalize.body.invoice_pdf",
+          "expected": "https://pay.stripe.com/invoice/acct#1/test#1/pdf?s=ap"
+        },
+        {
+          "path": "finalize.body.issuer.type",
+          "expected": "self"
+        },
+        {
+          "path": "finalize.body.last_finalization_error",
+          "expected": null
+        },
+        {
+          "path": "finalize.body.latest_revision",
+          "expected": null
+        },
+        {
+          "path": "finalize.body.lines.data[0].amount",
+          "expected": 400
+        },
+        {
+          "path": "finalize.body.lines.data[0].currency",
+          "expected": "usd"
+        },
+        {
+          "path": "finalize.body.lines.data[0].description",
+          "expected": null
+        },
+        {
+          "path": "finalize.body.lines.data[0].discount_amounts",
+          "expected": []
+        },
+        {
+          "path": "finalize.body.lines.data[0].discountable",
+          "expected": true
+        },
+        {
+          "path": "finalize.body.lines.data[0].discounts",
+          "expected": []
+        },
+        {
+          "path": "finalize.body.lines.data[0].id",
+          "expected": "il#1"
+        },
+        {
+          "path": "finalize.body.lines.data[0].invoice",
+          "expected": "in#1"
+        },
+        {
+          "path": "finalize.body.lines.data[0].livemode",
+          "expected": false
+        },
+        {
+          "path": "finalize.body.lines.data[0].metadata",
+          "expected": {}
+        },
+        {
+          "path": "finalize.body.lines.data[0].object",
+          "expected": "line_item"
+        },
+        {
+          "path": "finalize.body.lines.data[0].parent.invoice_item_details.invoice_item",
+          "expected": "ii#1"
+        },
+        {
+          "path": "finalize.body.lines.data[0].parent.invoice_item_details.proration",
+          "expected": false
+        },
+        {
+          "path": "finalize.body.lines.data[0].parent.invoice_item_details.proration_details.credited_items",
+          "expected": null
+        },
+        {
+          "path": "finalize.body.lines.data[0].parent.invoice_item_details.subscription",
+          "expected": null
+        },
+        {
+          "path": "finalize.body.lines.data[0].parent.subscription_item_details",
+          "expected": null
+        },
+        {
+          "path": "finalize.body.lines.data[0].parent.type",
+          "expected": "invoice_item_details"
+        },
+        {
+          "path": "finalize.body.lines.data[0].period.end",
+          "expected": 1791158400
+        },
+        {
+          "path": "finalize.body.lines.data[0].period.start",
+          "expected": 1791158400
+        },
+        {
+          "path": "finalize.body.lines.data[0].pretax_credit_amounts",
+          "expected": []
+        },
+        {
+          "path": "finalize.body.lines.data[0].pricing.price_details.price",
+          "expected": "price#1"
+        },
+        {
+          "path": "finalize.body.lines.data[0].pricing.price_details.product",
+          "expected": "prod#1"
+        },
+        {
+          "path": "finalize.body.lines.data[0].pricing.type",
+          "expected": "price_details"
+        },
+        {
+          "path": "finalize.body.lines.data[0].pricing.unit_amount_decimal",
+          "expected": "400"
+        },
+        {
+          "path": "finalize.body.lines.data[0].quantity",
+          "expected": 1
+        },
+        {
+          "path": "finalize.body.lines.data[0].quantity_decimal",
+          "expected": "1"
+        },
+        {
+          "path": "finalize.body.lines.data[0].subtotal",
+          "expected": 400
+        },
+        {
+          "path": "finalize.body.lines.data[0].taxes",
+          "expected": []
+        },
+        {
+          "path": "finalize.body.lines.has_more",
+          "expected": false
+        },
+        {
+          "path": "finalize.body.lines.object",
+          "expected": "list"
+        },
+        {
+          "path": "finalize.body.lines.total_count",
+          "expected": 1
+        },
+        {
+          "path": "finalize.body.lines.url",
+          "expected": "/v1/invoices/in#1/lines"
+        },
+        {
+          "path": "finalize.body.livemode",
+          "expected": false
+        },
+        {
+          "path": "finalize.body.metadata",
+          "expected": {}
+        },
+        {
+          "path": "finalize.body.next_payment_attempt",
+          "expected": null
+        },
+        {
+          "path": "finalize.body.object",
+          "expected": "invoice"
+        },
+        {
+          "path": "finalize.body.on_behalf_of",
+          "expected": null
+        },
+        {
+          "path": "finalize.body.parent",
+          "expected": null
+        },
+        {
+          "path": "finalize.body.payment_settings.default_mandate",
+          "expected": null
+        },
+        {
+          "path": "finalize.body.payment_settings.payment_method_options",
+          "expected": null
+        },
+        {
+          "path": "finalize.body.payment_settings.payment_method_types",
+          "expected": null
+        },
+        {
+          "path": "finalize.body.period_end",
+          "expected": 1793836800
+        },
+        {
+          "path": "finalize.body.period_start",
+          "expected": 1791158400
+        },
+        {
+          "path": "finalize.body.post_payment_credit_notes_amount",
+          "expected": 0
+        },
+        {
+          "path": "finalize.body.pre_payment_credit_notes_amount",
+          "expected": 0
+        },
+        {
+          "path": "finalize.body.receipt_number",
+          "expected": null
+        },
+        {
+          "path": "finalize.body.rendering.amount_tax_display",
+          "expected": null
+        },
+        {
+          "path": "finalize.body.rendering.pdf.page_size",
+          "expected": "letter"
+        },
+        {
+          "path": "finalize.body.rendering.template",
+          "expected": null
+        },
+        {
+          "path": "finalize.body.rendering.template_version",
+          "expected": null
+        },
+        {
+          "path": "finalize.body.shipping_cost",
+          "expected": null
+        },
+        {
+          "path": "finalize.body.shipping_details",
+          "expected": null
+        },
+        {
+          "path": "finalize.body.starting_balance",
+          "expected": 0
+        },
+        {
+          "path": "finalize.body.statement_descriptor",
+          "expected": null
+        },
+        {
+          "path": "finalize.body.status",
+          "expected": "open"
+        },
+        {
+          "path": "finalize.body.status_transitions.finalized_at",
+          "expected": 1791158400
+        },
+        {
+          "path": "finalize.body.status_transitions.marked_uncollectible_at",
+          "expected": null
+        },
+        {
+          "path": "finalize.body.status_transitions.paid_at",
+          "expected": null
+        },
+        {
+          "path": "finalize.body.status_transitions.voided_at",
+          "expected": null
+        },
+        {
+          "path": "finalize.body.subtotal",
+          "expected": 400
+        },
+        {
+          "path": "finalize.body.subtotal_excluding_tax",
+          "expected": 400
+        },
+        {
+          "path": "finalize.body.test_clock",
+          "expected": "clock#1"
+        },
+        {
+          "path": "finalize.body.total",
+          "expected": 400
+        },
+        {
+          "path": "finalize.body.total_discount_amounts",
+          "expected": []
+        },
+        {
+          "path": "finalize.body.total_excluding_tax",
+          "expected": 400
+        },
+        {
+          "path": "finalize.body.total_pretax_credit_amounts",
+          "expected": []
+        },
+        {
+          "path": "finalize.body.total_taxes",
+          "expected": []
+        },
+        {
+          "path": "finalize.body.webhooks_delivered_at",
+          "expected": 1791158400
+        },
+        {
+          "path": "finalize.error.code",
+          "actual": null
+        },
+        {
+          "path": "finalize.error.message",
+          "actual": "Unrecognized request URL (POST: /v1/invoices/in#1/finalize)."
+        },
+        {
+          "path": "finalize.error.param",
+          "actual": null
+        },
+        {
+          "path": "finalize.error.type",
+          "actual": "StripeInvalidRequestError"
+        },
+        {
+          "path": "finalize.ok",
+          "expected": true,
+          "actual": false
+        },
+        {
+          "path": "missing.error.param",
+          "expected": "invoice",
+          "actual": "id"
+        },
+        {
+          "path": "read.body.description",
+          "expected": "Manual",
+          "actual": null
+        },
+        {
+          "path": "update.body.account_country",
+          "expected": "FR"
+        },
+        {
+          "path": "update.body.account_name",
+          "expected": "environnement de test AcmeCo"
+        },
+        {
+          "path": "update.body.account_tax_ids",
+          "expected": null
+        },
+        {
+          "path": "update.body.amount_due",
+          "expected": 400
+        },
+        {
+          "path": "update.body.amount_overpaid",
+          "expected": 0
+        },
+        {
+          "path": "update.body.amount_paid",
+          "expected": 0
+        },
+        {
+          "path": "update.body.amount_remaining",
+          "expected": 400
+        },
+        {
+          "path": "update.body.amount_shipping",
+          "expected": 0
+        },
+        {
+          "path": "update.body.application",
+          "expected": null
+        },
+        {
+          "path": "update.body.attempt_count",
+          "expected": 0
+        },
+        {
+          "path": "update.body.attempted",
+          "expected": false
+        },
+        {
+          "path": "update.body.auto_advance",
+          "expected": false
+        },
+        {
+          "path": "update.body.automatic_tax.disabled_reason",
+          "expected": null
+        },
+        {
+          "path": "update.body.automatic_tax.enabled",
+          "expected": false
+        },
+        {
+          "path": "update.body.automatic_tax.liability",
+          "expected": null
+        },
+        {
+          "path": "update.body.automatic_tax.provider",
+          "expected": null
+        },
+        {
+          "path": "update.body.automatic_tax.status",
+          "expected": null
+        },
+        {
+          "path": "update.body.automatically_finalizes_at",
+          "expected": null
+        },
+        {
+          "path": "update.body.billing_reason",
+          "expected": "manual"
+        },
+        {
+          "path": "update.body.collection_method",
+          "expected": "charge_automatically"
+        },
+        {
+          "path": "update.body.created",
+          "expected": 1791158400
+        },
+        {
+          "path": "update.body.currency",
+          "expected": "usd"
+        },
+        {
+          "path": "update.body.custom_fields",
+          "expected": null
+        },
+        {
+          "path": "update.body.customer",
+          "expected": "cus#1"
+        },
+        {
+          "path": "update.body.customer_account",
+          "expected": null
+        },
+        {
+          "path": "update.body.customer_address",
+          "expected": null
+        },
+        {
+          "path": "update.body.customer_email",
+          "expected": null
+        },
+        {
+          "path": "update.body.customer_name",
+          "expected": null
+        },
+        {
+          "path": "update.body.customer_phone",
+          "expected": null
+        },
+        {
+          "path": "update.body.customer_shipping",
+          "expected": null
+        },
+        {
+          "path": "update.body.customer_tax_exempt",
+          "expected": "none"
+        },
+        {
+          "path": "update.body.customer_tax_ids",
+          "expected": []
+        },
+        {
+          "path": "update.body.default_payment_method",
+          "expected": null
+        },
+        {
+          "path": "update.body.default_source",
+          "expected": null
+        },
+        {
+          "path": "update.body.default_tax_rates",
+          "expected": []
+        },
+        {
+          "path": "update.body.description",
+          "expected": "Manual"
+        },
+        {
+          "path": "update.body.discounts",
+          "expected": []
+        },
+        {
+          "path": "update.body.due_date",
+          "expected": null
+        },
+        {
+          "path": "update.body.effective_at",
+          "expected": null
+        },
+        {
+          "path": "update.body.ending_balance",
+          "expected": null
+        },
+        {
+          "path": "update.body.footer",
+          "expected": null
+        },
+        {
+          "path": "update.body.from_invoice",
+          "expected": null
+        },
+        {
+          "path": "update.body.hosted_invoice_url",
+          "expected": null
+        },
+        {
+          "path": "update.body.id",
+          "expected": "in#1"
+        },
+        {
+          "path": "update.body.invoice_pdf",
+          "expected": null
+        },
+        {
+          "path": "update.body.issuer.type",
+          "expected": "self"
+        },
+        {
+          "path": "update.body.last_finalization_error",
+          "expected": null
+        },
+        {
+          "path": "update.body.latest_revision",
+          "expected": null
+        },
+        {
+          "path": "update.body.lines.data[0].amount",
+          "expected": 400
+        },
+        {
+          "path": "update.body.lines.data[0].currency",
+          "expected": "usd"
+        },
+        {
+          "path": "update.body.lines.data[0].description",
+          "expected": null
+        },
+        {
+          "path": "update.body.lines.data[0].discount_amounts",
+          "expected": []
+        },
+        {
+          "path": "update.body.lines.data[0].discountable",
+          "expected": true
+        },
+        {
+          "path": "update.body.lines.data[0].discounts",
+          "expected": []
+        },
+        {
+          "path": "update.body.lines.data[0].id",
+          "expected": "il#1"
+        },
+        {
+          "path": "update.body.lines.data[0].invoice",
+          "expected": "in#1"
+        },
+        {
+          "path": "update.body.lines.data[0].livemode",
+          "expected": false
+        },
+        {
+          "path": "update.body.lines.data[0].metadata",
+          "expected": {}
+        },
+        {
+          "path": "update.body.lines.data[0].object",
+          "expected": "line_item"
+        },
+        {
+          "path": "update.body.lines.data[0].parent.invoice_item_details.invoice_item",
+          "expected": "ii#1"
+        },
+        {
+          "path": "update.body.lines.data[0].parent.invoice_item_details.proration",
+          "expected": false
+        },
+        {
+          "path": "update.body.lines.data[0].parent.invoice_item_details.proration_details.credited_items",
+          "expected": null
+        },
+        {
+          "path": "update.body.lines.data[0].parent.invoice_item_details.subscription",
+          "expected": null
+        },
+        {
+          "path": "update.body.lines.data[0].parent.subscription_item_details",
+          "expected": null
+        },
+        {
+          "path": "update.body.lines.data[0].parent.type",
+          "expected": "invoice_item_details"
+        },
+        {
+          "path": "update.body.lines.data[0].period.end",
+          "expected": 1791158400
+        },
+        {
+          "path": "update.body.lines.data[0].period.start",
+          "expected": 1791158400
+        },
+        {
+          "path": "update.body.lines.data[0].pretax_credit_amounts",
+          "expected": []
+        },
+        {
+          "path": "update.body.lines.data[0].pricing.price_details.price",
+          "expected": "price#1"
+        },
+        {
+          "path": "update.body.lines.data[0].pricing.price_details.product",
+          "expected": "prod#1"
+        },
+        {
+          "path": "update.body.lines.data[0].pricing.type",
+          "expected": "price_details"
+        },
+        {
+          "path": "update.body.lines.data[0].pricing.unit_amount_decimal",
+          "expected": "400"
+        },
+        {
+          "path": "update.body.lines.data[0].quantity",
+          "expected": 1
+        },
+        {
+          "path": "update.body.lines.data[0].quantity_decimal",
+          "expected": "1"
+        },
+        {
+          "path": "update.body.lines.data[0].subtotal",
+          "expected": 400
+        },
+        {
+          "path": "update.body.lines.data[0].taxes",
+          "expected": []
+        },
+        {
+          "path": "update.body.lines.has_more",
+          "expected": false
+        },
+        {
+          "path": "update.body.lines.object",
+          "expected": "list"
+        },
+        {
+          "path": "update.body.lines.total_count",
+          "expected": 1
+        },
+        {
+          "path": "update.body.lines.url",
+          "expected": "/v1/invoices/in#1/lines"
+        },
+        {
+          "path": "update.body.livemode",
+          "expected": false
+        },
+        {
+          "path": "update.body.metadata",
+          "expected": {}
+        },
+        {
+          "path": "update.body.next_payment_attempt",
+          "expected": null
+        },
+        {
+          "path": "update.body.number",
+          "expected": null
+        },
+        {
+          "path": "update.body.object",
+          "expected": "invoice"
+        },
+        {
+          "path": "update.body.on_behalf_of",
+          "expected": null
+        },
+        {
+          "path": "update.body.parent",
+          "expected": null
+        },
+        {
+          "path": "update.body.payment_settings.default_mandate",
+          "expected": null
+        },
+        {
+          "path": "update.body.payment_settings.payment_method_options",
+          "expected": null
+        },
+        {
+          "path": "update.body.payment_settings.payment_method_types",
+          "expected": null
+        },
+        {
+          "path": "update.body.period_end",
+          "expected": 1793836800
+        },
+        {
+          "path": "update.body.period_start",
+          "expected": 1791158400
+        },
+        {
+          "path": "update.body.post_payment_credit_notes_amount",
+          "expected": 0
+        },
+        {
+          "path": "update.body.pre_payment_credit_notes_amount",
+          "expected": 0
+        },
+        {
+          "path": "update.body.receipt_number",
+          "expected": null
+        },
+        {
+          "path": "update.body.rendering.amount_tax_display",
+          "expected": null
+        },
+        {
+          "path": "update.body.rendering.pdf.page_size",
+          "expected": "auto"
+        },
+        {
+          "path": "update.body.rendering.template",
+          "expected": null
+        },
+        {
+          "path": "update.body.rendering.template_version",
+          "expected": null
+        },
+        {
+          "path": "update.body.shipping_cost",
+          "expected": null
+        },
+        {
+          "path": "update.body.shipping_details",
+          "expected": null
+        },
+        {
+          "path": "update.body.starting_balance",
+          "expected": 0
+        },
+        {
+          "path": "update.body.statement_descriptor",
+          "expected": null
+        },
+        {
+          "path": "update.body.status",
+          "expected": "draft"
+        },
+        {
+          "path": "update.body.status_transitions.finalized_at",
+          "expected": null
+        },
+        {
+          "path": "update.body.status_transitions.marked_uncollectible_at",
+          "expected": null
+        },
+        {
+          "path": "update.body.status_transitions.paid_at",
+          "expected": null
+        },
+        {
+          "path": "update.body.status_transitions.voided_at",
+          "expected": null
+        },
+        {
+          "path": "update.body.subtotal",
+          "expected": 400
+        },
+        {
+          "path": "update.body.subtotal_excluding_tax",
+          "expected": 400
+        },
+        {
+          "path": "update.body.test_clock",
+          "expected": "clock#1"
+        },
+        {
+          "path": "update.body.total",
+          "expected": 400
+        },
+        {
+          "path": "update.body.total_discount_amounts",
+          "expected": []
+        },
+        {
+          "path": "update.body.total_excluding_tax",
+          "expected": 400
+        },
+        {
+          "path": "update.body.total_pretax_credit_amounts",
+          "expected": []
+        },
+        {
+          "path": "update.body.total_taxes",
+          "expected": []
+        },
+        {
+          "path": "update.body.webhooks_delivered_at",
+          "expected": 1791158400
+        },
+        {
+          "path": "update.error.code",
+          "actual": null
+        },
+        {
+          "path": "update.error.message",
+          "actual": "Unrecognized request URL (POST: /v1/invoices/in#1)."
+        },
+        {
+          "path": "update.error.param",
+          "actual": null
+        },
+        {
+          "path": "update.error.type",
+          "actual": "StripeInvalidRequestError"
+        },
+        {
+          "path": "update.ok",
+          "expected": true,
+          "actual": false
+        }
+      ],
+      "reported": []
+    },
+    {
+      "id": "dev-v6-list-by-customer",
+      "split": "dev",
+      "rules": [
+        "LST-01"
+      ],
+      "pass": false,
+      "crashed": false,
+      "diffs": [
+        {
+          "path": "other_sub.body.application",
+          "actual": null
+        },
+        {
+          "path": "other_sub.body.application_fee_percent",
+          "actual": null
+        },
+        {
+          "path": "other_sub.body.automatic_tax.disabled_reason",
+          "actual": null
+        },
+        {
+          "path": "other_sub.body.automatic_tax.enabled",
+          "actual": false
+        },
+        {
+          "path": "other_sub.body.automatic_tax.liability",
+          "actual": null
+        },
+        {
+          "path": "other_sub.body.billing_cycle_anchor",
+          "actual": 1792042137
+        },
+        {
+          "path": "other_sub.body.billing_cycle_anchor_config",
+          "actual": null
+        },
+        {
+          "path": "other_sub.body.billing_mode.flexible.proration_discounts",
+          "actual": "included"
+        },
+        {
+          "path": "other_sub.body.billing_mode.type",
+          "actual": "flexible"
+        },
+        {
+          "path": "other_sub.body.billing_mode.updated_at",
+          "actual": 1792042137
+        },
+        {
+          "path": "other_sub.body.billing_schedules",
+          "actual": []
+        },
+        {
+          "path": "other_sub.body.billing_thresholds",
+          "actual": null
+        },
+        {
+          "path": "other_sub.body.cancel_at",
+          "actual": null
+        },
+        {
+          "path": "other_sub.body.cancel_at_period_end",
+          "actual": false
+        },
+        {
+          "path": "other_sub.body.canceled_at",
+          "actual": null
+        },
+        {
+          "path": "other_sub.body.cancellation_details.comment",
+          "actual": null
+        },
+        {
+          "path": "other_sub.body.cancellation_details.feedback",
+          "actual": null
+        },
+        {
+          "path": "other_sub.body.cancellation_details.feedback_option",
+          "actual": null
+        },
+        {
+          "path": "other_sub.body.cancellation_details.reason",
+          "actual": null
+        },
+        {
+          "path": "other_sub.body.collection_method",
+          "actual": "charge_automatically"
+        },
+        {
+          "path": "other_sub.body.created",
+          "actual": 1792042137
+        },
+        {
+          "path": "other_sub.body.currency",
+          "actual": "usd"
+        },
+        {
+          "path": "other_sub.body.customer",
+          "actual": "cus#2"
+        },
+        {
+          "path": "other_sub.body.customer_account",
+          "actual": null
+        },
+        {
+          "path": "other_sub.body.days_until_due",
+          "actual": null
+        },
+        {
+          "path": "other_sub.body.default_payment_method",
+          "actual": null
+        },
+        {
+          "path": "other_sub.body.default_source",
+          "actual": null
+        },
+        {
+          "path": "other_sub.body.default_tax_rates",
+          "actual": []
+        },
+        {
+          "path": "other_sub.body.description",
+          "actual": null
+        },
+        {
+          "path": "other_sub.body.discounts",
+          "actual": []
+        },
+        {
+          "path": "other_sub.body.ended_at",
+          "actual": null
+        },
+        {
+          "path": "other_sub.body.id",
+          "actual": "sub#2"
+        },
+        {
+          "path": "other_sub.body.invoice_settings.account_tax_ids",
+          "actual": null
+        },
+        {
+          "path": "other_sub.body.invoice_settings.custom_fields",
+          "actual": null
+        },
+        {
+          "path": "other_sub.body.invoice_settings.description",
+          "actual": null
+        },
+        {
+          "path": "other_sub.body.invoice_settings.footer",
+          "actual": null
+        },
+        {
+          "path": "other_sub.body.invoice_settings.issuer.type",
+          "actual": "self"
+        },
+        {
+          "path": "other_sub.body.items.data[0].billing_thresholds",
+          "actual": null
+        },
+        {
+          "path": "other_sub.body.items.data[0].created",
+          "actual": 1792042137
+        },
+        {
+          "path": "other_sub.body.items.data[0].current_period_end",
+          "actual": 1794720537
+        },
+        {
+          "path": "other_sub.body.items.data[0].current_period_start",
+          "actual": 1792042137
+        },
+        {
+          "path": "other_sub.body.items.data[0].current_trial",
+          "actual": null
+        },
+        {
+          "path": "other_sub.body.items.data[0].discounts",
+          "actual": []
+        },
+        {
+          "path": "other_sub.body.items.data[0].id",
+          "actual": "si#2"
+        },
+        {
+          "path": "other_sub.body.items.data[0].metadata",
+          "actual": {}
+        },
+        {
+          "path": "other_sub.body.items.data[0].object",
+          "actual": "subscription_item"
+        },
+        {
+          "path": "other_sub.body.items.data[0].plan.active",
+          "actual": true
+        },
+        {
+          "path": "other_sub.body.items.data[0].plan.amount",
+          "actual": 3000
+        },
+        {
+          "path": "other_sub.body.items.data[0].plan.amount_decimal",
+          "actual": "3000"
+        },
+        {
+          "path": "other_sub.body.items.data[0].plan.billing_scheme",
+          "actual": "per_unit"
+        },
+        {
+          "path": "other_sub.body.items.data[0].plan.created",
+          "actual": 1791158400
+        },
+        {
+          "path": "other_sub.body.items.data[0].plan.currency",
+          "actual": "usd"
+        },
+        {
+          "path": "other_sub.body.items.data[0].plan.id",
+          "actual": "price#2"
+        },
+        {
+          "path": "other_sub.body.items.data[0].plan.interval",
+          "actual": "month"
+        },
+        {
+          "path": "other_sub.body.items.data[0].plan.interval_count",
+          "actual": 1
+        },
+        {
+          "path": "other_sub.body.items.data[0].plan.livemode",
+          "actual": false
+        },
+        {
+          "path": "other_sub.body.items.data[0].plan.metadata",
+          "actual": {}
+        },
+        {
+          "path": "other_sub.body.items.data[0].plan.meter",
+          "actual": null
+        },
+        {
+          "path": "other_sub.body.items.data[0].plan.nickname",
+          "actual": null
+        },
+        {
+          "path": "other_sub.body.items.data[0].plan.object",
+          "actual": "plan"
+        },
+        {
+          "path": "other_sub.body.items.data[0].plan.product",
+          "actual": "prod#2"
+        },
+        {
+          "path": "other_sub.body.items.data[0].plan.tiers_mode",
+          "actual": null
+        },
+        {
+          "path": "other_sub.body.items.data[0].plan.transform_usage",
+          "actual": null
+        },
+        {
+          "path": "other_sub.body.items.data[0].plan.trial_period_days",
+          "actual": null
+        },
+        {
+          "path": "other_sub.body.items.data[0].plan.usage_type",
+          "actual": "licensed"
+        },
+        {
+          "path": "other_sub.body.items.data[0].price.active",
+          "actual": true
+        },
+        {
+          "path": "other_sub.body.items.data[0].price.billing_scheme",
+          "actual": "per_unit"
+        },
+        {
+          "path": "other_sub.body.items.data[0].price.created",
+          "actual": 1791158400
+        },
+        {
+          "path": "other_sub.body.items.data[0].price.currency",
+          "actual": "usd"
+        },
+        {
+          "path": "other_sub.body.items.data[0].price.custom_unit_amount",
+          "actual": null
+        },
+        {
+          "path": "other_sub.body.items.data[0].price.id",
+          "actual": "price#2"
+        },
+        {
+          "path": "other_sub.body.items.data[0].price.livemode",
+          "actual": false
+        },
+        {
+          "path": "other_sub.body.items.data[0].price.lookup_key",
+          "actual": null
+        },
+        {
+          "path": "other_sub.body.items.data[0].price.metadata",
+          "actual": {}
+        },
+        {
+          "path": "other_sub.body.items.data[0].price.nickname",
+          "actual": null
+        },
+        {
+          "path": "other_sub.body.items.data[0].price.object",
+          "actual": "price"
+        },
+        {
+          "path": "other_sub.body.items.data[0].price.product",
+          "actual": "prod#2"
+        },
+        {
+          "path": "other_sub.body.items.data[0].price.recurring.interval",
+          "actual": "month"
+        },
+        {
+          "path": "other_sub.body.items.data[0].price.recurring.interval_count",
+          "actual": 1
+        },
+        {
+          "path": "other_sub.body.items.data[0].price.recurring.meter",
+          "actual": null
+        },
+        {
+          "path": "other_sub.body.items.data[0].price.recurring.trial_period_days",
+          "actual": null
+        },
+        {
+          "path": "other_sub.body.items.data[0].price.recurring.usage_type",
+          "actual": "licensed"
+        },
+        {
+          "path": "other_sub.body.items.data[0].price.tax_behavior",
+          "actual": "unspecified"
+        },
+        {
+          "path": "other_sub.body.items.data[0].price.tiers_mode",
+          "actual": null
+        },
+        {
+          "path": "other_sub.body.items.data[0].price.transform_quantity",
+          "actual": null
+        },
+        {
+          "path": "other_sub.body.items.data[0].price.type",
+          "actual": "recurring"
+        },
+        {
+          "path": "other_sub.body.items.data[0].price.unit_amount",
+          "actual": 3000
+        },
+        {
+          "path": "other_sub.body.items.data[0].price.unit_amount_decimal",
+          "actual": "3000"
+        },
+        {
+          "path": "other_sub.body.items.data[0].quantity",
+          "actual": 1
+        },
+        {
+          "path": "other_sub.body.items.data[0].subscription",
+          "actual": "sub#2"
+        },
+        {
+          "path": "other_sub.body.items.data[0].tax_rates",
+          "actual": []
+        },
+        {
+          "path": "other_sub.body.items.has_more",
+          "actual": false
+        },
+        {
+          "path": "other_sub.body.items.object",
+          "actual": "list"
+        },
+        {
+          "path": "other_sub.body.items.total_count",
+          "actual": 1
+        },
+        {
+          "path": "other_sub.body.items.url",
+          "actual": "/v1/subscription_items?subscription=sub#2"
+        },
+        {
+          "path": "other_sub.body.latest_invoice",
+          "actual": "in#2"
+        },
+        {
+          "path": "other_sub.body.livemode",
+          "actual": false
+        },
+        {
+          "path": "other_sub.body.managed_payments.enabled",
+          "actual": false
+        },
+        {
+          "path": "other_sub.body.metadata",
+          "actual": {}
+        },
+        {
+          "path": "other_sub.body.next_pending_invoice_item_invoice",
+          "actual": null
+        },
+        {
+          "path": "other_sub.body.object",
+          "actual": "subscription"
+        },
+        {
+          "path": "other_sub.body.on_behalf_of",
+          "actual": null
+        },
+        {
+          "path": "other_sub.body.pause_collection",
+          "actual": null
+        },
+        {
+          "path": "other_sub.body.payment_settings.payment_method_options",
+          "actual": null
+        },
+        {
+          "path": "other_sub.body.payment_settings.payment_method_types",
+          "actual": null
+        },
+        {
+          "path": "other_sub.body.payment_settings.save_default_payment_method",
+          "actual": "off"
+        },
+        {
+          "path": "other_sub.body.pending_invoice_item_interval",
+          "actual": null
+        },
+        {
+          "path": "other_sub.body.pending_setup_intent",
+          "actual": null
+        },
+        {
+          "path": "other_sub.body.pending_update",
+          "actual": null
+        },
+        {
+          "path": "other_sub.body.plan.active",
+          "actual": true
+        },
+        {
+          "path": "other_sub.body.plan.amount",
+          "actual": 3000
+        },
+        {
+          "path": "other_sub.body.plan.amount_decimal",
+          "actual": "3000"
+        },
+        {
+          "path": "other_sub.body.plan.billing_scheme",
+          "actual": "per_unit"
+        },
+        {
+          "path": "other_sub.body.plan.created",
+          "actual": 1791158400
+        },
+        {
+          "path": "other_sub.body.plan.currency",
+          "actual": "usd"
+        },
+        {
+          "path": "other_sub.body.plan.id",
+          "actual": "price#2"
+        },
+        {
+          "path": "other_sub.body.plan.interval",
+          "actual": "month"
+        },
+        {
+          "path": "other_sub.body.plan.interval_count",
+          "actual": 1
+        },
+        {
+          "path": "other_sub.body.plan.livemode",
+          "actual": false
+        },
+        {
+          "path": "other_sub.body.plan.metadata",
+          "actual": {}
+        },
+        {
+          "path": "other_sub.body.plan.meter",
+          "actual": null
+        },
+        {
+          "path": "other_sub.body.plan.nickname",
+          "actual": null
+        },
+        {
+          "path": "other_sub.body.plan.object",
+          "actual": "plan"
+        },
+        {
+          "path": "other_sub.body.plan.product",
+          "actual": "prod#2"
+        },
+        {
+          "path": "other_sub.body.plan.tiers_mode",
+          "actual": null
+        },
+        {
+          "path": "other_sub.body.plan.transform_usage",
+          "actual": null
+        },
+        {
+          "path": "other_sub.body.plan.trial_period_days",
+          "actual": null
+        },
+        {
+          "path": "other_sub.body.plan.usage_type",
+          "actual": "licensed"
+        },
+        {
+          "path": "other_sub.body.quantity",
+          "actual": 1
+        },
+        {
+          "path": "other_sub.body.schedule",
+          "actual": null
+        },
+        {
+          "path": "other_sub.body.start_date",
+          "actual": 1792042137
+        },
+        {
+          "path": "other_sub.body.status",
+          "actual": "active"
+        },
+        {
+          "path": "other_sub.body.test_clock",
+          "actual": null
+        },
+        {
+          "path": "other_sub.body.transfer_data",
+          "actual": null
+        },
+        {
+          "path": "other_sub.body.trial_end",
+          "actual": null
+        },
+        {
+          "path": "other_sub.body.trial_settings.end_behavior.billing_cycle_anchor",
+          "actual": "now"
+        },
+        {
+          "path": "other_sub.body.trial_settings.end_behavior.missing_payment_method",
+          "actual": "create_invoice"
+        },
+        {
+          "path": "other_sub.body.trial_start",
+          "actual": null
+        },
+        {
+          "path": "other_sub.error.code",
+          "expected": "resource_missing"
+        },
+        {
+          "path": "other_sub.error.message",
+          "expected": "This customer has no attached payment source or default payment method. Please consider adding a default payment method. For more information, visit https://stripe.com/docs/billing/subscriptions/payment-methods-setting#payment-method-priority."
+        },
+        {
+          "path": "other_sub.error.param",
+          "expected": null
+        },
+        {
+          "path": "other_sub.error.type",
+          "expected": "StripeInvalidRequestError"
+        },
+        {
+          "path": "other_sub.ok",
+          "expected": false,
+          "actual": true
+        },
+        {
+          "path": "theirs.body.data",
+          "expected": []
+        },
+        {
+          "path": "theirs.body.data[0].application",
+          "actual": null
+        },
+        {
+          "path": "theirs.body.data[0].application_fee_percent",
+          "actual": null
+        },
+        {
+          "path": "theirs.body.data[0].automatic_tax.disabled_reason",
+          "actual": null
+        },
+        {
+          "path": "theirs.body.data[0].automatic_tax.enabled",
+          "actual": false
+        },
+        {
+          "path": "theirs.body.data[0].automatic_tax.liability",
+          "actual": null
+        },
+        {
+          "path": "theirs.body.data[0].billing_cycle_anchor",
+          "actual": 1792042137
+        },
+        {
+          "path": "theirs.body.data[0].billing_cycle_anchor_config",
+          "actual": null
+        },
+        {
+          "path": "theirs.body.data[0].billing_mode.flexible.proration_discounts",
+          "actual": "included"
+        },
+        {
+          "path": "theirs.body.data[0].billing_mode.type",
+          "actual": "flexible"
+        },
+        {
+          "path": "theirs.body.data[0].billing_mode.updated_at",
+          "actual": 1792042137
+        },
+        {
+          "path": "theirs.body.data[0].billing_schedules",
+          "actual": []
+        },
+        {
+          "path": "theirs.body.data[0].billing_thresholds",
+          "actual": null
+        },
+        {
+          "path": "theirs.body.data[0].cancel_at",
+          "actual": null
+        },
+        {
+          "path": "theirs.body.data[0].cancel_at_period_end",
+          "actual": false
+        },
+        {
+          "path": "theirs.body.data[0].canceled_at",
+          "actual": null
+        },
+        {
+          "path": "theirs.body.data[0].cancellation_details.comment",
+          "actual": null
+        },
+        {
+          "path": "theirs.body.data[0].cancellation_details.feedback",
+          "actual": null
+        },
+        {
+          "path": "theirs.body.data[0].cancellation_details.feedback_option",
+          "actual": null
+        },
+        {
+          "path": "theirs.body.data[0].cancellation_details.reason",
+          "actual": null
+        },
+        {
+          "path": "theirs.body.data[0].collection_method",
+          "actual": "charge_automatically"
+        },
+        {
+          "path": "theirs.body.data[0].created",
+          "actual": 1792042137
+        },
+        {
+          "path": "theirs.body.data[0].currency",
+          "actual": "usd"
+        },
+        {
+          "path": "theirs.body.data[0].customer",
+          "actual": "cus#2"
+        },
+        {
+          "path": "theirs.body.data[0].customer_account",
+          "actual": null
+        },
+        {
+          "path": "theirs.body.data[0].days_until_due",
+          "actual": null
+        },
+        {
+          "path": "theirs.body.data[0].default_payment_method",
+          "actual": null
+        },
+        {
+          "path": "theirs.body.data[0].default_source",
+          "actual": null
+        },
+        {
+          "path": "theirs.body.data[0].default_tax_rates",
+          "actual": []
+        },
+        {
+          "path": "theirs.body.data[0].description",
+          "actual": null
+        },
+        {
+          "path": "theirs.body.data[0].discounts",
+          "actual": []
+        },
+        {
+          "path": "theirs.body.data[0].ended_at",
+          "actual": null
+        },
+        {
+          "path": "theirs.body.data[0].id",
+          "actual": "sub#2"
+        },
+        {
+          "path": "theirs.body.data[0].invoice_settings.account_tax_ids",
+          "actual": null
+        },
+        {
+          "path": "theirs.body.data[0].invoice_settings.custom_fields",
+          "actual": null
+        },
+        {
+          "path": "theirs.body.data[0].invoice_settings.description",
+          "actual": null
+        },
+        {
+          "path": "theirs.body.data[0].invoice_settings.footer",
+          "actual": null
+        },
+        {
+          "path": "theirs.body.data[0].invoice_settings.issuer.type",
+          "actual": "self"
+        },
+        {
+          "path": "theirs.body.data[0].items.data[0].billing_thresholds",
+          "actual": null
+        },
+        {
+          "path": "theirs.body.data[0].items.data[0].created",
+          "actual": 1792042137
+        },
+        {
+          "path": "theirs.body.data[0].items.data[0].current_period_end",
+          "actual": 1794720537
+        },
+        {
+          "path": "theirs.body.data[0].items.data[0].current_period_start",
+          "actual": 1792042137
+        },
+        {
+          "path": "theirs.body.data[0].items.data[0].current_trial",
+          "actual": null
+        },
+        {
+          "path": "theirs.body.data[0].items.data[0].discounts",
+          "actual": []
+        },
+        {
+          "path": "theirs.body.data[0].items.data[0].id",
+          "actual": "si#2"
+        },
+        {
+          "path": "theirs.body.data[0].items.data[0].metadata",
+          "actual": {}
+        },
+        {
+          "path": "theirs.body.data[0].items.data[0].object",
+          "actual": "subscription_item"
+        },
+        {
+          "path": "theirs.body.data[0].items.data[0].plan.active",
+          "actual": true
+        },
+        {
+          "path": "theirs.body.data[0].items.data[0].plan.amount",
+          "actual": 3000
+        },
+        {
+          "path": "theirs.body.data[0].items.data[0].plan.amount_decimal",
+          "actual": "3000"
+        },
+        {
+          "path": "theirs.body.data[0].items.data[0].plan.billing_scheme",
+          "actual": "per_unit"
+        },
+        {
+          "path": "theirs.body.data[0].items.data[0].plan.created",
+          "actual": 1791158400
+        },
+        {
+          "path": "theirs.body.data[0].items.data[0].plan.currency",
+          "actual": "usd"
+        },
+        {
+          "path": "theirs.body.data[0].items.data[0].plan.id",
+          "actual": "price#2"
+        },
+        {
+          "path": "theirs.body.data[0].items.data[0].plan.interval",
+          "actual": "month"
+        },
+        {
+          "path": "theirs.body.data[0].items.data[0].plan.interval_count",
+          "actual": 1
+        },
+        {
+          "path": "theirs.body.data[0].items.data[0].plan.livemode",
+          "actual": false
+        },
+        {
+          "path": "theirs.body.data[0].items.data[0].plan.metadata",
+          "actual": {}
+        },
+        {
+          "path": "theirs.body.data[0].items.data[0].plan.meter",
+          "actual": null
+        },
+        {
+          "path": "theirs.body.data[0].items.data[0].plan.nickname",
+          "actual": null
+        },
+        {
+          "path": "theirs.body.data[0].items.data[0].plan.object",
+          "actual": "plan"
+        },
+        {
+          "path": "theirs.body.data[0].items.data[0].plan.product",
+          "actual": "prod#2"
+        },
+        {
+          "path": "theirs.body.data[0].items.data[0].plan.tiers_mode",
+          "actual": null
+        },
+        {
+          "path": "theirs.body.data[0].items.data[0].plan.transform_usage",
+          "actual": null
+        },
+        {
+          "path": "theirs.body.data[0].items.data[0].plan.trial_period_days",
+          "actual": null
+        },
+        {
+          "path": "theirs.body.data[0].items.data[0].plan.usage_type",
+          "actual": "licensed"
+        },
+        {
+          "path": "theirs.body.data[0].items.data[0].price.active",
+          "actual": true
+        },
+        {
+          "path": "theirs.body.data[0].items.data[0].price.billing_scheme",
+          "actual": "per_unit"
+        },
+        {
+          "path": "theirs.body.data[0].items.data[0].price.created",
+          "actual": 1791158400
+        },
+        {
+          "path": "theirs.body.data[0].items.data[0].price.currency",
+          "actual": "usd"
+        },
+        {
+          "path": "theirs.body.data[0].items.data[0].price.custom_unit_amount",
+          "actual": null
+        },
+        {
+          "path": "theirs.body.data[0].items.data[0].price.id",
+          "actual": "price#2"
+        },
+        {
+          "path": "theirs.body.data[0].items.data[0].price.livemode",
+          "actual": false
+        },
+        {
+          "path": "theirs.body.data[0].items.data[0].price.lookup_key",
+          "actual": null
+        },
+        {
+          "path": "theirs.body.data[0].items.data[0].price.metadata",
+          "actual": {}
+        },
+        {
+          "path": "theirs.body.data[0].items.data[0].price.nickname",
+          "actual": null
+        },
+        {
+          "path": "theirs.body.data[0].items.data[0].price.object",
+          "actual": "price"
+        },
+        {
+          "path": "theirs.body.data[0].items.data[0].price.product",
+          "actual": "prod#2"
+        },
+        {
+          "path": "theirs.body.data[0].items.data[0].price.recurring.interval",
+          "actual": "month"
+        },
+        {
+          "path": "theirs.body.data[0].items.data[0].price.recurring.interval_count",
+          "actual": 1
+        },
+        {
+          "path": "theirs.body.data[0].items.data[0].price.recurring.meter",
+          "actual": null
+        },
+        {
+          "path": "theirs.body.data[0].items.data[0].price.recurring.trial_period_days",
+          "actual": null
+        },
+        {
+          "path": "theirs.body.data[0].items.data[0].price.recurring.usage_type",
+          "actual": "licensed"
+        },
+        {
+          "path": "theirs.body.data[0].items.data[0].price.tax_behavior",
+          "actual": "unspecified"
+        },
+        {
+          "path": "theirs.body.data[0].items.data[0].price.tiers_mode",
+          "actual": null
+        },
+        {
+          "path": "theirs.body.data[0].items.data[0].price.transform_quantity",
+          "actual": null
+        },
+        {
+          "path": "theirs.body.data[0].items.data[0].price.type",
+          "actual": "recurring"
+        },
+        {
+          "path": "theirs.body.data[0].items.data[0].price.unit_amount",
+          "actual": 3000
+        },
+        {
+          "path": "theirs.body.data[0].items.data[0].price.unit_amount_decimal",
+          "actual": "3000"
+        },
+        {
+          "path": "theirs.body.data[0].items.data[0].quantity",
+          "actual": 1
+        },
+        {
+          "path": "theirs.body.data[0].items.data[0].subscription",
+          "actual": "sub#2"
+        },
+        {
+          "path": "theirs.body.data[0].items.data[0].tax_rates",
+          "actual": []
+        },
+        {
+          "path": "theirs.body.data[0].items.has_more",
+          "actual": false
+        },
+        {
+          "path": "theirs.body.data[0].items.object",
+          "actual": "list"
+        },
+        {
+          "path": "theirs.body.data[0].items.total_count",
+          "actual": 1
+        },
+        {
+          "path": "theirs.body.data[0].items.url",
+          "actual": "/v1/subscription_items?subscription=sub#2"
+        },
+        {
+          "path": "theirs.body.data[0].latest_invoice",
+          "actual": "in#2"
+        },
+        {
+          "path": "theirs.body.data[0].livemode",
+          "actual": false
+        },
+        {
+          "path": "theirs.body.data[0].managed_payments.enabled",
+          "actual": false
+        },
+        {
+          "path": "theirs.body.data[0].metadata",
+          "actual": {}
+        },
+        {
+          "path": "theirs.body.data[0].next_pending_invoice_item_invoice",
+          "actual": null
+        },
+        {
+          "path": "theirs.body.data[0].object",
+          "actual": "subscription"
+        },
+        {
+          "path": "theirs.body.data[0].on_behalf_of",
+          "actual": null
+        },
+        {
+          "path": "theirs.body.data[0].pause_collection",
+          "actual": null
+        },
+        {
+          "path": "theirs.body.data[0].payment_settings.payment_method_options",
+          "actual": null
+        },
+        {
+          "path": "theirs.body.data[0].payment_settings.payment_method_types",
+          "actual": null
+        },
+        {
+          "path": "theirs.body.data[0].payment_settings.save_default_payment_method",
+          "actual": "off"
+        },
+        {
+          "path": "theirs.body.data[0].pending_invoice_item_interval",
+          "actual": null
+        },
+        {
+          "path": "theirs.body.data[0].pending_setup_intent",
+          "actual": null
+        },
+        {
+          "path": "theirs.body.data[0].pending_update",
+          "actual": null
+        },
+        {
+          "path": "theirs.body.data[0].plan.active",
+          "actual": true
+        },
+        {
+          "path": "theirs.body.data[0].plan.amount",
+          "actual": 3000
+        },
+        {
+          "path": "theirs.body.data[0].plan.amount_decimal",
+          "actual": "3000"
+        },
+        {
+          "path": "theirs.body.data[0].plan.billing_scheme",
+          "actual": "per_unit"
+        },
+        {
+          "path": "theirs.body.data[0].plan.created",
+          "actual": 1791158400
+        },
+        {
+          "path": "theirs.body.data[0].plan.currency",
+          "actual": "usd"
+        },
+        {
+          "path": "theirs.body.data[0].plan.id",
+          "actual": "price#2"
+        },
+        {
+          "path": "theirs.body.data[0].plan.interval",
+          "actual": "month"
+        },
+        {
+          "path": "theirs.body.data[0].plan.interval_count",
+          "actual": 1
+        },
+        {
+          "path": "theirs.body.data[0].plan.livemode",
+          "actual": false
+        },
+        {
+          "path": "theirs.body.data[0].plan.metadata",
+          "actual": {}
+        },
+        {
+          "path": "theirs.body.data[0].plan.meter",
+          "actual": null
+        },
+        {
+          "path": "theirs.body.data[0].plan.nickname",
+          "actual": null
+        },
+        {
+          "path": "theirs.body.data[0].plan.object",
+          "actual": "plan"
+        },
+        {
+          "path": "theirs.body.data[0].plan.product",
+          "actual": "prod#2"
+        },
+        {
+          "path": "theirs.body.data[0].plan.tiers_mode",
+          "actual": null
+        },
+        {
+          "path": "theirs.body.data[0].plan.transform_usage",
+          "actual": null
+        },
+        {
+          "path": "theirs.body.data[0].plan.trial_period_days",
+          "actual": null
+        },
+        {
+          "path": "theirs.body.data[0].plan.usage_type",
+          "actual": "licensed"
+        },
+        {
+          "path": "theirs.body.data[0].quantity",
+          "actual": 1
+        },
+        {
+          "path": "theirs.body.data[0].schedule",
+          "actual": null
+        },
+        {
+          "path": "theirs.body.data[0].start_date",
+          "actual": 1792042137
+        },
+        {
+          "path": "theirs.body.data[0].status",
+          "actual": "active"
+        },
+        {
+          "path": "theirs.body.data[0].test_clock",
+          "actual": null
+        },
+        {
+          "path": "theirs.body.data[0].transfer_data",
+          "actual": null
+        },
+        {
+          "path": "theirs.body.data[0].trial_end",
+          "actual": null
+        },
+        {
+          "path": "theirs.body.data[0].trial_settings.end_behavior.billing_cycle_anchor",
+          "actual": "now"
+        },
+        {
+          "path": "theirs.body.data[0].trial_settings.end_behavior.missing_payment_method",
+          "actual": "create_invoice"
+        },
+        {
+          "path": "theirs.body.data[0].trial_start",
+          "actual": null
+        }
+      ],
+      "reported": []
+    },
+    {
+      "id": "dev-v6-list-by-status",
+      "split": "dev",
+      "rules": [
+        "LST-01"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v6-oneoff-other-subscription",
+      "split": "dev",
+      "rules": [
+        "INV-03"
+      ],
+      "pass": false,
+      "crashed": false,
+      "diffs": [
+        {
+          "path": "invoices.body.data[0].amount_due",
+          "expected": 1000,
+          "actual": 3400
+        },
+        {
+          "path": "invoices.body.data[0].amount_paid",
+          "expected": 1000,
+          "actual": 3400
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[0].amount",
+          "expected": 1000,
+          "actual": 400
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[0].description",
+          "expected": "1 × Basic (at $10.00 / month)",
+          "actual": null
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[0].parent.invoice_item_details",
+          "expected": null
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[0].parent.invoice_item_details.invoice_item",
+          "actual": "ii#1"
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[0].parent.invoice_item_details.proration",
+          "actual": false
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[0].parent.invoice_item_details.proration_details.credited_items",
+          "actual": null
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[0].parent.invoice_item_details.subscription",
+          "actual": "sub#1"
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[0].parent.subscription_item_details",
+          "actual": null
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[0].parent.subscription_item_details.invoice_item",
+          "expected": null
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[0].parent.subscription_item_details.proration",
+          "expected": false
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[0].parent.subscription_item_details.proration_details.credited_items",
+          "expected": null
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[0].parent.subscription_item_details.subscription",
+          "expected": "sub#1"
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[0].parent.subscription_item_details.subscription_item",
+          "expected": "si#1"
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[0].parent.type",
+          "expected": "subscription_item_details",
+          "actual": "invoice_item_details"
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[0].period.end",
+          "expected": 1796428800,
+          "actual": 1791158400
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[0].period.start",
+          "expected": 1793836800,
+          "actual": 1791158400
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[0].pricing.unit_amount_decimal",
+          "expected": "1000",
+          "actual": "400"
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[0].subtotal",
+          "expected": 1000,
+          "actual": 400
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[1].amount",
+          "actual": 3000
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[1].currency",
+          "actual": "usd"
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[1].description",
+          "actual": "1 × Pro (at $30.00 / month)"
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[1].discount_amounts",
+          "actual": []
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[1].discountable",
+          "actual": true
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[1].discounts",
+          "actual": []
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[1].id",
+          "actual": "il#2"
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[1].invoice",
+          "actual": "in#1"
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[1].livemode",
+          "actual": false
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[1].metadata",
+          "actual": {}
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[1].object",
+          "actual": "line_item"
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[1].parent.invoice_item_details",
+          "actual": null
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[1].parent.subscription_item_details.invoice_item",
+          "actual": null
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[1].parent.subscription_item_details.proration",
+          "actual": false
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[1].parent.subscription_item_details.proration_details.credited_items",
+          "actual": null
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[1].parent.subscription_item_details.subscription",
+          "actual": "sub#1"
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[1].parent.subscription_item_details.subscription_item",
+          "actual": "si#1"
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[1].parent.type",
+          "actual": "subscription_item_details"
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[1].period.end",
+          "actual": 1796428800
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[1].period.start",
+          "actual": 1793836800
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[1].pretax_credit_amounts",
+          "actual": []
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[1].pricing.price_details.price",
+          "actual": "price#2"
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[1].pricing.price_details.product",
+          "actual": "prod#2"
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[1].pricing.type",
+          "actual": "price_details"
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[1].pricing.unit_amount_decimal",
+          "actual": "3000"
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[1].quantity",
+          "actual": 1
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[1].quantity_decimal",
+          "actual": "1"
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[1].subtotal",
+          "actual": 3000
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[1].taxes",
+          "actual": []
+        },
+        {
+          "path": "invoices.body.data[0].lines.total_count",
+          "expected": 1,
+          "actual": 2
+        },
+        {
+          "path": "invoices.body.data[0].subtotal",
+          "expected": 1000,
+          "actual": 3400
+        },
+        {
+          "path": "invoices.body.data[0].subtotal_excluding_tax",
+          "expected": 1000,
+          "actual": 3400
+        },
+        {
+          "path": "invoices.body.data[0].total",
+          "expected": 1000,
+          "actual": 3400
+        },
+        {
+          "path": "invoices.body.data[0].total_excluding_tax",
+          "expected": 1000,
+          "actual": 3400
+        },
+        {
+          "path": "invoices.body.data[1].amount_due",
+          "expected": 3400,
+          "actual": 1000
+        },
+        {
+          "path": "invoices.body.data[1].amount_paid",
+          "expected": 3400,
+          "actual": 1000
+        },
+        {
+          "path": "invoices.body.data[1].lines.data[0].amount",
+          "expected": 400,
+          "actual": 1000
+        },
+        {
+          "path": "invoices.body.data[1].lines.data[0].description",
+          "expected": null,
+          "actual": "1 × Basic (at $10.00 / month)"
+        },
+        {
+          "path": "invoices.body.data[1].lines.data[0].id",
+          "expected": "il#2",
+          "actual": "il#3"
+        },
+        {
+          "path": "invoices.body.data[1].lines.data[0].parent.invoice_item_details",
+          "actual": null
+        },
+        {
+          "path": "invoices.body.data[1].lines.data[0].parent.invoice_item_details.invoice_item",
+          "expected": "ii#1"
+        },
+        {
+          "path": "invoices.body.data[1].lines.data[0].parent.invoice_item_details.proration",
+          "expected": false
+        },
+        {
+          "path": "invoices.body.data[1].lines.data[0].parent.invoice_item_details.proration_details.credited_items",
+          "expected": null
+        },
+        {
+          "path": "invoices.body.data[1].lines.data[0].parent.invoice_item_details.subscription",
+          "expected": "sub#2"
+        },
+        {
+          "path": "invoices.body.data[1].lines.data[0].parent.subscription_item_details",
+          "expected": null
+        },
+        {
+          "path": "invoices.body.data[1].lines.data[0].parent.subscription_item_details.invoice_item",
+          "actual": null
+        },
+        {
+          "path": "invoices.body.data[1].lines.data[0].parent.subscription_item_details.proration",
+          "actual": false
+        },
+        {
+          "path": "invoices.body.data[1].lines.data[0].parent.subscription_item_details.proration_details.credited_items",
+          "actual": null
+        },
+        {
+          "path": "invoices.body.data[1].lines.data[0].parent.subscription_item_details.subscription",
+          "actual": "sub#2"
+        },
+        {
+          "path": "invoices.body.data[1].lines.data[0].parent.subscription_item_details.subscription_item",
+          "actual": "si#2"
+        },
+        {
+          "path": "invoices.body.data[1].lines.data[0].parent.type",
+          "expected": "invoice_item_details",
+          "actual": "subscription_item_details"
+        },
+        {
+          "path": "invoices.body.data[1].lines.data[0].period.end",
+          "expected": 1791158400,
+          "actual": 1796428800
+        },
+        {
+          "path": "invoices.body.data[1].lines.data[0].period.start",
+          "expected": 1791158400,
+          "actual": 1793836800
+        },
+        {
+          "path": "invoices.body.data[1].lines.data[0].pricing.price_details.price",
+          "expected": "price#2",
+          "actual": "price#3"
+        },
+        {
+          "path": "invoices.body.data[1].lines.data[0].pricing.price_details.product",
+          "expected": "prod#2",
+          "actual": "prod#3"
+        },
+        {
+          "path": "invoices.body.data[1].lines.data[0].pricing.unit_amount_decimal",
+          "expected": "400",
+          "actual": "1000"
+        },
+        {
+          "path": "invoices.body.data[1].lines.data[0].subtotal",
+          "expected": 400,
+          "actual": 1000
+        },
+        {
+          "path": "invoices.body.data[1].lines.data[1].amount",
+          "expected": 3000
+        },
+        {
+          "path": "invoices.body.data[1].lines.data[1].currency",
+          "expected": "usd"
+        },
+        {
+          "path": "invoices.body.data[1].lines.data[1].description",
+          "expected": "1 × Pro (at $30.00 / month)"
+        },
+        {
+          "path": "invoices.body.data[1].lines.data[1].discount_amounts",
+          "expected": []
+        },
+        {
+          "path": "invoices.body.data[1].lines.data[1].discountable",
+          "expected": true
+        },
+        {
+          "path": "invoices.body.data[1].lines.data[1].discounts",
+          "expected": []
+        },
+        {
+          "path": "invoices.body.data[1].lines.data[1].id",
+          "expected": "il#3"
+        },
+        {
+          "path": "invoices.body.data[1].lines.data[1].invoice",
+          "expected": "in#2"
+        },
+        {
+          "path": "invoices.body.data[1].lines.data[1].livemode",
+          "expected": false
+        },
+        {
+          "path": "invoices.body.data[1].lines.data[1].metadata",
+          "expected": {}
+        },
+        {
+          "path": "invoices.body.data[1].lines.data[1].object",
+          "expected": "line_item"
+        },
+        {
+          "path": "invoices.body.data[1].lines.data[1].parent.invoice_item_details",
+          "expected": null
+        },
+        {
+          "path": "invoices.body.data[1].lines.data[1].parent.subscription_item_details.invoice_item",
+          "expected": null
+        },
+        {
+          "path": "invoices.body.data[1].lines.data[1].parent.subscription_item_details.proration",
+          "expected": false
+        },
+        {
+          "path": "invoices.body.data[1].lines.data[1].parent.subscription_item_details.proration_details.credited_items",
+          "expected": null
+        },
+        {
+          "path": "invoices.body.data[1].lines.data[1].parent.subscription_item_details.subscription",
+          "expected": "sub#2"
+        },
+        {
+          "path": "invoices.body.data[1].lines.data[1].parent.subscription_item_details.subscription_item",
+          "expected": "si#2"
+        },
+        {
+          "path": "invoices.body.data[1].lines.data[1].parent.type",
+          "expected": "subscription_item_details"
+        },
+        {
+          "path": "invoices.body.data[1].lines.data[1].period.end",
+          "expected": 1796428800
+        },
+        {
+          "path": "invoices.body.data[1].lines.data[1].period.start",
+          "expected": 1793836800
+        },
+        {
+          "path": "invoices.body.data[1].lines.data[1].pretax_credit_amounts",
+          "expected": []
+        },
+        {
+          "path": "invoices.body.data[1].lines.data[1].pricing.price_details.price",
+          "expected": "price#3"
+        },
+        {
+          "path": "invoices.body.data[1].lines.data[1].pricing.price_details.product",
+          "expected": "prod#3"
+        },
+        {
+          "path": "invoices.body.data[1].lines.data[1].pricing.type",
+          "expected": "price_details"
+        },
+        {
+          "path": "invoices.body.data[1].lines.data[1].pricing.unit_amount_decimal",
+          "expected": "3000"
+        },
+        {
+          "path": "invoices.body.data[1].lines.data[1].quantity",
+          "expected": 1
+        },
+        {
+          "path": "invoices.body.data[1].lines.data[1].quantity_decimal",
+          "expected": "1"
+        },
+        {
+          "path": "invoices.body.data[1].lines.data[1].subtotal",
+          "expected": 3000
+        },
+        {
+          "path": "invoices.body.data[1].lines.data[1].taxes",
+          "expected": []
+        },
+        {
+          "path": "invoices.body.data[1].lines.total_count",
+          "expected": 2,
+          "actual": 1
+        },
+        {
+          "path": "invoices.body.data[1].subtotal",
+          "expected": 3400,
+          "actual": 1000
+        },
+        {
+          "path": "invoices.body.data[1].subtotal_excluding_tax",
+          "expected": 3400,
+          "actual": 1000
+        },
+        {
+          "path": "invoices.body.data[1].total",
+          "expected": 3400,
+          "actual": 1000
+        },
+        {
+          "path": "invoices.body.data[1].total_excluding_tax",
+          "expected": 3400,
+          "actual": 1000
+        },
+        {
+          "path": "invoices.body.data[2].lines.data[0].parent.subscription_item_details.subscription",
+          "expected": "sub#2",
+          "actual": "sub#1"
+        },
+        {
+          "path": "invoices.body.data[2].lines.data[0].parent.subscription_item_details.subscription_item",
+          "expected": "si#2",
+          "actual": "si#1"
+        },
+        {
+          "path": "invoices.body.data[2].lines.data[0].pricing.price_details.price",
+          "expected": "price#3",
+          "actual": "price#2"
+        },
+        {
+          "path": "invoices.body.data[2].lines.data[0].pricing.price_details.product",
+          "expected": "prod#3",
+          "actual": "prod#2"
+        },
+        {
+          "path": "invoices.body.data[2].parent.subscription_details.subscription",
+          "expected": "sub#2",
+          "actual": "sub#1"
+        },
+        {
+          "path": "invoices.body.data[3].lines.data[0].parent.subscription_item_details.subscription",
+          "expected": "sub#1",
+          "actual": "sub#2"
+        },
+        {
+          "path": "invoices.body.data[3].lines.data[0].parent.subscription_item_details.subscription_item",
+          "expected": "si#1",
+          "actual": "si#2"
+        },
+        {
+          "path": "invoices.body.data[3].lines.data[0].pricing.price_details.price",
+          "expected": "price#1",
+          "actual": "price#3"
+        },
+        {
+          "path": "invoices.body.data[3].lines.data[0].pricing.price_details.product",
+          "expected": "prod#1",
+          "actual": "prod#3"
+        },
+        {
+          "path": "invoices.body.data[3].parent.subscription_details.subscription",
+          "expected": "sub#1",
+          "actual": "sub#2"
+        },
+        {
+          "path": "item.body.parent.subscription_details.subscription",
+          "expected": "sub#2",
+          "actual": "sub#1"
+        },
+        {
+          "path": "item.body.pricing.price_details.price",
+          "expected": "price#2",
+          "actual": "price#1"
+        },
+        {
+          "path": "item.body.pricing.price_details.product",
+          "expected": "prod#2",
+          "actual": "prod#1"
+        },
+        {
+          "path": "second.body.id",
+          "expected": "sub#2",
+          "actual": "sub#1"
+        },
+        {
+          "path": "second.body.items.data[0].id",
+          "expected": "si#2",
+          "actual": "si#1"
+        },
+        {
+          "path": "second.body.items.data[0].plan.id",
+          "expected": "price#3",
+          "actual": "price#2"
+        },
+        {
+          "path": "second.body.items.data[0].plan.product",
+          "expected": "prod#3",
+          "actual": "prod#2"
+        },
+        {
+          "path": "second.body.items.data[0].price.id",
+          "expected": "price#3",
+          "actual": "price#2"
+        },
+        {
+          "path": "second.body.items.data[0].price.product",
+          "expected": "prod#3",
+          "actual": "prod#2"
+        },
+        {
+          "path": "second.body.items.data[0].subscription",
+          "expected": "sub#2",
+          "actual": "sub#1"
+        },
+        {
+          "path": "second.body.items.url",
+          "expected": "/v1/subscription_items?subscription=sub#2",
+          "actual": "/v1/subscription_items?subscription=sub#1"
+        },
+        {
+          "path": "second.body.plan.id",
+          "expected": "price#3",
+          "actual": "price#2"
+        },
+        {
+          "path": "second.body.plan.product",
+          "expected": "prod#3",
+          "actual": "prod#2"
+        }
+      ],
+      "reported": []
+    },
+    {
+      "id": "dev-v6-pending-item-always-invoice",
+      "split": "dev",
+      "rules": [
+        "INV-03",
+        "PRO-05"
+      ],
+      "pass": false,
+      "crashed": false,
+      "diffs": [
+        {
+          "path": "invoices.body.data[0].lines.data[0].amount",
+          "expected": -677,
+          "actual": 400
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[0].description",
+          "expected": "Unused time on Basic after 15 Oct 2026",
+          "actual": null
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[0].discountable",
+          "expected": false,
+          "actual": true
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[0].parent.invoice_item_details",
+          "expected": null
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[0].parent.invoice_item_details.invoice_item",
+          "actual": "ii#1"
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[0].parent.invoice_item_details.proration",
+          "actual": false
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[0].parent.invoice_item_details.proration_details.credited_items",
+          "actual": null
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[0].parent.invoice_item_details.subscription",
+          "actual": null
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[0].parent.subscription_item_details",
+          "actual": null
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[0].parent.subscription_item_details.invoice_item",
+          "expected": "ii#1"
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[0].parent.subscription_item_details.proration",
+          "expected": true
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[0].parent.subscription_item_details.proration_details.credited_items.invoice",
+          "expected": "in#2"
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[0].parent.subscription_item_details.proration_details.credited_items.invoice_line_items[0]",
+          "expected": "il#2"
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[0].parent.subscription_item_details.subscription",
+          "expected": "sub#1"
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[0].parent.subscription_item_details.subscription_item",
+          "expected": "si#1"
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[0].parent.type",
+          "expected": "subscription_item_details",
+          "actual": "invoice_item_details"
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[0].period.end",
+          "expected": 1793836800,
+          "actual": 1792022400
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[0].pricing.unit_amount_decimal",
+          "expected": null,
+          "actual": "400"
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[0].subtotal",
+          "expected": -677,
+          "actual": 400
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[1].amount",
+          "expected": 2032,
+          "actual": -677
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[1].description",
+          "expected": "Remaining time on Pro after 15 Oct 2026",
+          "actual": "Unused time on Basic after 15 Oct 2026"
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[1].id",
+          "expected": "il#3",
+          "actual": "il#2"
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[1].parent.subscription_item_details.proration_details.credited_items",
+          "expected": null
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[1].parent.subscription_item_details.proration_details.credited_items.invoice",
+          "actual": "in#2"
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[1].parent.subscription_item_details.proration_details.credited_items.invoice_line_items[0]",
+          "actual": "il#3"
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[1].subtotal",
+          "expected": 2032,
+          "actual": -677
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[2].amount",
+          "expected": 400,
+          "actual": 2032
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[2].description",
+          "expected": null,
+          "actual": "Remaining time on Pro after 15 Oct 2026"
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[2].discountable",
+          "expected": true,
+          "actual": false
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[2].parent.invoice_item_details",
+          "actual": null
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[2].parent.invoice_item_details.invoice_item",
+          "expected": "ii#3"
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[2].parent.invoice_item_details.proration",
+          "expected": false
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[2].parent.invoice_item_details.proration_details.credited_items",
+          "expected": null
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[2].parent.invoice_item_details.subscription",
+          "expected": null
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[2].parent.subscription_item_details",
+          "expected": null
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[2].parent.subscription_item_details.invoice_item",
+          "actual": "ii#3"
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[2].parent.subscription_item_details.proration",
+          "actual": true
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[2].parent.subscription_item_details.proration_details.credited_items",
+          "actual": null
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[2].parent.subscription_item_details.subscription",
+          "actual": "sub#1"
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[2].parent.subscription_item_details.subscription_item",
+          "actual": "si#1"
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[2].parent.type",
+          "expected": "invoice_item_details",
+          "actual": "subscription_item_details"
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[2].period.end",
+          "expected": 1792022400,
+          "actual": 1793836800
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[2].pricing.unit_amount_decimal",
+          "expected": "400",
+          "actual": null
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[2].subtotal",
+          "expected": 400,
+          "actual": 2032
+        },
+        {
+          "path": "invoices.body.data[0].period_start",
+          "expected": 1791158400,
+          "actual": 1792022400
+        },
+        {
+          "path": "invoices.body.data[1].lines.data[0].id",
+          "expected": "il#2",
+          "actual": "il#3"
+        },
+        {
+          "path": "invoices.body.data[1].lines.data[0].pricing.price_details.price",
+          "expected": "price#1",
+          "actual": "price#2"
+        },
+        {
+          "path": "invoices.body.data[1].lines.data[0].pricing.price_details.product",
+          "expected": "prod#1",
+          "actual": "prod#2"
+        },
+        {
+          "path": "item.body.id",
+          "expected": "ii#3",
+          "actual": "ii#1"
+        },
+        {
+          "path": "item.body.pricing.price_details.price",
+          "expected": "price#3",
+          "actual": "price#1"
+        },
+        {
+          "path": "item.body.pricing.price_details.product",
+          "expected": "prod#3",
+          "actual": "prod#1"
+        },
+        {
+          "path": "preview.body.lines.data[0].amount",
+          "expected": -677,
+          "actual": 400
+        },
+        {
+          "path": "preview.body.lines.data[0].description",
+          "expected": "Unused time on Basic after 15 Oct 2026",
+          "actual": null
+        },
+        {
+          "path": "preview.body.lines.data[0].discountable",
+          "expected": false,
+          "actual": true
+        },
+        {
+          "path": "preview.body.lines.data[0].parent.invoice_item_details",
+          "expected": null
+        },
+        {
+          "path": "preview.body.lines.data[0].parent.invoice_item_details.invoice_item",
+          "actual": "ii#1"
+        },
+        {
+          "path": "preview.body.lines.data[0].parent.invoice_item_details.proration",
+          "actual": false
+        },
+        {
+          "path": "preview.body.lines.data[0].parent.invoice_item_details.proration_details.credited_items",
+          "actual": null
+        },
+        {
+          "path": "preview.body.lines.data[0].parent.invoice_item_details.subscription",
+          "actual": null
+        },
+        {
+          "path": "preview.body.lines.data[0].parent.subscription_item_details",
+          "actual": null
+        },
+        {
+          "path": "preview.body.lines.data[0].parent.subscription_item_details.invoice_item",
+          "expected": "ii#4"
+        },
+        {
+          "path": "preview.body.lines.data[0].parent.subscription_item_details.proration",
+          "expected": true
+        },
+        {
+          "path": "preview.body.lines.data[0].parent.subscription_item_details.proration_details.credited_items.invoice",
+          "expected": "in#2"
+        },
+        {
+          "path": "preview.body.lines.data[0].parent.subscription_item_details.proration_details.credited_items.invoice_line_items[0]",
+          "expected": "il#2"
+        },
+        {
+          "path": "preview.body.lines.data[0].parent.subscription_item_details.subscription",
+          "expected": "sub#1"
+        },
+        {
+          "path": "preview.body.lines.data[0].parent.subscription_item_details.subscription_item",
+          "expected": "si#1"
+        },
+        {
+          "path": "preview.body.lines.data[0].parent.type",
+          "expected": "subscription_item_details",
+          "actual": "invoice_item_details"
+        },
+        {
+          "path": "preview.body.lines.data[0].period.end",
+          "expected": 1793836800,
+          "actual": 1792022400
+        },
+        {
+          "path": "preview.body.lines.data[0].pricing.unit_amount_decimal",
+          "expected": null,
+          "actual": "400"
+        },
+        {
+          "path": "preview.body.lines.data[0].subtotal",
+          "expected": -677,
+          "actual": 400
+        },
+        {
+          "path": "preview.body.lines.data[1].amount",
+          "expected": 2032,
+          "actual": -677
+        },
+        {
+          "path": "preview.body.lines.data[1].description",
+          "expected": "Remaining time on Pro after 15 Oct 2026",
+          "actual": "Unused time on Basic after 15 Oct 2026"
+        },
+        {
+          "path": "preview.body.lines.data[1].parent.subscription_item_details.invoice_item",
+          "expected": "ii#5",
+          "actual": "ii#4"
+        },
+        {
+          "path": "preview.body.lines.data[1].parent.subscription_item_details.proration_details.credited_items",
+          "expected": null
+        },
+        {
+          "path": "preview.body.lines.data[1].parent.subscription_item_details.proration_details.credited_items.invoice",
+          "actual": "in#2"
+        },
+        {
+          "path": "preview.body.lines.data[1].parent.subscription_item_details.proration_details.credited_items.invoice_line_items[0]",
+          "actual": "il#3"
+        },
+        {
+          "path": "preview.body.lines.data[1].subtotal",
+          "expected": 2032,
+          "actual": -677
+        },
+        {
+          "path": "preview.body.lines.data[2].amount",
+          "expected": 400,
+          "actual": 2032
+        },
+        {
+          "path": "preview.body.lines.data[2].description",
+          "expected": null,
+          "actual": "Remaining time on Pro after 15 Oct 2026"
+        },
+        {
+          "path": "preview.body.lines.data[2].discountable",
+          "expected": true,
+          "actual": false
+        },
+        {
+          "path": "preview.body.lines.data[2].parent.invoice_item_details",
+          "actual": null
+        },
+        {
+          "path": "preview.body.lines.data[2].parent.invoice_item_details.invoice_item",
+          "expected": "ii#3"
+        },
+        {
+          "path": "preview.body.lines.data[2].parent.invoice_item_details.proration",
+          "expected": false
+        },
+        {
+          "path": "preview.body.lines.data[2].parent.invoice_item_details.proration_details.credited_items",
+          "expected": null
+        },
+        {
+          "path": "preview.body.lines.data[2].parent.invoice_item_details.subscription",
+          "expected": null
+        },
+        {
+          "path": "preview.body.lines.data[2].parent.subscription_item_details",
+          "expected": null
+        },
+        {
+          "path": "preview.body.lines.data[2].parent.subscription_item_details.invoice_item",
+          "actual": "ii#5"
+        },
+        {
+          "path": "preview.body.lines.data[2].parent.subscription_item_details.proration",
+          "actual": true
+        },
+        {
+          "path": "preview.body.lines.data[2].parent.subscription_item_details.proration_details.credited_items",
+          "actual": null
+        },
+        {
+          "path": "preview.body.lines.data[2].parent.subscription_item_details.subscription",
+          "actual": "sub#1"
+        },
+        {
+          "path": "preview.body.lines.data[2].parent.subscription_item_details.subscription_item",
+          "actual": "si#1"
+        },
+        {
+          "path": "preview.body.lines.data[2].parent.type",
+          "expected": "invoice_item_details",
+          "actual": "subscription_item_details"
+        },
+        {
+          "path": "preview.body.lines.data[2].period.end",
+          "expected": 1792022400,
+          "actual": 1793836800
+        },
+        {
+          "path": "preview.body.lines.data[2].pricing.unit_amount_decimal",
+          "expected": "400",
+          "actual": null
+        },
+        {
+          "path": "preview.body.lines.data[2].subtotal",
+          "expected": 400,
+          "actual": 2032
+        },
+        {
+          "path": "preview.body.parent.subscription_details.subscription_proration_date",
+          "expected": 1792022400
+        },
+        {
+          "path": "preview.body.period_start",
+          "expected": 1791158400,
+          "actual": 1792022400
+        },
+        {
+          "path": "update.body.items.data[0].plan.id",
+          "expected": "price#2",
+          "actual": "price#3"
+        },
+        {
+          "path": "update.body.items.data[0].plan.product",
+          "expected": "prod#2",
+          "actual": "prod#3"
+        },
+        {
+          "path": "update.body.items.data[0].price.id",
+          "expected": "price#2",
+          "actual": "price#3"
+        },
+        {
+          "path": "update.body.items.data[0].price.product",
+          "expected": "prod#2",
+          "actual": "prod#3"
+        },
+        {
+          "path": "update.body.plan.id",
+          "expected": "price#2",
+          "actual": "price#3"
+        },
+        {
+          "path": "update.body.plan.product",
+          "expected": "prod#2",
+          "actual": "prod#3"
+        }
+      ],
+      "reported": []
+    },
+    {
+      "id": "dev-v6-pending-item-period-end-cancel",
+      "split": "dev",
+      "rules": [
+        "INV-03",
+        "LIF-03"
+      ],
+      "pass": true,
+      "crashed": false,
+      "diffs": [],
+      "reported": []
+    },
+    {
+      "id": "dev-v6-pending-item-preview",
+      "split": "dev",
+      "rules": [
+        "INV-03"
+      ],
+      "pass": false,
+      "crashed": false,
+      "diffs": [
+        {
+          "path": "preview.body.lines.data[0].amount",
+          "expected": -677,
+          "actual": 400
+        },
+        {
+          "path": "preview.body.lines.data[0].description",
+          "expected": "Unused time on Basic after 15 Oct 2026",
+          "actual": null
+        },
+        {
+          "path": "preview.body.lines.data[0].discountable",
+          "expected": false,
+          "actual": true
+        },
+        {
+          "path": "preview.body.lines.data[0].parent.invoice_item_details",
+          "expected": null
+        },
+        {
+          "path": "preview.body.lines.data[0].parent.invoice_item_details.invoice_item",
+          "actual": "ii#1"
+        },
+        {
+          "path": "preview.body.lines.data[0].parent.invoice_item_details.proration",
+          "actual": false
+        },
+        {
+          "path": "preview.body.lines.data[0].parent.invoice_item_details.proration_details.credited_items",
+          "actual": null
+        },
+        {
+          "path": "preview.body.lines.data[0].parent.invoice_item_details.subscription",
+          "actual": null
+        },
+        {
+          "path": "preview.body.lines.data[0].parent.subscription_item_details",
+          "actual": null
+        },
+        {
+          "path": "preview.body.lines.data[0].parent.subscription_item_details.invoice_item",
+          "expected": "ii#2"
+        },
+        {
+          "path": "preview.body.lines.data[0].parent.subscription_item_details.proration",
+          "expected": true
+        },
+        {
+          "path": "preview.body.lines.data[0].parent.subscription_item_details.proration_details.credited_items.invoice",
+          "expected": "in#1"
+        },
+        {
+          "path": "preview.body.lines.data[0].parent.subscription_item_details.proration_details.credited_items.invoice_line_items[0]",
+          "expected": "il#1"
+        },
+        {
+          "path": "preview.body.lines.data[0].parent.subscription_item_details.subscription",
+          "expected": "sub#1"
+        },
+        {
+          "path": "preview.body.lines.data[0].parent.subscription_item_details.subscription_item",
+          "expected": "si#1"
+        },
+        {
+          "path": "preview.body.lines.data[0].parent.type",
+          "expected": "subscription_item_details",
+          "actual": "invoice_item_details"
+        },
+        {
+          "path": "preview.body.lines.data[0].period.end",
+          "expected": 1793836800,
+          "actual": 1792022400
+        },
+        {
+          "path": "preview.body.lines.data[0].pricing.price_details.price",
+          "expected": "price#2",
+          "actual": "price#1"
+        },
+        {
+          "path": "preview.body.lines.data[0].pricing.price_details.product",
+          "expected": "prod#2",
+          "actual": "prod#1"
+        },
+        {
+          "path": "preview.body.lines.data[0].pricing.unit_amount_decimal",
+          "expected": null,
+          "actual": "400"
+        },
+        {
+          "path": "preview.body.lines.data[0].subtotal",
+          "expected": -677,
+          "actual": 400
+        },
+        {
+          "path": "preview.body.lines.data[1].amount",
+          "expected": 2032,
+          "actual": -677
+        },
+        {
+          "path": "preview.body.lines.data[1].description",
+          "expected": "Remaining time on Pro after 15 Oct 2026",
+          "actual": "Unused time on Basic after 15 Oct 2026"
+        },
+        {
+          "path": "preview.body.lines.data[1].parent.subscription_item_details.invoice_item",
+          "expected": "ii#3",
+          "actual": "ii#2"
+        },
+        {
+          "path": "preview.body.lines.data[1].parent.subscription_item_details.proration_details.credited_items",
+          "expected": null
+        },
+        {
+          "path": "preview.body.lines.data[1].parent.subscription_item_details.proration_details.credited_items.invoice",
+          "actual": "in#1"
+        },
+        {
+          "path": "preview.body.lines.data[1].parent.subscription_item_details.proration_details.credited_items.invoice_line_items[0]",
+          "actual": "il#1"
+        },
+        {
+          "path": "preview.body.lines.data[1].pricing.price_details.price",
+          "expected": "price#3",
+          "actual": "price#2"
+        },
+        {
+          "path": "preview.body.lines.data[1].pricing.price_details.product",
+          "expected": "prod#3",
+          "actual": "prod#2"
+        },
+        {
+          "path": "preview.body.lines.data[1].subtotal",
+          "expected": 2032,
+          "actual": -677
+        },
+        {
+          "path": "preview.body.lines.data[2].amount",
+          "expected": 400,
+          "actual": 2032
+        },
+        {
+          "path": "preview.body.lines.data[2].description",
+          "expected": null,
+          "actual": "Remaining time on Pro after 15 Oct 2026"
+        },
+        {
+          "path": "preview.body.lines.data[2].discountable",
+          "expected": true,
+          "actual": false
+        },
+        {
+          "path": "preview.body.lines.data[2].parent.invoice_item_details",
+          "actual": null
+        },
+        {
+          "path": "preview.body.lines.data[2].parent.invoice_item_details.invoice_item",
+          "expected": "ii#1"
+        },
+        {
+          "path": "preview.body.lines.data[2].parent.invoice_item_details.proration",
+          "expected": false
+        },
+        {
+          "path": "preview.body.lines.data[2].parent.invoice_item_details.proration_details.credited_items",
+          "expected": null
+        },
+        {
+          "path": "preview.body.lines.data[2].parent.invoice_item_details.subscription",
+          "expected": null
+        },
+        {
+          "path": "preview.body.lines.data[2].parent.subscription_item_details",
+          "expected": null
+        },
+        {
+          "path": "preview.body.lines.data[2].parent.subscription_item_details.invoice_item",
+          "actual": "ii#3"
+        },
+        {
+          "path": "preview.body.lines.data[2].parent.subscription_item_details.proration",
+          "actual": true
+        },
+        {
+          "path": "preview.body.lines.data[2].parent.subscription_item_details.proration_details.credited_items",
+          "actual": null
+        },
+        {
+          "path": "preview.body.lines.data[2].parent.subscription_item_details.subscription",
+          "actual": "sub#1"
+        },
+        {
+          "path": "preview.body.lines.data[2].parent.subscription_item_details.subscription_item",
+          "actual": "si#1"
+        },
+        {
+          "path": "preview.body.lines.data[2].parent.type",
+          "expected": "invoice_item_details",
+          "actual": "subscription_item_details"
+        },
+        {
+          "path": "preview.body.lines.data[2].period.end",
+          "expected": 1792022400,
+          "actual": 1793836800
+        },
+        {
+          "path": "preview.body.lines.data[2].pricing.price_details.price",
+          "expected": "price#1",
+          "actual": "price#3"
+        },
+        {
+          "path": "preview.body.lines.data[2].pricing.price_details.product",
+          "expected": "prod#1",
+          "actual": "prod#3"
+        },
+        {
+          "path": "preview.body.lines.data[2].pricing.unit_amount_decimal",
+          "expected": "400",
+          "actual": null
+        },
+        {
+          "path": "preview.body.lines.data[2].subtotal",
+          "expected": 400,
+          "actual": 2032
+        },
+        {
+          "path": "preview.body.parent.subscription_details.subscription_proration_date",
+          "expected": 1792022400
+        }
+      ],
+      "reported": []
+    },
+    {
       "id": "fresh-001",
       "split": "dev",
       "rules": [
@@ -21908,80 +28560,80 @@
     {
       "id": "PRO-01",
       "status": "verified",
-      "pass": 963,
-      "total": 963
+      "pass": 1019,
+      "total": 1019
     },
     {
       "id": "PRO-02",
       "status": "verified",
-      "pass": 962,
-      "total": 962
+      "pass": 1018,
+      "total": 1018
     },
     {
       "id": "PRO-03",
       "status": "verified",
-      "pass": 959,
-      "total": 959
+      "pass": 1015,
+      "total": 1015
     },
     {
       "id": "PRO-04",
       "status": "verified",
-      "pass": 969,
-      "total": 969
+      "pass": 1025,
+      "total": 1025
     },
     {
       "id": "PRO-05",
-      "status": "verified",
-      "pass": 934,
-      "total": 934
+      "status": "failing",
+      "pass": 988,
+      "total": 989
     },
     {
       "id": "PRO-06",
       "status": "verified",
-      "pass": 74,
-      "total": 74
+      "pass": 77,
+      "total": 77
     },
     {
       "id": "PRO-07",
       "status": "verified",
-      "pass": 168,
-      "total": 168
+      "pass": 174,
+      "total": 174
     },
     {
       "id": "PRO-08",
       "status": "verified",
-      "pass": 451,
-      "total": 451
+      "pass": 480,
+      "total": 480
     },
     {
       "id": "PRO-09",
       "status": "verified",
-      "pass": 455,
-      "total": 455
+      "pass": 482,
+      "total": 482
     },
     {
       "id": "PRO-10",
       "status": "verified",
-      "pass": 374,
-      "total": 374
+      "pass": 402,
+      "total": 402
     },
     {
       "id": "PER-01",
       "status": "verified",
-      "pass": 182,
-      "total": 182
+      "pass": 196,
+      "total": 196
     },
     {
       "id": "INT-01",
       "status": "verified",
-      "pass": 119,
-      "total": 119
+      "pass": 125,
+      "total": 125
     },
     {
       "id": "DSC-01",
       "status": "verified",
-      "pass": 445,
-      "total": 445
+      "pass": 488,
+      "total": 488
     },
     {
       "id": "DSC-02",
@@ -21992,26 +28644,26 @@
     {
       "id": "DSC-03",
       "status": "verified",
-      "pass": 444,
-      "total": 444
+      "pass": 478,
+      "total": 478
     },
     {
       "id": "DSC-04",
       "status": "verified",
-      "pass": 191,
-      "total": 191
+      "pass": 248,
+      "total": 248
     },
     {
       "id": "DSC-05",
       "status": "verified",
-      "pass": 322,
-      "total": 322
+      "pass": 382,
+      "total": 382
     },
     {
       "id": "MOD-01",
       "status": "verified",
-      "pass": 334,
-      "total": 334
+      "pass": 394,
+      "total": 394
     },
     {
       "id": "ERR-01",
@@ -22070,14 +28722,14 @@
     {
       "id": "LIF-03",
       "status": "verified",
-      "pass": 1,
-      "total": 1
+      "pass": 2,
+      "total": 2
     },
     {
       "id": "LIF-04",
-      "status": "verified",
+      "status": "failing",
       "pass": 1,
-      "total": 1
+      "total": 2
     },
     {
       "id": "LIF-05",
@@ -22148,14 +28800,14 @@
     {
       "id": "ITM-01",
       "status": "verified",
-      "pass": 486,
-      "total": 486
+      "pass": 546,
+      "total": 546
     },
     {
       "id": "DSC-06",
       "status": "verified",
-      "pass": 269,
-      "total": 269
+      "pass": 293,
+      "total": 293
     },
     {
       "id": "DSC-07",
@@ -22201,9 +28853,9 @@
     },
     {
       "id": "INV-02",
-      "status": "verified",
+      "status": "failing",
       "pass": 3,
-      "total": 3
+      "total": 4
     },
     {
       "id": "LIF-08",
@@ -22219,21 +28871,33 @@
     },
     {
       "id": "INV-03",
-      "status": "verified",
-      "pass": 2,
-      "total": 2
+      "status": "failing",
+      "pass": 3,
+      "total": 6
     },
     {
       "id": "LIF-09",
-      "status": "verified",
+      "status": "failing",
       "pass": 2,
-      "total": 2
+      "total": 3
     },
     {
       "id": "DSC-10",
       "status": "unverified",
       "pass": 0,
       "total": 0
+    },
+    {
+      "id": "LST-01",
+      "status": "failing",
+      "pass": 1,
+      "total": 2
+    },
+    {
+      "id": "ERR-03",
+      "status": "failing",
+      "pass": 0,
+      "total": 1
     }
   ]
 }

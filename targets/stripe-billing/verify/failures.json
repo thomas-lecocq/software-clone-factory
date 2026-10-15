@@ -1,1 +1,264 @@
-{}
+{
+  "LIF-09": [
+    {
+      "fixture": "dev-v6-cancel-at-mid-cleared",
+      "diffs": [
+        {
+          "path": "after.latest_invoice.amount_due",
+          "expected": 1000,
+          "actual": 484
+        },
+        {
+          "path": "after.latest_invoice.amount_paid",
+          "expected": 1000,
+          "actual": 484
+        },
+        {
+          "path": "after.latest_invoice.lines[0].amount",
+          "expected": 516,
+          "actual": -516
+        },
+        {
+          "path": "after.latest_invoice.lines[0].description",
+          "expected": "Remaining time on Basic after 20 Oct 2026",
+          "actual": "Unused time on Basic after 20 Oct 2026"
+        },
+        {
+          "path": "after.latest_invoice.lines[1].amount",
+          "expected": -516,
+          "actual": 1000
+        }
+      ]
+    }
+  ],
+  "LIF-04": [
+    {
+      "fixture": "dev-v6-cancel-at-mid-cleared",
+      "diffs": [
+        {
+          "path": "after.latest_invoice.amount_due",
+          "expected": 1000,
+          "actual": 484
+        },
+        {
+          "path": "after.latest_invoice.amount_paid",
+          "expected": 1000,
+          "actual": 484
+        },
+        {
+          "path": "after.latest_invoice.lines[0].amount",
+          "expected": 516,
+          "actual": -516
+        },
+        {
+          "path": "after.latest_invoice.lines[0].description",
+          "expected": "Remaining time on Basic after 20 Oct 2026",
+          "actual": "Unused time on Basic after 20 Oct 2026"
+        },
+        {
+          "path": "after.latest_invoice.lines[1].amount",
+          "expected": -516,
+          "actual": 1000
+        }
+      ]
+    }
+  ],
+  "ERR-03": [
+    {
+      "fixture": "dev-v6-invalid-proration-behavior",
+      "diffs": [
+        {
+          "path": "preview.body.account_country",
+          "actual": "FR"
+        },
+        {
+          "path": "preview.body.account_name",
+          "actual": "environnement de test AcmeCo"
+        },
+        {
+          "path": "preview.body.account_tax_ids",
+          "actual": null
+        },
+        {
+          "path": "preview.body.amount_due",
+          "actual": 5000
+        },
+        {
+          "path": "preview.body.amount_overpaid",
+          "actual": 0
+        }
+      ]
+    }
+  ],
+  "INV-02": [
+    {
+      "fixture": "dev-v6-invoice-routing",
+      "diffs": [
+        {
+          "path": "finalize.body.account_country",
+          "expected": "FR"
+        },
+        {
+          "path": "finalize.body.account_name",
+          "expected": "environnement de test AcmeCo"
+        },
+        {
+          "path": "finalize.body.account_tax_ids",
+          "expected": null
+        },
+        {
+          "path": "finalize.body.amount_due",
+          "expected": 400
+        },
+        {
+          "path": "finalize.body.amount_overpaid",
+          "expected": 0
+        }
+      ]
+    }
+  ],
+  "LST-01": [
+    {
+      "fixture": "dev-v6-list-by-customer",
+      "diffs": [
+        {
+          "path": "other_sub.body.application",
+          "actual": null
+        },
+        {
+          "path": "other_sub.body.application_fee_percent",
+          "actual": null
+        },
+        {
+          "path": "other_sub.body.automatic_tax.disabled_reason",
+          "actual": null
+        },
+        {
+          "path": "other_sub.body.automatic_tax.enabled",
+          "actual": false
+        },
+        {
+          "path": "other_sub.body.automatic_tax.liability",
+          "actual": null
+        }
+      ]
+    }
+  ],
+  "INV-03": [
+    {
+      "fixture": "dev-v6-oneoff-other-subscription",
+      "diffs": [
+        {
+          "path": "invoices.body.data[0].amount_due",
+          "expected": 1000,
+          "actual": 3400
+        },
+        {
+          "path": "invoices.body.data[0].amount_paid",
+          "expected": 1000,
+          "actual": 3400
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[0].amount",
+          "expected": 1000,
+          "actual": 400
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[0].description",
+          "expected": "1 × Basic (at $10.00 / month)",
+          "actual": null
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[0].parent.invoice_item_details",
+          "expected": null
+        }
+      ]
+    },
+    {
+      "fixture": "dev-v6-pending-item-always-invoice",
+      "diffs": [
+        {
+          "path": "invoices.body.data[0].lines.data[0].amount",
+          "expected": -677,
+          "actual": 400
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[0].description",
+          "expected": "Unused time on Basic after 15 Oct 2026",
+          "actual": null
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[0].discountable",
+          "expected": false,
+          "actual": true
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[0].parent.invoice_item_details",
+          "expected": null
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[0].parent.invoice_item_details.invoice_item",
+          "actual": "ii#1"
+        }
+      ]
+    },
+    {
+      "fixture": "dev-v6-pending-item-preview",
+      "diffs": [
+        {
+          "path": "preview.body.lines.data[0].amount",
+          "expected": -677,
+          "actual": 400
+        },
+        {
+          "path": "preview.body.lines.data[0].description",
+          "expected": "Unused time on Basic after 15 Oct 2026",
+          "actual": null
+        },
+        {
+          "path": "preview.body.lines.data[0].discountable",
+          "expected": false,
+          "actual": true
+        },
+        {
+          "path": "preview.body.lines.data[0].parent.invoice_item_details",
+          "expected": null
+        },
+        {
+          "path": "preview.body.lines.data[0].parent.invoice_item_details.invoice_item",
+          "actual": "ii#1"
+        }
+      ]
+    }
+  ],
+  "PRO-05": [
+    {
+      "fixture": "dev-v6-pending-item-always-invoice",
+      "diffs": [
+        {
+          "path": "invoices.body.data[0].lines.data[0].amount",
+          "expected": -677,
+          "actual": 400
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[0].description",
+          "expected": "Unused time on Basic after 15 Oct 2026",
+          "actual": null
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[0].discountable",
+          "expected": false,
+          "actual": true
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[0].parent.invoice_item_details",
+          "expected": null
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[0].parent.invoice_item_details.invoice_item",
+          "actual": "ii#1"
+        }
+      ]
+    }
+  ]
+}
