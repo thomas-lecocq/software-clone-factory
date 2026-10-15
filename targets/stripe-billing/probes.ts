@@ -2265,6 +2265,221 @@ const v5Lifecycle: [string, string[], Record<string, unknown>][] = [
   ],
 ];
 
+// v6: behaviour no fixture pinned on clone v5, from mutation testing (subscription lists, an
+// invalid enum value, a one-off item of another subscription, invoice routing) and from the v5
+// builder's own unpinned choices (clone/NOTES.md, pass 8). Designed after seeing the gaps, so dev.
+const second = raw("second", "POST", "/v1/subscriptions", {
+  customer: "{customer}",
+  "items[0][price]": "{price2}",
+});
+const pendingItem = (extra: Record<string, string> = {}) =>
+  raw("item", "POST", "/v1/invoiceitems", {
+    customer: "{customer}",
+    amount: "400",
+    currency: "usd",
+    ...extra,
+  });
+const v6Lifecycle: [string, string[], Record<string, unknown>][] = [
+  [
+    "dev-v6-list-by-customer",
+    ["LST-01"],
+    {
+      amount: 1000,
+      second_amount: 3000,
+      trial_days: null,
+      steps: [
+        raw("other", "POST", "/v1/customers", { "preferred_locales[0]": "en" }),
+        raw("other_sub", "POST", "/v1/subscriptions", {
+          customer: "{other.id}",
+          "items[0][price]": "{price2}",
+        }),
+        raw("mine", "GET", "/v1/subscriptions", { customer: "{customer}" }),
+        raw("theirs", "GET", "/v1/subscriptions", { customer: "{other.id}", status: "all" }),
+      ],
+    },
+  ],
+  [
+    "dev-v6-list-by-status",
+    ["LST-01"],
+    {
+      amount: 1000,
+      second_amount: 3000,
+      trial_days: null,
+      steps: [
+        second,
+        raw("cancel", "DELETE", "/v1/subscriptions/{second.id}"),
+        raw("default", "GET", "/v1/subscriptions", { customer: "{customer}" }),
+        raw("all", "GET", "/v1/subscriptions", { customer: "{customer}", status: "all" }),
+        raw("active", "GET", "/v1/subscriptions", { customer: "{customer}", status: "active" }),
+        raw("canceled", "GET", "/v1/subscriptions", {
+          customer: "{customer}",
+          status: "canceled",
+        }),
+      ],
+    },
+  ],
+  [
+    "dev-v6-invalid-proration-behavior",
+    ["ERR-03"],
+    {
+      amount: 1000,
+      second_amount: 3000,
+      trial_days: null,
+      steps: [
+        raw("update", "POST", "/v1/subscriptions/{subscription}", {
+          "items[0][id]": "{item}",
+          "items[0][price]": "{price2}",
+          proration_behavior: "sometimes",
+        }),
+        raw("preview", "POST", "/v1/invoices/create_preview", {
+          subscription: "{subscription}",
+          "subscription_details[items][0][id]": "{item}",
+          "subscription_details[items][0][price]": "{price2}",
+          "subscription_details[proration_behavior]": "sometimes",
+        }),
+        sub("unchanged"),
+      ],
+    },
+  ],
+  [
+    "dev-v6-oneoff-other-subscription",
+    ["INV-03"],
+    {
+      amount: 1000,
+      second_amount: 3000,
+      trial_days: null,
+      steps: [
+        second,
+        pendingItem({ subscription: "{second.id}" }),
+        { do: "advance", seconds: M },
+        sub("renewed"),
+        raw("invoices", "GET", "/v1/invoices", { customer: "{customer}" }),
+      ],
+    },
+  ],
+  [
+    "dev-v6-invoice-routing",
+    ["INV-02"],
+    {
+      amount: 1000,
+      trial_days: null,
+      steps: [
+        pendingItem(),
+        raw("draft", "POST", "/v1/invoices", {
+          customer: "{customer}",
+          pending_invoice_items_behavior: "include",
+        }),
+        raw("update", "POST", "/v1/invoices/{draft.id}", { description: "Manual" }),
+        raw("read", "GET", "/v1/invoices/{draft.id}"),
+        raw("finalize", "POST", "/v1/invoices/{draft.id}/finalize"),
+        raw("missing", "GET", "/v1/invoices/in_Missing0000000000"),
+      ],
+    },
+  ],
+  [
+    "dev-v6-cancel-at-mid-cleared",
+    ["LIF-09", "LIF-04"],
+    {
+      amount: 1000,
+      trial_days: null,
+      steps: [
+        raw("set", "POST", "/v1/subscriptions/{subscription}", {
+          cancel_at: String(MID),
+          proration_behavior: "create_prorations",
+        }),
+        raw("pending_set", "GET", "/v1/invoiceitems", { customer: "{customer}", pending: "true" }),
+        raw("unset", "POST", "/v1/subscriptions/{subscription}", { cancel_at: "" }),
+        raw("pending_unset", "GET", "/v1/invoiceitems", {
+          customer: "{customer}",
+          pending: "true",
+        }),
+        { do: "advance", seconds: M },
+        sub("after"),
+        raw("invoices", "GET", "/v1/invoices", { customer: "{customer}" }),
+      ],
+    },
+  ],
+  [
+    "dev-v6-pending-item-period-end-cancel",
+    ["INV-03", "LIF-03"],
+    {
+      amount: 1000,
+      trial_days: null,
+      steps: [
+        { do: "advance", seconds: 10 * 86400 },
+        pendingItem(),
+        { do: "cancel_at_period_end" },
+        { do: "advance", seconds: M },
+        sub("ended"),
+        raw("pending", "GET", "/v1/invoiceitems", { customer: "{customer}", pending: "true" }),
+        raw("invoices", "GET", "/v1/invoices", { customer: "{customer}" }),
+      ],
+    },
+  ],
+  [
+    "dev-v6-pending-item-always-invoice",
+    ["INV-03", "PRO-05"],
+    {
+      amount: 1000,
+      second_amount: 3000,
+      trial_days: null,
+      steps: [
+        { do: "advance", seconds: 10 * 86400 },
+        pendingItem(),
+        raw("preview", "POST", "/v1/invoices/create_preview", {
+          subscription: "{subscription}",
+          "subscription_details[items][0][id]": "{item}",
+          "subscription_details[items][0][price]": "{price2}",
+          "subscription_details[proration_behavior]": "always_invoice",
+        }),
+        raw("update", "POST", "/v1/subscriptions/{subscription}", {
+          "items[0][id]": "{item}",
+          "items[0][price]": "{price2}",
+          proration_behavior: "always_invoice",
+        }),
+        raw("invoices", "GET", "/v1/invoices", { customer: "{customer}" }),
+        raw("pending", "GET", "/v1/invoiceitems", { customer: "{customer}", pending: "true" }),
+      ],
+    },
+  ],
+  [
+    "dev-v6-pending-item-preview",
+    ["INV-03"],
+    {
+      amount: 1000,
+      second_amount: 3000,
+      trial_days: null,
+      steps: [
+        { do: "advance", seconds: 10 * 86400 },
+        pendingItem(),
+        raw("preview", "POST", "/v1/invoices/create_preview", {
+          subscription: "{subscription}",
+          "subscription_details[items][0][id]": "{item}",
+          "subscription_details[items][0][price]": "{price2}",
+        }),
+      ],
+    },
+  ],
+];
+
+// v6: once coupons in classic billing mode on several items (the v5 builder applied the flexible
+// rule there unpinned), drawn from WIDE_DISTRIBUTION_V2 and kept inside that area.
+function v6Wide(): [string, WideInput][] {
+  return wideProbesV2(4000, 20261016, "x")
+    .map(([, p]) => p)
+    .filter(
+      (p) =>
+        p.billing_mode === "classic" &&
+        p.items.length >= 2 &&
+        p.coupons.some((c) => c.duration === "once"),
+    )
+    .slice(0, 60)
+    .map((p, i): [string, WideInput] => [
+      `dev-v6-classic-once-${String(i + 1).padStart(3, "0")}`,
+      p,
+    ]);
+}
+
 export function probes(): Probe[] {
   const logic = [
     ...designed.map(([id, p]) => [`d-${id}`, p] as const),
@@ -2296,6 +2511,11 @@ export function probes(): Probe[] {
       input: JsonSchema.parse({ kind: "lifecycle", start: STARTS.oct, ...rest }),
     })),
     ...lifecycleV2.map(([id, rules, rest]) => ({
+      id,
+      rules,
+      input: JsonSchema.parse({ kind: "lifecycle", start: STARTS.oct, ...rest }),
+    })),
+    ...v6Lifecycle.map(([id, rules, rest]) => ({
       id,
       rules,
       input: JsonSchema.parse({ kind: "lifecycle", start: STARTS.oct, ...rest }),
@@ -2337,6 +2557,7 @@ export function probes(): Probe[] {
     ...batch3Probes(),
     ...v4Wide(),
     ...v5Wide(),
+    ...v6Wide(),
     ...holdoutBatches(),
   ].map(([id, p]) => ({
     id,

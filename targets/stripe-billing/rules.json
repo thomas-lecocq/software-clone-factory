@@ -494,6 +494,24 @@
         "kind": "inferred",
         "ref": "mutation survivor billing.ts:30 (GAPS.md); to be confirmed by dev-v5-percent-*"
       }
+    },
+    {
+      "id": "LST-01",
+      "area": "logic",
+      "statement": "Listing subscriptions filters by customer and by status: without status, canceled subscriptions are left out; status=all includes them; status=<s> keeps only that status.",
+      "provenance": {
+        "kind": "documented",
+        "ref": "Stripe API list subscriptions; mutation survivors api.ts:484 and api.ts:486 on clone v5 (GAPS.md); to be confirmed by dev-v6-list-*"
+      }
+    },
+    {
+      "id": "ERR-03",
+      "area": "logic",
+      "statement": "An enum parameter given a value outside its set is rejected with an invalid_request_error naming the parameter.",
+      "provenance": {
+        "kind": "documented",
+        "ref": "Stripe API errors; mutation survivor api.ts:321 on clone v5; to be confirmed by dev-v6-invalid-*"
+      }
     }
   ]
 }
