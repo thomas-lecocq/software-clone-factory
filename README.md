@@ -145,14 +145,17 @@ whole batch.
 
 **What the claims do not say.**
 
-- A quarter of batch 2 is easy (Stripe errors, changes that change nothing). On the 343
-  substantive cases the bound is 0.87 % at 95 % and 1.33 % at 99 %: "below 1 %" holds at 95 % only.
-- It is in-distribution. A breaker agent then chose 40 inputs to make the clone fail (100 %
-  coupons, quantity 0, very large amounts, several items changing interval): the clone fails **12
-  of 40**.
-- It is about this clone. Two more builds from scratch, with the same inputs, score 472 of 473 each on
-  batch 2, failing different cases ([`variance.md`](targets/stripe-billing/variance.md)): the 99 %
-  result is the best build's, not every build's.
+- Part of each batch is easy (Stripe errors, changes that change nothing). On substantive cases
+  alone, batch 2 supports "below 1 %" at 95 % only (343 cases), and so does batch 6 (410 cases,
+  bound 1.12 % at 99 %).
+- It is in-distribution. Breaker agents chose inputs to make the clone fail: the first clone
+  failed **12 of 40**; the level A clone (v5) fails **34 of 41** of a second round, 30 of them in
+  lifecycle behaviour the probes never covered (trials, pausing, billing anchors, retries) and 4
+  in the preview (inputs Stripe rejects, one classic-mode case). A skeptic finds the edge of the
+  measured slice in minutes.
+- It is about one clone. On batch 2, two more builds from scratch scored 472 of 473 each, failing
+  different cases ([`variance.md`](targets/stripe-billing/variance.md)); the wider distribution's
+  99 % is one build's result.
 - It is test mode only, USD only, and none of the factory's components was ablated.
 
 **An agent was given real tasks.** Eight everyday billing tasks, twice each, against the clone and
@@ -166,8 +169,11 @@ agent actually makes; the factory measures both.
 the committed auditor prompt found 12 of 12 (recall at least 77.9 % at 95 %). Two more runs on the
 clean repository found 20 real problems, all fixed, among them: the clone ran inside the scorer's
 process, could read the recorded fixtures, and could fake its layout from its own page code. Today
-it runs in its own process under Node's permission model, and layout is measured in an isolated
-world.
+it runs in its own process under Node's permission model (files only: its network is not
+restricted, `GAPS.md`), and layout is measured in an isolated
+world. A third run, on 2026-10-15 after the v4 to v6 work, found 9 more:
+three wrong statements in `GAPS.md` and a guard gap (fixed), and five limits now declared in
+`GAPS.md` (among them the clone's unrestricted network and invoice links in fixtures).
 
 Not affiliated with Stripe. The clone reimplements observed behaviour of the public API in test
 mode; it contains no Stripe code, and no documentation text beyond short quotes.

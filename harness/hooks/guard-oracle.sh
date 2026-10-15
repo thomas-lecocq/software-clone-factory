@@ -106,6 +106,12 @@ redirect='>>?[[:space:]]*[^[:space:]]*(fixtures/|fixtures\.lock|policy\.json|rul
 if [[ "$tool" == "Bash" ]] && { [[ "$target" =~ $redirect ]] || { [[ "$target" =~ $oracle ]] && [[ "$target" =~ (sed -i|tee |mv |cp |rm |perl -i|record|git checkout|git restore|writeFile|open\(|python|ruby|perl |truncate |chmod |dd |install ) ]]; }; }; then
   block "$role cannot modify the evaluator through the shell"
 fi
+# The target's driver code (adapter, probes, drivers) runs on both sides, so it shapes the score:
+# a shell write to a target's top-level .ts file is blocked like a Write on it. Reads stay allowed.
+driver='targets/[^/[:space:]]+/[^/[:space:]]+\.ts'
+if [[ "$tool" == "Bash" ]] && { [[ "$target" =~ \>\>?[[:space:]]*[^[:space:]]*$driver ]] || { [[ "$target" =~ $driver ]] && [[ "$target" =~ (sed -i|tee |mv |cp |rm |perl -i|truncate |dd |writeFile) ]]; }; }; then
+  block "$role cannot modify the target's driver code through the shell"
+fi
 if [[ "$target" == *fixtures/holdout* ]]; then
   block "$role cannot read holdout fixtures"
 fi

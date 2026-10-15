@@ -23,7 +23,9 @@ below 1 % of cases diverge at 99 % confidence (holdout batch 2, 473 of 473, clon
 (batch 4, 472 of 473, v3; batch 5, 472 of 473, v4). Everything else below is counts without a
 claim.
 
-**A quarter of that batch is easy.** Of its 473 cases, 74 are Stripe errors (70 of them the
+**Part of each batch is easy.** In batch 6, 53 of 473 cases are Stripe errors and 10 change
+nothing; on the 410 others, with no failure, the bound is 0.73 % at 95 % and 1.12 % at 99 %: on
+substantive changes alone, batch 6 supports "below 1 % at 95 %", not at 99 %. In batch 2, of its 473 cases, 74 are Stripe errors (70 of them the
 `none` behaviour given a proration date) and 56 are changes that change nothing (50 with no change at all, 6 that
 ask for the current quantity). On the 343 other cases, with no failure either, the bound is 0.87 % at 95 % and 1.33 % at 99 %: on substantive
 changes alone the result is "below 1 % at 95 %", not at 99 %. This split was not in the plan, so it
@@ -56,8 +58,8 @@ The analysis of batch 1 is `analysis/batch1-failures.md`. The clone measured bef
 ## Measured on clone v5 after its claim (dev, outside the claim's distribution)
 
 The `dev-v6-` probes, written for v5's mutation holes and its builder's unpinned choices and
-recorded after batch 6's look, show 7 divergences of the claimed clone, all in the lifecycle API
-rather than slice 1's preview:
+recorded after batch 6's look, show 7 divergences of the claimed clone, in the lifecycle API and
+in `create_preview` calls made from lifecycle probes, outside the claim's distribution:
 
 - clearing `cancel_at` after a mid-period `cancel_at` with prorations (`dev-v6-cancel-at-mid-cleared`);
 - `create_preview` given an invalid `proration_behavior`: Stripe rejects it, the clone answers
@@ -73,6 +75,25 @@ rather than slice 1's preview:
 The 60 `dev-v6-classic-once-` cases (once coupons in classic mode on several items) all pass.
 These are listed in `expected-failures.json` until a next clone is built and measured.
 
+## Out of distribution: breaker round 2 on clone v5
+
+A breaker agent read clone v5 and proposed 41 inputs to make it fail (`breaker-round2.json`, its
+reasoning in `breaker-round2-notes.json`; 11 min, $2.58). Recorded on Stripe and replayed, the
+clone passes **7 of 41**:
+
+- **slice 1's preview (`wide`), 7 of 11 pass.** Three failures are inputs Stripe rejects and the
+  clone accepts (a negative quantity, a fractional quantity, a fractional proration date); one
+  is a classic-mode change the clone computes differently (`dev-brk2-classic-trunc12-a`).
+- **the lifecycle, 0 of 30 pass**: trials (ending now, zero days, a change or a cancellation
+  during one), `pause_collection`, `billing_cycle_anchor=now`, cancelling twice, adding or
+  deleting items, changes on a canceled subscription, retries until exhausted, invoice items with
+  a price or a quantity.
+
+This is the share the claim does not speak for: below 1 % at 99 % holds on the distribution
+batch 6 was drawn from, and a skeptic reading the code finds the clone's edge within minutes.
+Like round 1, these are dev probes from now on; their failure share is reported, never used as
+an estimate. They are listed in `expected-failures.json`.
+
 ## Rules that fit the fixtures but are thin
 
 - **DSC-07 (credit-line discounts in immediate flexible invoices).** Implemented as a decision
@@ -81,7 +102,8 @@ These are listed in `expected-failures.json` until a next clone is built and mea
   distribution may fall in a cell no fixture filled (the analysis puts the shape it explains at
   about 0.08 % of draws).
 - **PRO-04 (rounding at exactly .5)** and **MOD-01 (classic vs flexible)**: few separating cases.
-- **LIF-03 and LIF-04** have no dev fixture: coded from their statements only, unverified.
+- **LIF-03 and LIF-04** have few dev fixtures (2 each); LIF-04 fails one of them on clone v5
+  (`dev-v6-cancel-at-mid-cleared`).
 
 ## Found by task validation
 
@@ -165,6 +187,28 @@ dialog, **live mode** (assumed equal to test mode).
 - **No ablation of the factory's components.** Record-first, the sandbox, the holdout batches
   and the guard were never switched off one at a time, so none of them can be credited with the
   result on its own. The one ablation run is of the second builder pass (`measurements.md`).
+- **The clone's network is not restricted.** The permission model keeps it off the disk outside
+  its folder, but it is started with `--allow-net` on Node 25 and later (to serve HTTP), and Node
+  24 has no network permission at all: a clone could fetch the public repository's holdout
+  fixtures at verify time. The auditor of 2026-10-15 found it; no clone was seen doing so (the
+  builder's sandbox has no route out but the model API). Running the clone in a container
+  without egress would close it.
+- **Invoice links in fixtures.** 16 dev fixtures recorded since 2026-10-14 (finalized invoices
+  read through raw calls) keep Stripe's `hosted_invoice_url` and `invoice_pdf`. Their token
+  encodes the account ID in base64, which undoes the scrubber's replacement, plus a test-mode
+  access secret to that invoice. Test mode only, and never compared (noise), but against
+  invariant 8's intent; scrubbing them means re-recording those fixtures.
+- **Installed dependencies are not hashed.** The lock covers `package.json` and
+  `package-lock.json`, whose integrity hashes `npm ci` checks, but not `node_modules` itself, so a
+  locally changed dependency would go unnoticed.
+- **CI looks are not logged.** CI scores every holdout batch on each push (`verify --split all`);
+  its `runs.jsonl` line stays on the runner. Every batch's first look happened locally before
+  its seed was pushed, so the claims rest on logged looks, but the look counts understate the
+  later ones.
+- **Wall-clock time in the clone.** Objects not on a test clock (a second customer, for
+  instance) are dated with `Date.now()` (`clone/state.ts`), so those fields differ between runs.
+  Stripe's values there are noise and ignored, so no score depends on it, but invariant 5's
+  determinism holds only for the fields compared.
 - **Guardrails are string matching**, but no longer the network's only defence: the agent
   container is on an internal network whose only way out is an egress proxy that lets through the
   model API (and hosts a target lists) and refuses the rest. The task-validation agent (whose

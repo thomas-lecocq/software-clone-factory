@@ -354,6 +354,42 @@ describe("invariant 3: the guard hook keeps agents away from the evaluator", () 
       0,
     ],
     [
+      "builder rewrites the probes through the shell",
+      {
+        agent_type: "builder",
+        tool_name: "Bash",
+        tool_input: { command: "sed -i 's/a/b/' targets/t/probes.ts" },
+      },
+      2,
+    ],
+    [
+      "builder redirects into the adapter",
+      {
+        agent_type: "builder",
+        tool_name: "Bash",
+        tool_input: { command: "echo x >> targets/t/adapter.ts" },
+      },
+      2,
+    ],
+    [
+      "builder edits its clone through the shell",
+      {
+        agent_type: "builder",
+        tool_name: "Bash",
+        tool_input: { command: "sed -i 's/a/b/' targets/t/clone/api.ts" },
+      },
+      0,
+    ],
+    [
+      "builder reads the probes",
+      {
+        agent_type: "builder",
+        tool_name: "Bash",
+        tool_input: { command: "cat targets/t/probes.ts" },
+      },
+      0,
+    ],
+    [
       "analyst searches its spent batch",
       {
         agent_type: "analyst",
