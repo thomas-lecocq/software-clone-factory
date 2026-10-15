@@ -196,8 +196,10 @@ dialog, **live mode** (assumed equal to test mode).
 - **Invoice links in fixtures.** 16 dev fixtures recorded since 2026-10-14 (finalized invoices
   read through raw calls) keep Stripe's `hosted_invoice_url` and `invoice_pdf`. Their token
   encodes the account ID in base64, which undoes the scrubber's replacement, plus a test-mode
-  access secret to that invoice. Test mode only, and never compared (noise), but against
-  invariant 8's intent; scrubbing them means re-recording those fixtures.
+  access secret to that invoice. Judged harmless and kept: an account ID is not a secret (it
+  grants no access), the account name it leads to is the repository owner's, and the secret only
+  shows test invoices of fictitious customers. Scrubbing them would mean re-recording those
+  fixtures.
 - **Installed dependencies are not hashed.** The lock covers `package.json` and
   `package-lock.json`, whose integrity hashes `npm ci` checks, but not `node_modules` itself, so a
   locally changed dependency would go unnoticed.
