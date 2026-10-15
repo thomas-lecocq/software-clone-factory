@@ -1,0 +1,111 @@
+{
+  "id": "dev-brk2-retries-exhausted",
+  "rules": [
+    "LIF-06",
+    "LIF-01"
+  ],
+  "input": {
+    "kind": "lifecycle",
+    "start": 1791158400,
+    "amount": 1000,
+    "trial_days": null,
+    "coupon": null,
+    "second_amount": null,
+    "spare_coupon": null,
+    "steps": [
+      {
+        "do": "failing_card"
+      },
+      {
+        "do": "advance",
+        "seconds": 2682000
+      },
+      {
+        "do": "advance",
+        "seconds": 864000
+      },
+      {
+        "do": "snapshot",
+        "as": "after_retries"
+      },
+      {
+        "do": "advance",
+        "seconds": 1814400
+      },
+      {
+        "do": "snapshot",
+        "as": "next_cycle"
+      }
+    ]
+  },
+  "observed": {
+    "after_retries": {
+      "status": "past_due",
+      "cancel_at_period_end": false,
+      "cancel_at": null,
+      "canceled_at": null,
+      "ended_at": null,
+      "trial_end": null,
+      "period_start": 1793836800,
+      "period_end": 1796428800,
+      "latest_invoice": {
+        "status": "open",
+        "billing_reason": "subscription_cycle",
+        "subtotal": 1000,
+        "total": 1000,
+        "amount_due": 1000,
+        "amount_paid": 0,
+        "amount_remaining": 1000,
+        "attempt_count": 3,
+        "period_start": 1791158400,
+        "period_end": 1793836800,
+        "lines": [
+          {
+            "amount": 1000,
+            "description": "1 × Basic (at $10.00 / month)"
+          }
+        ]
+      },
+      "invoice_count": 2
+    },
+    "next_cycle": {
+      "status": "canceled",
+      "cancel_at_period_end": false,
+      "cancel_at": null,
+      "canceled_at": 1794954684,
+      "ended_at": 1794954684,
+      "trial_end": null,
+      "period_start": 1793836800,
+      "period_end": 1796428800,
+      "latest_invoice": {
+        "status": "open",
+        "billing_reason": "subscription_cycle",
+        "subtotal": 1000,
+        "total": 1000,
+        "amount_due": 1000,
+        "amount_paid": 0,
+        "amount_remaining": 1000,
+        "attempt_count": 7,
+        "period_start": 1791158400,
+        "period_end": 1793836800,
+        "lines": [
+          {
+            "amount": 1000,
+            "description": "1 × Basic (at $10.00 / month)"
+          }
+        ]
+      },
+      "invoice_count": 2
+    }
+  },
+  "noise": [
+    "next_cycle.canceled_at",
+    "next_cycle.ended_at",
+    "next_cycle.latest_invoice.attempt_count"
+  ],
+  "recorded_at": "2026-10-15T06:31:37.353Z",
+  "recorded_with": {
+    "stripe_api_version": "2026-08-26.dahlia",
+    "stripe_node": "22.6.2"
+  }
+}

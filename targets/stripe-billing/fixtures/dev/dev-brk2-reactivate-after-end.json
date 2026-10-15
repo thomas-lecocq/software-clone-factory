@@ -1,0 +1,84 @@
+{
+  "id": "dev-brk2-reactivate-after-end",
+  "rules": [
+    "LIF-03",
+    "LIF-04"
+  ],
+  "input": {
+    "kind": "lifecycle",
+    "start": 1791158400,
+    "amount": 1000,
+    "trial_days": null,
+    "coupon": null,
+    "second_amount": null,
+    "spare_coupon": null,
+    "steps": [
+      {
+        "do": "cancel_at_period_end"
+      },
+      {
+        "do": "advance",
+        "seconds": 2682000
+      },
+      {
+        "do": "raw",
+        "as": "reactivate",
+        "method": "POST",
+        "path": "/v1/subscriptions/{subscription}",
+        "params": {
+          "cancel_at_period_end": "false"
+        }
+      },
+      {
+        "do": "snapshot",
+        "as": "after"
+      }
+    ]
+  },
+  "observed": {
+    "reactivate": {
+      "ok": false,
+      "error": {
+        "type": "StripeInvalidRequestError",
+        "code": "invalid_canceled_subscription_fields",
+        "param": null,
+        "message": "A canceled subscription can only update its cancellation_details and metadata."
+      }
+    },
+    "after": {
+      "status": "canceled",
+      "cancel_at_period_end": true,
+      "cancel_at": 1793836800,
+      "canceled_at": 1791158400,
+      "ended_at": 1793836800,
+      "trial_end": null,
+      "period_start": 1791158400,
+      "period_end": 1793836800,
+      "latest_invoice": {
+        "status": "paid",
+        "billing_reason": "subscription_create",
+        "subtotal": 1000,
+        "total": 1000,
+        "amount_due": 1000,
+        "amount_paid": 1000,
+        "amount_remaining": 0,
+        "attempt_count": 1,
+        "period_start": 1791158400,
+        "period_end": 1791158400,
+        "lines": [
+          {
+            "amount": 1000,
+            "description": "1 × Basic (at $10.00 / month)"
+          }
+        ]
+      },
+      "invoice_count": 1
+    }
+  },
+  "noise": [],
+  "recorded_at": "2026-10-15T06:29:41.542Z",
+  "recorded_with": {
+    "stripe_api_version": "2026-08-26.dahlia",
+    "stripe_node": "22.6.2"
+  }
+}

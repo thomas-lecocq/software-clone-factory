@@ -1,0 +1,51 @@
+{
+  "id": "dev-brk2-fractional-proration-date",
+  "rules": [
+    "ERR-01",
+    "ERR-03"
+  ],
+  "input": {
+    "kind": "wide",
+    "start": 1791158400,
+    "billing_mode": "flexible",
+    "interval": "month",
+    "items": [
+      {
+        "amount": 1000,
+        "quantity": 1
+      }
+    ],
+    "coupons": [],
+    "change": {
+      "item": 0,
+      "amount": 3000,
+      "interval": null,
+      "quantity": null,
+      "offset": 864000.5,
+      "proration_behavior": null,
+      "discount": null
+    }
+  },
+  "observed": {
+    "preview": {
+      "error": {
+        "type": "StripeInvalidRequestError",
+        "code": "parameter_invalid_integer",
+        "param": "subscription_details[proration_date]",
+        "message": "Invalid integer: 1792022400.5"
+      }
+    },
+    "first_invoice": {
+      "subtotal": 1000,
+      "total": 1000,
+      "amount_due": 1000,
+      "status": "paid"
+    }
+  },
+  "noise": [],
+  "recorded_at": "2026-10-15T06:30:59.260Z",
+  "recorded_with": {
+    "stripe_api_version": "2026-08-26.dahlia",
+    "stripe_node": "22.6.2"
+  }
+}

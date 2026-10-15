@@ -1,0 +1,64 @@
+{
+  "id": "dev-brk2-invoiceitem-recurring-price",
+  "rules": [
+    "ITM-02",
+    "ERR-03"
+  ],
+  "input": {
+    "kind": "lifecycle",
+    "start": 1791158400,
+    "amount": 1000,
+    "trial_days": null,
+    "coupon": null,
+    "second_amount": null,
+    "spare_coupon": null,
+    "steps": [
+      {
+        "do": "raw",
+        "as": "item",
+        "method": "POST",
+        "path": "/v1/invoiceitems",
+        "params": {
+          "customer": "{customer}",
+          "price": "{price}"
+        }
+      },
+      {
+        "do": "raw",
+        "as": "pending",
+        "method": "GET",
+        "path": "/v1/invoiceitems",
+        "params": {
+          "customer": "{customer}",
+          "pending": "true"
+        }
+      }
+    ]
+  },
+  "observed": {
+    "item": {
+      "ok": false,
+      "error": {
+        "type": "StripeInvalidRequestError",
+        "code": "parameter_unknown",
+        "param": "price",
+        "message": "Received unknown parameter: price. Did you mean pricing?"
+      }
+    },
+    "pending": {
+      "ok": true,
+      "body": {
+        "object": "list",
+        "data": [],
+        "has_more": false,
+        "url": "/v1/invoiceitems"
+      }
+    }
+  },
+  "noise": [],
+  "recorded_at": "2026-10-15T06:30:14.425Z",
+  "recorded_with": {
+    "stripe_api_version": "2026-08-26.dahlia",
+    "stripe_node": "22.6.2"
+  }
+}

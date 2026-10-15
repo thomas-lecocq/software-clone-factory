@@ -1,0 +1,142 @@
+{
+  "id": "dev-brk2-cancel-now-invoice-pending-no-prorate",
+  "rules": [
+    "LIF-05",
+    "INV-03"
+  ],
+  "input": {
+    "kind": "lifecycle",
+    "start": 1791158400,
+    "amount": 1000,
+    "trial_days": null,
+    "coupon": null,
+    "second_amount": null,
+    "spare_coupon": null,
+    "steps": [
+      {
+        "do": "advance",
+        "seconds": 864000
+      },
+      {
+        "do": "raw",
+        "as": "item",
+        "method": "POST",
+        "path": "/v1/invoiceitems",
+        "params": {
+          "customer": "{customer}",
+          "subscription": "{subscription}",
+          "amount": "400",
+          "currency": "usd"
+        }
+      },
+      {
+        "do": "cancel_now",
+        "prorate": false,
+        "invoice_now": true
+      },
+      {
+        "do": "snapshot",
+        "as": "canceled"
+      },
+      {
+        "do": "raw",
+        "as": "pending",
+        "method": "GET",
+        "path": "/v1/invoiceitems",
+        "params": {
+          "customer": "{customer}",
+          "pending": "true"
+        }
+      }
+    ]
+  },
+  "observed": {
+    "item": {
+      "ok": true,
+      "body": {
+        "id": "ii_1UQiBeAcmeAcct00XtwSd2V0",
+        "object": "invoiceitem",
+        "amount": 400,
+        "currency": "usd",
+        "customer": "cus_VRbOPCx01bqtcm",
+        "customer_account": null,
+        "date": 1792022400,
+        "description": null,
+        "discountable": true,
+        "discounts": [],
+        "frozen_fields": [],
+        "invoice": null,
+        "invoicing_rules": [],
+        "livemode": false,
+        "metadata": {},
+        "parent": {
+          "subscription_details": {
+            "subscription": "sub_1UQiBYAcmeAcct00zosbJsiM"
+          },
+          "type": "subscription_details"
+        },
+        "period": {
+          "end": 1792022400,
+          "start": 1792022400
+        },
+        "pricing": {
+          "price_details": {
+            "price": "price_1UQiBeAcmeAcct00rWBGNbWw",
+            "product": "prod_VRbOxt0N6oevEK"
+          },
+          "type": "price_details",
+          "unit_amount_decimal": "400"
+        },
+        "proration": false,
+        "quantity": 1,
+        "quantity_decimal": "1",
+        "tax_rates": [],
+        "test_clock": "clock_1UQiBXAcmeAcct00LdB4J5uO"
+      }
+    },
+    "canceled": {
+      "status": "canceled",
+      "cancel_at_period_end": false,
+      "cancel_at": null,
+      "canceled_at": 1792022400,
+      "ended_at": 1792022400,
+      "trial_end": null,
+      "period_start": 1791158400,
+      "period_end": 1793836800,
+      "latest_invoice": {
+        "status": "draft",
+        "billing_reason": "subscription_cycle",
+        "subtotal": 400,
+        "total": 400,
+        "amount_due": 400,
+        "amount_paid": 0,
+        "amount_remaining": 400,
+        "attempt_count": 0,
+        "period_start": 1791158400,
+        "period_end": 1792022400,
+        "lines": [
+          {
+            "amount": 400,
+            "description": null
+          }
+        ]
+      },
+      "invoice_count": 2
+    },
+    "pending": {
+      "ok": true,
+      "body": {
+        "object": "list",
+        "data": [],
+        "has_more": false,
+        "url": "/v1/invoiceitems"
+      }
+    }
+  },
+  "noise": [],
+  "recorded_at": "2026-10-15T06:30:54.791Z",
+  "recorded_with": {
+    "stripe_api_version": "2026-08-26.dahlia",
+    "stripe_node": "22.6.2"
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "id": "dev-brk2-fractional-quantity",
+  "rules": [
+    "ERR-03",
+    "PRO-08"
+  ],
+  "input": {
+    "kind": "wide",
+    "start": 1791158400,
+    "billing_mode": "classic",
+    "interval": "month",
+    "items": [
+      {
+        "amount": 1000,
+        "quantity": 2
+      }
+    ],
+    "coupons": [],
+    "change": {
+      "item": 0,
+      "amount": null,
+      "interval": null,
+      "quantity": 1.5,
+      "offset": 864000,
+      "proration_behavior": null,
+      "discount": null
+    }
+  },
+  "observed": {
+    "preview": {
+      "error": {
+        "type": "StripeInvalidRequestError",
+        "code": "parameter_invalid_integer",
+        "param": "subscription_details[items][0][quantity]",
+        "message": "Invalid integer: 1.5"
+      }
+    },
+    "first_invoice": {
+      "subtotal": 2000,
+      "total": 2000,
+      "amount_due": 2000,
+      "status": "paid"
+    }
+  },
+  "noise": [],
+  "recorded_at": "2026-10-15T06:30:55.057Z",
+  "recorded_with": {
+    "stripe_api_version": "2026-08-26.dahlia",
+    "stripe_node": "22.6.2"
+  }
+}

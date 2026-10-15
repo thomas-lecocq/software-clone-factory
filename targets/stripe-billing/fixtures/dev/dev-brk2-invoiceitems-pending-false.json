@@ -1,0 +1,183 @@
+{
+  "id": "dev-brk2-invoiceitems-pending-false",
+  "rules": [
+    "ITM-02",
+    "INV-03"
+  ],
+  "input": {
+    "kind": "lifecycle",
+    "start": 1791158400,
+    "amount": 1000,
+    "trial_days": null,
+    "coupon": null,
+    "second_amount": null,
+    "spare_coupon": null,
+    "steps": [
+      {
+        "do": "raw",
+        "as": "first",
+        "method": "POST",
+        "path": "/v1/invoiceitems",
+        "params": {
+          "customer": "{customer}",
+          "amount": "400",
+          "currency": "usd"
+        }
+      },
+      {
+        "do": "advance",
+        "seconds": 2682000
+      },
+      {
+        "do": "raw",
+        "as": "second",
+        "method": "POST",
+        "path": "/v1/invoiceitems",
+        "params": {
+          "customer": "{customer}",
+          "amount": "200",
+          "currency": "usd"
+        }
+      },
+      {
+        "do": "raw",
+        "as": "invoiced",
+        "method": "GET",
+        "path": "/v1/invoiceitems",
+        "params": {
+          "customer": "{customer}",
+          "pending": "false"
+        }
+      }
+    ]
+  },
+  "observed": {
+    "first": {
+      "ok": true,
+      "body": {
+        "id": "ii_1UQiB7AcmeAcct00kShshC9H",
+        "object": "invoiceitem",
+        "amount": 400,
+        "currency": "usd",
+        "customer": "cus_VRbNGxPpHIVN3D",
+        "customer_account": null,
+        "date": 1791158400,
+        "description": null,
+        "discountable": true,
+        "discounts": [],
+        "frozen_fields": [],
+        "invoice": null,
+        "invoicing_rules": [],
+        "livemode": false,
+        "metadata": {},
+        "parent": null,
+        "period": {
+          "end": 1791158400,
+          "start": 1791158400
+        },
+        "pricing": {
+          "price_details": {
+            "price": "price_1UQiB7AcmeAcct00hkHnF03i",
+            "product": "prod_VRbNtur40bfmqA"
+          },
+          "type": "price_details",
+          "unit_amount_decimal": "400"
+        },
+        "proration": false,
+        "quantity": 1,
+        "quantity_decimal": "1",
+        "tax_rates": [],
+        "test_clock": "clock_1UQiB3AcmeAcct00MbJ9rq6j"
+      }
+    },
+    "second": {
+      "ok": true,
+      "body": {
+        "id": "ii_1UQiBJAcmeAcct00lK4xVSyP",
+        "object": "invoiceitem",
+        "amount": 200,
+        "currency": "usd",
+        "customer": "cus_VRbNGxPpHIVN3D",
+        "customer_account": null,
+        "date": 1793840400,
+        "description": null,
+        "discountable": true,
+        "discounts": [],
+        "frozen_fields": [],
+        "invoice": null,
+        "invoicing_rules": [],
+        "livemode": false,
+        "metadata": {},
+        "parent": null,
+        "period": {
+          "end": 1793840400,
+          "start": 1793840400
+        },
+        "pricing": {
+          "price_details": {
+            "price": "price_1UQiBJAcmeAcct006NVh2nbA",
+            "product": "prod_VRbOK4BigCETa5"
+          },
+          "type": "price_details",
+          "unit_amount_decimal": "200"
+        },
+        "proration": false,
+        "quantity": 1,
+        "quantity_decimal": "1",
+        "tax_rates": [],
+        "test_clock": "clock_1UQiB3AcmeAcct00MbJ9rq6j"
+      }
+    },
+    "invoiced": {
+      "ok": true,
+      "body": {
+        "object": "list",
+        "data": [
+          {
+            "id": "ii_1UQiB7AcmeAcct00kShshC9H",
+            "object": "invoiceitem",
+            "amount": 400,
+            "currency": "usd",
+            "customer": "cus_VRbNGxPpHIVN3D",
+            "customer_account": null,
+            "date": 1791158400,
+            "description": null,
+            "discountable": true,
+            "discounts": [],
+            "frozen_fields": [],
+            "invoice": "in_1UQiBAAcmeAcct00yW63QUjd",
+            "invoicing_rules": [],
+            "livemode": false,
+            "metadata": {},
+            "parent": null,
+            "period": {
+              "end": 1791158400,
+              "start": 1791158400
+            },
+            "pricing": {
+              "price_details": {
+                "price": "price_1UQiB7AcmeAcct00hkHnF03i",
+                "product": "prod_VRbNtur40bfmqA"
+              },
+              "type": "price_details",
+              "unit_amount_decimal": "400"
+            },
+            "proration": false,
+            "quantity": 1,
+            "quantity_decimal": "1",
+            "tax_rates": [],
+            "test_clock": "clock_1UQiB3AcmeAcct00MbJ9rq6j"
+          }
+        ],
+        "has_more": false,
+        "url": "/v1/invoiceitems"
+      }
+    }
+  },
+  "noise": [],
+  "recorded_at": "2026-10-15T06:30:43.786Z",
+  "recorded_with": {
+    "stripe_api_version": "2026-08-26.dahlia",
+    "stripe_node": "22.6.2"
+  }
+}

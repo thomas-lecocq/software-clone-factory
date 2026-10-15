@@ -1,0 +1,75 @@
+{
+  "id": "dev-brk2-delete-only-item",
+  "rules": [
+    "ITM-01",
+    "ERR-03"
+  ],
+  "input": {
+    "kind": "lifecycle",
+    "start": 1791158400,
+    "amount": 1000,
+    "trial_days": null,
+    "coupon": null,
+    "second_amount": null,
+    "spare_coupon": null,
+    "steps": [
+      {
+        "do": "raw",
+        "as": "delete",
+        "method": "DELETE",
+        "path": "/v1/subscription_items/{item}",
+        "params": {}
+      },
+      {
+        "do": "snapshot",
+        "as": "after"
+      }
+    ]
+  },
+  "observed": {
+    "delete": {
+      "ok": false,
+      "error": {
+        "type": "StripeInvalidRequestError",
+        "code": null,
+        "param": null,
+        "message": "A subscription must have at least one active plan. To cancel a subscription, please use the cancel API endpoint on /v1/subscriptions."
+      }
+    },
+    "after": {
+      "status": "active",
+      "cancel_at_period_end": false,
+      "cancel_at": null,
+      "canceled_at": null,
+      "ended_at": null,
+      "trial_end": null,
+      "period_start": 1791158400,
+      "period_end": 1793836800,
+      "latest_invoice": {
+        "status": "paid",
+        "billing_reason": "subscription_create",
+        "subtotal": 1000,
+        "total": 1000,
+        "amount_due": 1000,
+        "amount_paid": 1000,
+        "amount_remaining": 0,
+        "attempt_count": 1,
+        "period_start": 1791158400,
+        "period_end": 1791158400,
+        "lines": [
+          {
+            "amount": 1000,
+            "description": "1 × Basic (at $10.00 / month)"
+          }
+        ]
+      },
+      "invoice_count": 1
+    }
+  },
+  "noise": [],
+  "recorded_at": "2026-10-15T06:29:48.232Z",
+  "recorded_with": {
+    "stripe_api_version": "2026-08-26.dahlia",
+    "stripe_node": "22.6.2"
+  }
+}

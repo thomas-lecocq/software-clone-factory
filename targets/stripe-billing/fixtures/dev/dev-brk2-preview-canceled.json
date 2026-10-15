@@ -1,0 +1,53 @@
+{
+  "id": "dev-brk2-preview-canceled",
+  "rules": [
+    "LIF-05",
+    "ERR-03"
+  ],
+  "input": {
+    "kind": "lifecycle",
+    "start": 1791158400,
+    "amount": 1000,
+    "trial_days": null,
+    "coupon": null,
+    "second_amount": null,
+    "spare_coupon": null,
+    "steps": [
+      {
+        "do": "advance",
+        "seconds": 864000
+      },
+      {
+        "do": "cancel_now",
+        "prorate": false,
+        "invoice_now": false
+      },
+      {
+        "do": "raw",
+        "as": "preview",
+        "method": "POST",
+        "path": "/v1/invoices/create_preview",
+        "params": {
+          "subscription": "{subscription}"
+        }
+      }
+    ]
+  },
+  "observed": {
+    "preview": {
+      "ok": false,
+      "error": {
+        "type": "StripeInvalidRequestError",
+        "code": "invoice_upcoming_none",
+        "param": null,
+        "message": "You cannot preview the upcoming invoice for a canceled subscription."
+      }
+    }
+  },
+  "noise": [],
+  "recorded_at": "2026-10-15T06:30:33.705Z",
+  "recorded_with": {
+    "stripe_api_version": "2026-08-26.dahlia",
+    "stripe_node": "22.6.2"
+  }
+}

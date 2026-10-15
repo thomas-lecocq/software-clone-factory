@@ -1,0 +1,68 @@
+{
+  "id": "dev-brk2-trial-cancel-now-prorate",
+  "rules": [
+    "LIF-05",
+    "LIF-07"
+  ],
+  "input": {
+    "kind": "lifecycle",
+    "start": 1791158400,
+    "amount": 1000,
+    "trial_days": 14,
+    "coupon": null,
+    "second_amount": null,
+    "spare_coupon": null,
+    "steps": [
+      {
+        "do": "advance",
+        "seconds": 259200
+      },
+      {
+        "do": "cancel_now",
+        "prorate": true,
+        "invoice_now": true
+      },
+      {
+        "do": "snapshot",
+        "as": "canceled"
+      }
+    ]
+  },
+  "observed": {
+    "canceled": {
+      "status": "canceled",
+      "cancel_at_period_end": false,
+      "cancel_at": null,
+      "canceled_at": 1791417600,
+      "ended_at": 1791417600,
+      "trial_end": 1792368000,
+      "period_start": 1791158400,
+      "period_end": 1792368000,
+      "latest_invoice": {
+        "status": "paid",
+        "billing_reason": "subscription_create",
+        "subtotal": 0,
+        "total": 0,
+        "amount_due": 0,
+        "amount_paid": 0,
+        "amount_remaining": 0,
+        "attempt_count": 0,
+        "period_start": 1791158400,
+        "period_end": 1791158400,
+        "lines": [
+          {
+            "amount": 0,
+            "description": "Free trial for 1 × Basic"
+          }
+        ]
+      },
+      "invoice_count": 1
+    }
+  },
+  "noise": [],
+  "recorded_at": "2026-10-15T06:29:35.186Z",
+  "recorded_with": {
+    "stripe_api_version": "2026-08-26.dahlia",
+    "stripe_node": "22.6.2"
+  }
+}

@@ -1,0 +1,64 @@
+{
+  "id": "dev-brk2-mixed-interval-preview-amount-coupon",
+  "rules": [
+    "INT-01",
+    "DSC-03",
+    "ITM-01"
+  ],
+  "input": {
+    "kind": "wide",
+    "start": 1791158400,
+    "billing_mode": "flexible",
+    "interval": "month",
+    "items": [
+      {
+        "amount": 1000,
+        "quantity": 1
+      },
+      {
+        "amount": 2000,
+        "quantity": 1
+      }
+    ],
+    "coupons": [
+      {
+        "percent_off": 10,
+        "duration": "forever"
+      }
+    ],
+    "change": {
+      "item": 0,
+      "amount": 10000,
+      "interval": "year",
+      "quantity": null,
+      "offset": 864000,
+      "proration_behavior": null,
+      "discount": {
+        "amount_off": 300,
+        "duration": "forever"
+      }
+    }
+  },
+  "observed": {
+    "preview": {
+      "error": {
+        "type": "StripeInvalidRequestError",
+        "code": null,
+        "param": null,
+        "message": "Subscriptions with multiple intervals only support percent_off coupons, `duration=once` amount_off coupons, and `duration=repeating` amount_off coupons."
+      }
+    },
+    "first_invoice": {
+      "subtotal": 3000,
+      "total": 2700,
+      "amount_due": 2700,
+      "status": "paid"
+    }
+  },
+  "noise": [],
+  "recorded_at": "2026-10-15T06:31:07.631Z",
+  "recorded_with": {
+    "stripe_api_version": "2026-08-26.dahlia",
+    "stripe_node": "22.6.2"
+  }
+}

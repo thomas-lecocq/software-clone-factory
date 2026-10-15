@@ -1,0 +1,142 @@
+{
+  "id": "dev-brk2-cancel-at-next-period",
+  "rules": [
+    "LIF-09",
+    "LIF-01"
+  ],
+  "input": {
+    "kind": "lifecycle",
+    "start": 1791158400,
+    "amount": 1000,
+    "trial_days": null,
+    "coupon": null,
+    "second_amount": null,
+    "spare_coupon": null,
+    "steps": [
+      {
+        "do": "raw",
+        "as": "set",
+        "method": "POST",
+        "path": "/v1/subscriptions/{subscription}",
+        "params": {
+          "cancel_at": "1795132800"
+        }
+      },
+      {
+        "do": "snapshot",
+        "as": "set"
+      },
+      {
+        "do": "advance",
+        "seconds": 2682000
+      },
+      {
+        "do": "snapshot",
+        "as": "renewed"
+      },
+      {
+        "do": "advance",
+        "seconds": 1382400
+      },
+      {
+        "do": "snapshot",
+        "as": "ended"
+      }
+    ]
+  },
+  "observed": {
+    "set": {
+      "status": "active",
+      "cancel_at_period_end": false,
+      "cancel_at": 1795132800,
+      "canceled_at": 1791158400,
+      "ended_at": null,
+      "trial_end": null,
+      "period_start": 1791158400,
+      "period_end": 1793836800,
+      "latest_invoice": {
+        "status": "paid",
+        "billing_reason": "subscription_create",
+        "subtotal": 1000,
+        "total": 1000,
+        "amount_due": 1000,
+        "amount_paid": 1000,
+        "amount_remaining": 0,
+        "attempt_count": 1,
+        "period_start": 1791158400,
+        "period_end": 1791158400,
+        "lines": [
+          {
+            "amount": 1000,
+            "description": "1 × Basic (at $10.00 / month)"
+          }
+        ]
+      },
+      "invoice_count": 1
+    },
+    "renewed": {
+      "status": "active",
+      "cancel_at_period_end": false,
+      "cancel_at": 1795132800,
+      "canceled_at": 1791158400,
+      "ended_at": null,
+      "trial_end": null,
+      "period_start": 1793836800,
+      "period_end": 1795132800,
+      "latest_invoice": {
+        "status": "paid",
+        "billing_reason": "subscription_cycle",
+        "subtotal": 500,
+        "total": 500,
+        "amount_due": 500,
+        "amount_paid": 500,
+        "amount_remaining": 0,
+        "attempt_count": 1,
+        "period_start": 1791158400,
+        "period_end": 1793836800,
+        "lines": [
+          {
+            "amount": 500,
+            "description": "Time on Basic after 05 Nov 2026"
+          }
+        ]
+      },
+      "invoice_count": 2
+    },
+    "ended": {
+      "status": "canceled",
+      "cancel_at_period_end": false,
+      "cancel_at": 1795132800,
+      "canceled_at": 1791158400,
+      "ended_at": 1795132800,
+      "trial_end": null,
+      "period_start": 1793836800,
+      "period_end": 1795132800,
+      "latest_invoice": {
+        "status": "paid",
+        "billing_reason": "subscription_cycle",
+        "subtotal": 500,
+        "total": 500,
+        "amount_due": 500,
+        "amount_paid": 500,
+        "amount_remaining": 0,
+        "attempt_count": 1,
+        "period_start": 1791158400,
+        "period_end": 1793836800,
+        "lines": [
+          {
+            "amount": 500,
+            "description": "Time on Basic after 05 Nov 2026"
+          }
+        ]
+      },
+      "invoice_count": 2
+    }
+  },
+  "noise": [],
+  "recorded_at": "2026-10-15T06:30:39.239Z",
+  "recorded_with": {
+    "stripe_api_version": "2026-08-26.dahlia",
+    "stripe_node": "22.6.2"
+  }
+}
