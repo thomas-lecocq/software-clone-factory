@@ -53,6 +53,26 @@ probes, never by reading a holdout the clone was later scored on:
 The analysis of batch 1 is `analysis/batch1-failures.md`. The clone measured before that analysis
 (`7238f46`) also fails 22 of batch 2's 473 cases: the second builder pass is what closed the gap.
 
+## Measured on clone v5 after its claim (dev, outside the claim's distribution)
+
+The `dev-v6-` probes, written for v5's mutation holes and its builder's unpinned choices and
+recorded after batch 6's look, show 7 divergences of the claimed clone, all in the lifecycle API
+rather than slice 1's preview:
+
+- clearing `cancel_at` after a mid-period `cancel_at` with prorations (`dev-v6-cancel-at-mid-cleared`);
+- `create_preview` given an invalid `proration_behavior`: Stripe rejects it, the clone answers
+  (`dev-v6-invalid-proration-behavior`);
+- finalizing a manual invoice (`dev-v6-invoice-routing`);
+- creating a subscription for a customer with no payment method: Stripe refuses
+  (`dev-v6-list-by-customer`);
+- a one-off item attached to another subscription of the same customer, at renewal
+  (`dev-v6-oneoff-other-subscription`);
+- pending one-off items in an `always_invoice` change and in a preview: Stripe includes them
+  (`dev-v6-pending-item-always-invoice`, `dev-v6-pending-item-preview`).
+
+The 60 `dev-v6-classic-once-` cases (once coupons in classic mode on several items) all pass.
+These are listed in `expected-failures.json` until a next clone is built and measured.
+
 ## Rules that fit the fixtures but are thin
 
 - **DSC-07 (credit-line discounts in immediate flexible invoices).** Implemented as a decision
