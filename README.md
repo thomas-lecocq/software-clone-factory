@@ -190,15 +190,15 @@ wider distribution:
 |                      |                                                                                                                                                                               |
 | -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Level**            | **A**: below 1 % of cases diverge, at 99 % confidence                                                                                                                         |
-| **Measured on**      | batch `hold-b6-`, 473 of 473; plan `analysis-plan-b6.md`, committed first; 4 looks, its claim rests on the first (`measurements.md`)                                          |
+| **Measured on**      | batch `hold-b6-`, 473 of 473; plan `analysis-plan-b6.md`, committed first; 6 looks, its claim rests on the first (`measurements.md`)                                          |
 | **Bound**            | 0.63 % at 95 %, 0.97 % at 99 %                                                                                                                                                |
-| **Breaker probes**   | 40 of 40 pass; they are dev cases the builder may have learnt, so only a new breaker round tests the clone out of distribution                                                |
-| **Dev (training)**   | 1258 of 1265                                                                                                                                                                  |
+| **Breaker probes**   | `breaker-round2.json`, proposed against this clone: 7 of 41 pass, outside the measured distribution; earlier rounds: 40 of 40, dev cases the builder may have learnt          |
+| **Dev (training)**   | 1265 of 1306                                                                                                                                                                  |
 | **Determinism**      | 10 of 10 replays identical after reset                                                                                                                                        |
 | **Mutation testing** | 34 of 40 planted bugs caught by the fixtures (run 2026-10-14)                                                                                                                 |
 | **Auditors**         | found 12 of 12 planted defects                                                                                                                                                |
 | **Agent tasks**      | an agent (claude-sonnet-5-5) gets the same outcome on the clone as on the original in 16 of 16 task runs; it succeeds in 16 on the clone, 16 on the original (run 2026-10-14) |
-| **Evaluator**        | lock `7b6b53fcd9ac`, commit b7c81a3, clean tree                                                                                                                               |
+| **Evaluator**        | lock `efbf97c649c5`, commit 74d96be, clean tree                                                                                                                               |
 
 ## Run it
 

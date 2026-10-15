@@ -1,5 +1,983 @@
 {
+  "ITM-01": [
+    {
+      "fixture": "dev-brk2-add-second-item",
+      "diffs": [
+        {
+          "path": "add.body.application",
+          "expected": null
+        },
+        {
+          "path": "add.body.application_fee_percent",
+          "expected": null
+        },
+        {
+          "path": "add.body.automatic_tax.disabled_reason",
+          "expected": null
+        },
+        {
+          "path": "add.body.automatic_tax.enabled",
+          "expected": false
+        },
+        {
+          "path": "add.body.automatic_tax.liability",
+          "expected": null
+        }
+      ]
+    },
+    {
+      "fixture": "dev-brk2-delete-only-item",
+      "diffs": [
+        {
+          "path": "delete.body.billing_thresholds",
+          "actual": null
+        },
+        {
+          "path": "delete.body.created",
+          "actual": 1791158400
+        },
+        {
+          "path": "delete.body.current_period_end",
+          "actual": 1793836800
+        },
+        {
+          "path": "delete.body.current_period_start",
+          "actual": 1791158400
+        },
+        {
+          "path": "delete.body.current_trial",
+          "actual": null
+        }
+      ]
+    },
+    {
+      "fixture": "dev-brk2-swap-item-deleted",
+      "diffs": [
+        {
+          "path": "pending.body.data",
+          "actual": []
+        },
+        {
+          "path": "pending.body.data[0].amount",
+          "expected": -677
+        },
+        {
+          "path": "pending.body.data[0].currency",
+          "expected": "usd"
+        },
+        {
+          "path": "pending.body.data[0].customer",
+          "expected": "cus#1"
+        },
+        {
+          "path": "pending.body.data[0].customer_account",
+          "expected": null
+        }
+      ]
+    }
+  ],
+  "PRO-02": [
+    {
+      "fixture": "dev-brk2-add-second-item",
+      "diffs": [
+        {
+          "path": "add.body.application",
+          "expected": null
+        },
+        {
+          "path": "add.body.application_fee_percent",
+          "expected": null
+        },
+        {
+          "path": "add.body.automatic_tax.disabled_reason",
+          "expected": null
+        },
+        {
+          "path": "add.body.automatic_tax.enabled",
+          "expected": false
+        },
+        {
+          "path": "add.body.automatic_tax.liability",
+          "expected": null
+        }
+      ]
+    },
+    {
+      "fixture": "dev-brk2-classic-trunc12-a",
+      "diffs": [
+        {
+          "path": "preview.amount_due",
+          "expected": 200112136,
+          "actual": 200112135
+        },
+        {
+          "path": "preview.amount_remaining",
+          "expected": 200112136,
+          "actual": 200112135
+        },
+        {
+          "path": "preview.lines.data[1].amount",
+          "expected": 112157,
+          "actual": 112156
+        },
+        {
+          "path": "preview.lines.data[1].subtotal",
+          "expected": 112157,
+          "actual": 112156
+        },
+        {
+          "path": "preview.subtotal",
+          "expected": 200112136,
+          "actual": 200112135
+        }
+      ]
+    },
+    {
+      "fixture": "dev-brk2-trial-change-preview",
+      "diffs": [
+        {
+          "path": "preview.body.amount_due",
+          "expected": 0,
+          "actual": 4571
+        },
+        {
+          "path": "preview.body.amount_remaining",
+          "expected": 0,
+          "actual": 4571
+        },
+        {
+          "path": "preview.body.auto_advance",
+          "expected": false,
+          "actual": true
+        },
+        {
+          "path": "preview.body.created",
+          "expected": 1791417600,
+          "actual": 1792368000
+        },
+        {
+          "path": "preview.body.lines.data[0].amount",
+          "expected": 0,
+          "actual": -786
+        }
+      ]
+    }
+  ],
+  "PRO-07": [
+    {
+      "fixture": "dev-brk2-always-invoice-real-with-coupon",
+      "diffs": [
+        {
+          "path": "after.latest_invoice.period_start",
+          "expected": 1791158400,
+          "actual": 1792022400
+        },
+        {
+          "path": "invoices.body.data[0].discounts",
+          "actual": []
+        },
+        {
+          "path": "invoices.body.data[0].discounts[0]",
+          "expected": "di#1"
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[0].discount_amounts",
+          "actual": []
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[0].discount_amounts[0].amount",
+          "expected": 0
+        }
+      ]
+    },
+    {
+      "fixture": "dev-brk2-billing-cycle-anchor-now",
+      "diffs": [
+        {
+          "path": "after.period_end",
+          "expected": 1794700800,
+          "actual": 1793836800
+        },
+        {
+          "path": "after.period_start",
+          "expected": 1792022400,
+          "actual": 1791158400
+        },
+        {
+          "path": "reset.body.billing_cycle_anchor",
+          "expected": 1792022400,
+          "actual": 1791158400
+        },
+        {
+          "path": "reset.body.items.data[0].current_period_end",
+          "expected": 1794700800,
+          "actual": 1793836800
+        },
+        {
+          "path": "reset.body.items.data[0].current_period_start",
+          "expected": 1792022400,
+          "actual": 1791158400
+        }
+      ]
+    },
+    {
+      "fixture": "dev-brk2-cancel-at-mid-always-invoice",
+      "diffs": [
+        {
+          "path": "invoices.body.data[0].amount_due",
+          "expected": 0,
+          "actual": 1000
+        },
+        {
+          "path": "invoices.body.data[0].amount_paid",
+          "expected": 0,
+          "actual": 1000
+        },
+        {
+          "path": "invoices.body.data[0].attempt_count",
+          "expected": 0,
+          "actual": 1
+        },
+        {
+          "path": "invoices.body.data[0].billing_reason",
+          "expected": "subscription_update",
+          "actual": "subscription_create"
+        },
+        {
+          "path": "invoices.body.data[0].ending_balance",
+          "expected": -516,
+          "actual": 0
+        }
+      ]
+    },
+    {
+      "fixture": "dev-brk2-error-if-incomplete",
+      "diffs": [
+        {
+          "path": "after.invoice_count",
+          "expected": 1,
+          "actual": 2
+        },
+        {
+          "path": "after.latest_invoice.amount_due",
+          "expected": 1000,
+          "actual": 1355
+        },
+        {
+          "path": "after.latest_invoice.amount_paid",
+          "expected": 1000,
+          "actual": 0
+        },
+        {
+          "path": "after.latest_invoice.amount_remaining",
+          "expected": 0,
+          "actual": 1355
+        },
+        {
+          "path": "after.latest_invoice.billing_reason",
+          "expected": "subscription_create",
+          "actual": "subscription_update"
+        }
+      ]
+    }
+  ],
+  "DSC-07": [
+    {
+      "fixture": "dev-brk2-always-invoice-real-with-coupon",
+      "diffs": [
+        {
+          "path": "after.latest_invoice.period_start",
+          "expected": 1791158400,
+          "actual": 1792022400
+        },
+        {
+          "path": "invoices.body.data[0].discounts",
+          "actual": []
+        },
+        {
+          "path": "invoices.body.data[0].discounts[0]",
+          "expected": "di#1"
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[0].discount_amounts",
+          "actual": []
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[0].discount_amounts[0].amount",
+          "expected": 0
+        }
+      ]
+    }
+  ],
+  "DSC-02": [
+    {
+      "fixture": "dev-brk2-always-invoice-real-with-coupon",
+      "diffs": [
+        {
+          "path": "after.latest_invoice.period_start",
+          "expected": 1791158400,
+          "actual": 1792022400
+        },
+        {
+          "path": "invoices.body.data[0].discounts",
+          "actual": []
+        },
+        {
+          "path": "invoices.body.data[0].discounts[0]",
+          "expected": "di#1"
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[0].discount_amounts",
+          "actual": []
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[0].discount_amounts[0].amount",
+          "expected": 0
+        }
+      ]
+    },
+    {
+      "fixture": "dev-brk2-second-change-carries-old-discount",
+      "diffs": [
+        {
+          "path": "preview.body.amount_due",
+          "expected": 1058,
+          "actual": 852
+        },
+        {
+          "path": "preview.body.amount_remaining",
+          "expected": 1058,
+          "actual": 852
+        },
+        {
+          "path": "preview.body.lines.data[0].amount",
+          "expected": -1239,
+          "actual": -542
+        },
+        {
+          "path": "preview.body.lines.data[0].description",
+          "expected": "Unused time on Pro (with 20.0% off) after 20 Oct 2026",
+          "actual": "Unused time on Basic (with 20.0% off) after 15 Oct 2026"
+        },
+        {
+          "path": "preview.body.lines.data[0].discount_amounts",
+          "actual": []
+        }
+      ]
+    }
+  ],
+  "PER-01": [
+    {
+      "fixture": "dev-brk2-billing-cycle-anchor-now",
+      "diffs": [
+        {
+          "path": "after.period_end",
+          "expected": 1794700800,
+          "actual": 1793836800
+        },
+        {
+          "path": "after.period_start",
+          "expected": 1792022400,
+          "actual": 1791158400
+        },
+        {
+          "path": "reset.body.billing_cycle_anchor",
+          "expected": 1792022400,
+          "actual": 1791158400
+        },
+        {
+          "path": "reset.body.items.data[0].current_period_end",
+          "expected": 1794700800,
+          "actual": 1793836800
+        },
+        {
+          "path": "reset.body.items.data[0].current_period_start",
+          "expected": 1792022400,
+          "actual": 1791158400
+        }
+      ]
+    }
+  ],
+  "PRO-01": [
+    {
+      "fixture": "dev-brk2-billing-cycle-anchor-now",
+      "diffs": [
+        {
+          "path": "after.period_end",
+          "expected": 1794700800,
+          "actual": 1793836800
+        },
+        {
+          "path": "after.period_start",
+          "expected": 1792022400,
+          "actual": 1791158400
+        },
+        {
+          "path": "reset.body.billing_cycle_anchor",
+          "expected": 1792022400,
+          "actual": 1791158400
+        },
+        {
+          "path": "reset.body.items.data[0].current_period_end",
+          "expected": 1794700800,
+          "actual": 1793836800
+        },
+        {
+          "path": "reset.body.items.data[0].current_period_start",
+          "expected": 1792022400,
+          "actual": 1791158400
+        }
+      ]
+    },
+    {
+      "fixture": "dev-brk2-flex-credit-after-none-change",
+      "diffs": [
+        {
+          "path": "preview.body.amount_due",
+          "expected": 9388,
+          "actual": 8033
+        },
+        {
+          "path": "preview.body.amount_remaining",
+          "expected": 9388,
+          "actual": 8033
+        },
+        {
+          "path": "preview.body.lines.data[0].amount",
+          "expected": -677,
+          "actual": -2032
+        },
+        {
+          "path": "preview.body.lines.data[0].description",
+          "expected": "Unused time on Basic after 15 Oct 2026",
+          "actual": "Unused time on Pro after 15 Oct 2026"
+        },
+        {
+          "path": "preview.body.lines.data[0].subtotal",
+          "expected": -677,
+          "actual": -2032
+        }
+      ]
+    },
+    {
+      "fixture": "dev-brk2-preview-cancel-now",
+      "diffs": [
+        {
+          "path": "preview.body.amount_due",
+          "expected": 0,
+          "actual": 1000
+        },
+        {
+          "path": "preview.body.amount_remaining",
+          "expected": 0,
+          "actual": 1000
+        },
+        {
+          "path": "preview.body.created",
+          "expected": 1792022400,
+          "actual": 1793836800
+        },
+        {
+          "path": "preview.body.ending_balance",
+          "expected": null,
+          "actual": 0
+        },
+        {
+          "path": "preview.body.lines.data[0].amount",
+          "expected": -677,
+          "actual": 1000
+        }
+      ]
+    },
+    {
+      "fixture": "dev-brk2-second-change-carries-old-discount",
+      "diffs": [
+        {
+          "path": "preview.body.amount_due",
+          "expected": 1058,
+          "actual": 852
+        },
+        {
+          "path": "preview.body.amount_remaining",
+          "expected": 1058,
+          "actual": 852
+        },
+        {
+          "path": "preview.body.lines.data[0].amount",
+          "expected": -1239,
+          "actual": -542
+        },
+        {
+          "path": "preview.body.lines.data[0].description",
+          "expected": "Unused time on Pro (with 20.0% off) after 20 Oct 2026",
+          "actual": "Unused time on Basic (with 20.0% off) after 15 Oct 2026"
+        },
+        {
+          "path": "preview.body.lines.data[0].discount_amounts",
+          "actual": []
+        }
+      ]
+    },
+    {
+      "fixture": "dev-brk2-swap-item-deleted",
+      "diffs": [
+        {
+          "path": "pending.body.data",
+          "actual": []
+        },
+        {
+          "path": "pending.body.data[0].amount",
+          "expected": -677
+        },
+        {
+          "path": "pending.body.data[0].currency",
+          "expected": "usd"
+        },
+        {
+          "path": "pending.body.data[0].customer",
+          "expected": "cus#1"
+        },
+        {
+          "path": "pending.body.data[0].customer_account",
+          "expected": null
+        }
+      ]
+    },
+    {
+      "fixture": "dev-brk2-trial-change-preview",
+      "diffs": [
+        {
+          "path": "preview.body.amount_due",
+          "expected": 0,
+          "actual": 4571
+        },
+        {
+          "path": "preview.body.amount_remaining",
+          "expected": 0,
+          "actual": 4571
+        },
+        {
+          "path": "preview.body.auto_advance",
+          "expected": false,
+          "actual": true
+        },
+        {
+          "path": "preview.body.created",
+          "expected": 1791417600,
+          "actual": 1792368000
+        },
+        {
+          "path": "preview.body.lines.data[0].amount",
+          "expected": 0,
+          "actual": -786
+        }
+      ]
+    },
+    {
+      "fixture": "dev-brk2-update-items-on-canceled",
+      "diffs": [
+        {
+          "path": "change.body.application",
+          "actual": null
+        },
+        {
+          "path": "change.body.application_fee_percent",
+          "actual": null
+        },
+        {
+          "path": "change.body.automatic_tax.disabled_reason",
+          "actual": null
+        },
+        {
+          "path": "change.body.automatic_tax.enabled",
+          "actual": false
+        },
+        {
+          "path": "change.body.automatic_tax.liability",
+          "actual": null
+        }
+      ]
+    }
+  ],
+  "LIF-02": [
+    {
+      "fixture": "dev-brk2-cancel-at-and-flag",
+      "diffs": [
+        {
+          "path": "after.cancel_at",
+          "expected": null,
+          "actual": 1793836800
+        },
+        {
+          "path": "after.canceled_at",
+          "expected": null,
+          "actual": 1791158400
+        },
+        {
+          "path": "both.body.application",
+          "actual": null
+        },
+        {
+          "path": "both.body.application_fee_percent",
+          "actual": null
+        },
+        {
+          "path": "both.body.automatic_tax.disabled_reason",
+          "actual": null
+        }
+      ]
+    }
+  ],
+  "LIF-08": [
+    {
+      "fixture": "dev-brk2-cancel-at-and-flag",
+      "diffs": [
+        {
+          "path": "after.cancel_at",
+          "expected": null,
+          "actual": 1793836800
+        },
+        {
+          "path": "after.canceled_at",
+          "expected": null,
+          "actual": 1791158400
+        },
+        {
+          "path": "both.body.application",
+          "actual": null
+        },
+        {
+          "path": "both.body.application_fee_percent",
+          "actual": null
+        },
+        {
+          "path": "both.body.automatic_tax.disabled_reason",
+          "actual": null
+        }
+      ]
+    }
+  ],
+  "ERR-03": [
+    {
+      "fixture": "dev-brk2-cancel-at-and-flag",
+      "diffs": [
+        {
+          "path": "after.cancel_at",
+          "expected": null,
+          "actual": 1793836800
+        },
+        {
+          "path": "after.canceled_at",
+          "expected": null,
+          "actual": 1791158400
+        },
+        {
+          "path": "both.body.application",
+          "actual": null
+        },
+        {
+          "path": "both.body.application_fee_percent",
+          "actual": null
+        },
+        {
+          "path": "both.body.automatic_tax.disabled_reason",
+          "actual": null
+        }
+      ]
+    },
+    {
+      "fixture": "dev-brk2-cancel-twice",
+      "diffs": [
+        {
+          "path": "after.ended_at",
+          "expected": 1792022400,
+          "actual": 1792108800
+        },
+        {
+          "path": "second.body.application",
+          "actual": null
+        },
+        {
+          "path": "second.body.application_fee_percent",
+          "actual": null
+        },
+        {
+          "path": "second.body.automatic_tax.disabled_reason",
+          "actual": null
+        },
+        {
+          "path": "second.body.automatic_tax.enabled",
+          "actual": false
+        }
+      ]
+    },
+    {
+      "fixture": "dev-brk2-delete-only-item",
+      "diffs": [
+        {
+          "path": "delete.body.billing_thresholds",
+          "actual": null
+        },
+        {
+          "path": "delete.body.created",
+          "actual": 1791158400
+        },
+        {
+          "path": "delete.body.current_period_end",
+          "actual": 1793836800
+        },
+        {
+          "path": "delete.body.current_period_start",
+          "actual": 1791158400
+        },
+        {
+          "path": "delete.body.current_trial",
+          "actual": null
+        }
+      ]
+    },
+    {
+      "fixture": "dev-brk2-fractional-proration-date",
+      "diffs": [
+        {
+          "path": "preview.account_country",
+          "actual": "FR"
+        },
+        {
+          "path": "preview.account_name",
+          "actual": "environnement de test AcmeCo"
+        },
+        {
+          "path": "preview.account_tax_ids",
+          "actual": null
+        },
+        {
+          "path": "preview.amount_due",
+          "actual": 4355
+        },
+        {
+          "path": "preview.amount_overpaid",
+          "actual": 0
+        }
+      ]
+    },
+    {
+      "fixture": "dev-brk2-fractional-quantity",
+      "diffs": [
+        {
+          "path": "preview.account_country",
+          "actual": "FR"
+        },
+        {
+          "path": "preview.account_name",
+          "actual": "environnement de test AcmeCo"
+        },
+        {
+          "path": "preview.account_tax_ids",
+          "actual": null
+        },
+        {
+          "path": "preview.amount_due",
+          "actual": 1161
+        },
+        {
+          "path": "preview.amount_overpaid",
+          "actual": 0
+        }
+      ]
+    },
+    {
+      "fixture": "dev-brk2-invoiceitem-recurring-price",
+      "diffs": [
+        {
+          "path": "item.body.amount",
+          "actual": 0
+        },
+        {
+          "path": "item.body.currency",
+          "actual": "usd"
+        },
+        {
+          "path": "item.body.customer",
+          "actual": "cus#1"
+        },
+        {
+          "path": "item.body.customer_account",
+          "actual": null
+        },
+        {
+          "path": "item.body.date",
+          "actual": 1791158400
+        }
+      ]
+    },
+    {
+      "fixture": "dev-brk2-negative-quantity",
+      "diffs": [
+        {
+          "path": "preview.account_country",
+          "actual": "FR"
+        },
+        {
+          "path": "preview.account_name",
+          "actual": "environnement de test AcmeCo"
+        },
+        {
+          "path": "preview.account_tax_ids",
+          "actual": null
+        },
+        {
+          "path": "preview.amount_due",
+          "actual": 0
+        },
+        {
+          "path": "preview.amount_overpaid",
+          "actual": 0
+        }
+      ]
+    },
+    {
+      "fixture": "dev-brk2-preview-canceled",
+      "diffs": [
+        {
+          "path": "preview.body.account_country",
+          "actual": "FR"
+        },
+        {
+          "path": "preview.body.account_name",
+          "actual": "environnement de test AcmeCo"
+        },
+        {
+          "path": "preview.body.account_tax_ids",
+          "actual": null
+        },
+        {
+          "path": "preview.body.amount_due",
+          "actual": 1000
+        },
+        {
+          "path": "preview.body.amount_overpaid",
+          "actual": 0
+        }
+      ]
+    },
+    {
+      "fixture": "dev-v6-invalid-proration-behavior",
+      "diffs": [
+        {
+          "path": "preview.body.account_country",
+          "actual": "FR"
+        },
+        {
+          "path": "preview.body.account_name",
+          "actual": "environnement de test AcmeCo"
+        },
+        {
+          "path": "preview.body.account_tax_ids",
+          "actual": null
+        },
+        {
+          "path": "preview.body.amount_due",
+          "actual": 5000
+        },
+        {
+          "path": "preview.body.amount_overpaid",
+          "actual": 0
+        }
+      ]
+    }
+  ],
   "LIF-09": [
+    {
+      "fixture": "dev-brk2-cancel-at-mid-always-invoice",
+      "diffs": [
+        {
+          "path": "invoices.body.data[0].amount_due",
+          "expected": 0,
+          "actual": 1000
+        },
+        {
+          "path": "invoices.body.data[0].amount_paid",
+          "expected": 0,
+          "actual": 1000
+        },
+        {
+          "path": "invoices.body.data[0].attempt_count",
+          "expected": 0,
+          "actual": 1
+        },
+        {
+          "path": "invoices.body.data[0].billing_reason",
+          "expected": "subscription_update",
+          "actual": "subscription_create"
+        },
+        {
+          "path": "invoices.body.data[0].ending_balance",
+          "expected": -516,
+          "actual": 0
+        }
+      ]
+    },
+    {
+      "fixture": "dev-brk2-cancel-at-mid-then-flag-false",
+      "diffs": [
+        {
+          "path": "later.invoice_count",
+          "expected": 1,
+          "actual": 2
+        },
+        {
+          "path": "later.latest_invoice.amount_due",
+          "expected": 1000,
+          "actual": 484
+        },
+        {
+          "path": "later.latest_invoice.amount_paid",
+          "expected": 1000,
+          "actual": 484
+        },
+        {
+          "path": "later.latest_invoice.billing_reason",
+          "expected": "subscription_create",
+          "actual": "subscription_cycle"
+        },
+        {
+          "path": "later.latest_invoice.lines[0].amount",
+          "expected": 1000,
+          "actual": -516
+        }
+      ]
+    },
+    {
+      "fixture": "dev-brk2-cancel-at-next-period",
+      "diffs": [
+        {
+          "path": "ended.latest_invoice.amount_due",
+          "expected": 500,
+          "actual": 1000
+        },
+        {
+          "path": "ended.latest_invoice.amount_paid",
+          "expected": 500,
+          "actual": 1000
+        },
+        {
+          "path": "ended.latest_invoice.lines[0].amount",
+          "expected": 500,
+          "actual": 1000
+        },
+        {
+          "path": "ended.latest_invoice.lines[0].description",
+          "expected": "Time on Basic after 05 Nov 2026",
+          "actual": "1 × Basic (at $10.00 / month)"
+        },
+        {
+          "path": "ended.latest_invoice.subtotal",
+          "expected": 500,
+          "actual": 1000
+        }
+      ]
+    },
     {
       "fixture": "dev-v6-cancel-at-mid-cleared",
       "diffs": [
@@ -33,6 +1011,64 @@
   ],
   "LIF-04": [
     {
+      "fixture": "dev-brk2-cancel-at-mid-then-flag-false",
+      "diffs": [
+        {
+          "path": "later.invoice_count",
+          "expected": 1,
+          "actual": 2
+        },
+        {
+          "path": "later.latest_invoice.amount_due",
+          "expected": 1000,
+          "actual": 484
+        },
+        {
+          "path": "later.latest_invoice.amount_paid",
+          "expected": 1000,
+          "actual": 484
+        },
+        {
+          "path": "later.latest_invoice.billing_reason",
+          "expected": "subscription_create",
+          "actual": "subscription_cycle"
+        },
+        {
+          "path": "later.latest_invoice.lines[0].amount",
+          "expected": 1000,
+          "actual": -516
+        }
+      ]
+    },
+    {
+      "fixture": "dev-brk2-reactivate-after-end",
+      "diffs": [
+        {
+          "path": "after.cancel_at",
+          "expected": 1793836800,
+          "actual": null
+        },
+        {
+          "path": "after.cancel_at_period_end",
+          "expected": true,
+          "actual": false
+        },
+        {
+          "path": "after.canceled_at",
+          "expected": 1791158400,
+          "actual": null
+        },
+        {
+          "path": "reactivate.body.application",
+          "actual": null
+        },
+        {
+          "path": "reactivate.body.application_fee_percent",
+          "actual": null
+        }
+      ]
+    },
+    {
       "fixture": "dev-v6-cancel-at-mid-cleared",
       "diffs": [
         {
@@ -63,9 +1099,247 @@
       ]
     }
   ],
-  "ERR-03": [
+  "LIF-01": [
     {
-      "fixture": "dev-v6-invalid-proration-behavior",
+      "fixture": "dev-brk2-cancel-at-next-period",
+      "diffs": [
+        {
+          "path": "ended.latest_invoice.amount_due",
+          "expected": 500,
+          "actual": 1000
+        },
+        {
+          "path": "ended.latest_invoice.amount_paid",
+          "expected": 500,
+          "actual": 1000
+        },
+        {
+          "path": "ended.latest_invoice.lines[0].amount",
+          "expected": 500,
+          "actual": 1000
+        },
+        {
+          "path": "ended.latest_invoice.lines[0].description",
+          "expected": "Time on Basic after 05 Nov 2026",
+          "actual": "1 × Basic (at $10.00 / month)"
+        },
+        {
+          "path": "ended.latest_invoice.subtotal",
+          "expected": 500,
+          "actual": 1000
+        }
+      ]
+    },
+    {
+      "fixture": "dev-brk2-pause-collection-void",
+      "diffs": [
+        {
+          "path": "invoices.body.data[0].amount_paid",
+          "expected": 0,
+          "actual": 1000
+        },
+        {
+          "path": "invoices.body.data[0].amount_remaining",
+          "expected": 1000,
+          "actual": 0
+        },
+        {
+          "path": "invoices.body.data[0].attempt_count",
+          "expected": 0,
+          "actual": 1
+        },
+        {
+          "path": "invoices.body.data[0].attempted",
+          "expected": false,
+          "actual": true
+        },
+        {
+          "path": "invoices.body.data[0].status",
+          "expected": "void",
+          "actual": "paid"
+        }
+      ]
+    },
+    {
+      "fixture": "dev-brk2-retries-exhausted",
+      "diffs": [
+        {
+          "path": "next_cycle.invoice_count",
+          "expected": 2,
+          "actual": 3
+        },
+        {
+          "path": "next_cycle.latest_invoice.period_end",
+          "expected": 1793836800,
+          "actual": 1796428800
+        },
+        {
+          "path": "next_cycle.latest_invoice.period_start",
+          "expected": 1791158400,
+          "actual": 1793836800
+        },
+        {
+          "path": "next_cycle.period_end",
+          "expected": 1796428800,
+          "actual": 1799107200
+        },
+        {
+          "path": "next_cycle.period_start",
+          "expected": 1793836800,
+          "actual": 1796428800
+        }
+      ]
+    },
+    {
+      "fixture": "dev-brk2-trial-days-zero",
+      "diffs": [
+        {
+          "path": "renewed.invoice_count",
+          "expected": 2,
+          "actual": 3
+        },
+        {
+          "path": "renewed.trial_end",
+          "expected": null,
+          "actual": 1791158400
+        },
+        {
+          "path": "start.latest_invoice.amount_due",
+          "expected": 1000,
+          "actual": 0
+        },
+        {
+          "path": "start.latest_invoice.amount_paid",
+          "expected": 1000,
+          "actual": 0
+        },
+        {
+          "path": "start.latest_invoice.attempt_count",
+          "expected": 1,
+          "actual": 0
+        }
+      ]
+    }
+  ],
+  "LIF-05": [
+    {
+      "fixture": "dev-brk2-cancel-now-invoice-pending-no-prorate",
+      "diffs": [
+        {
+          "path": "canceled.invoice_count",
+          "expected": 2,
+          "actual": 1
+        },
+        {
+          "path": "canceled.latest_invoice.amount_due",
+          "expected": 400,
+          "actual": 1000
+        },
+        {
+          "path": "canceled.latest_invoice.amount_paid",
+          "expected": 0,
+          "actual": 1000
+        },
+        {
+          "path": "canceled.latest_invoice.amount_remaining",
+          "expected": 400,
+          "actual": 0
+        },
+        {
+          "path": "canceled.latest_invoice.attempt_count",
+          "expected": 0,
+          "actual": 1
+        }
+      ]
+    },
+    {
+      "fixture": "dev-brk2-cancel-stops-retries",
+      "diffs": [
+        {
+          "path": "after.latest_invoice.amount_paid",
+          "expected": 0,
+          "actual": 1000
+        },
+        {
+          "path": "after.latest_invoice.amount_remaining",
+          "expected": 1000,
+          "actual": 0
+        },
+        {
+          "path": "after.latest_invoice.attempt_count",
+          "expected": 1,
+          "actual": 2
+        },
+        {
+          "path": "after.latest_invoice.status",
+          "expected": "open",
+          "actual": "paid"
+        },
+        {
+          "path": "invoices.body.data[0].amount_paid",
+          "expected": 0,
+          "actual": 1000
+        }
+      ]
+    },
+    {
+      "fixture": "dev-brk2-cancel-twice",
+      "diffs": [
+        {
+          "path": "after.ended_at",
+          "expected": 1792022400,
+          "actual": 1792108800
+        },
+        {
+          "path": "second.body.application",
+          "actual": null
+        },
+        {
+          "path": "second.body.application_fee_percent",
+          "actual": null
+        },
+        {
+          "path": "second.body.automatic_tax.disabled_reason",
+          "actual": null
+        },
+        {
+          "path": "second.body.automatic_tax.enabled",
+          "actual": false
+        }
+      ]
+    },
+    {
+      "fixture": "dev-brk2-preview-cancel-now",
+      "diffs": [
+        {
+          "path": "preview.body.amount_due",
+          "expected": 0,
+          "actual": 1000
+        },
+        {
+          "path": "preview.body.amount_remaining",
+          "expected": 0,
+          "actual": 1000
+        },
+        {
+          "path": "preview.body.created",
+          "expected": 1792022400,
+          "actual": 1793836800
+        },
+        {
+          "path": "preview.body.ending_balance",
+          "expected": null,
+          "actual": 0
+        },
+        {
+          "path": "preview.body.lines.data[0].amount",
+          "expected": -677,
+          "actual": 1000
+        }
+      ]
+    },
+    {
+      "fixture": "dev-brk2-preview-canceled",
       "diffs": [
         {
           "path": "preview.body.account_country",
@@ -81,70 +1355,158 @@
         },
         {
           "path": "preview.body.amount_due",
-          "actual": 5000
+          "actual": 1000
         },
         {
           "path": "preview.body.amount_overpaid",
           "actual": 0
         }
       ]
-    }
-  ],
-  "INV-02": [
+    },
     {
-      "fixture": "dev-v6-invoice-routing",
+      "fixture": "dev-brk2-trial-cancel-now-prorate",
       "diffs": [
         {
-          "path": "finalize.body.account_country",
-          "expected": "FR"
+          "path": "canceled.invoice_count",
+          "expected": 1,
+          "actual": 2
         },
         {
-          "path": "finalize.body.account_name",
-          "expected": "environnement de test AcmeCo"
+          "path": "canceled.latest_invoice.billing_reason",
+          "expected": "subscription_create",
+          "actual": "subscription_cycle"
         },
         {
-          "path": "finalize.body.account_tax_ids",
-          "expected": null
+          "path": "canceled.latest_invoice.lines[0].amount",
+          "expected": 0,
+          "actual": -786
         },
         {
-          "path": "finalize.body.amount_due",
-          "expected": 400
+          "path": "canceled.latest_invoice.lines[0].description",
+          "expected": "Free trial for 1 × Basic",
+          "actual": "Unused time on Basic after 08 Oct 2026"
         },
         {
-          "path": "finalize.body.amount_overpaid",
-          "expected": 0
+          "path": "canceled.latest_invoice.period_end",
+          "expected": 1791158400,
+          "actual": 1791417600
         }
       ]
-    }
-  ],
-  "LST-01": [
+    },
     {
-      "fixture": "dev-v6-list-by-customer",
+      "fixture": "dev-brk2-update-items-on-canceled",
       "diffs": [
         {
-          "path": "other_sub.body.application",
+          "path": "change.body.application",
           "actual": null
         },
         {
-          "path": "other_sub.body.application_fee_percent",
+          "path": "change.body.application_fee_percent",
           "actual": null
         },
         {
-          "path": "other_sub.body.automatic_tax.disabled_reason",
+          "path": "change.body.automatic_tax.disabled_reason",
           "actual": null
         },
         {
-          "path": "other_sub.body.automatic_tax.enabled",
+          "path": "change.body.automatic_tax.enabled",
           "actual": false
         },
         {
-          "path": "other_sub.body.automatic_tax.liability",
+          "path": "change.body.automatic_tax.liability",
           "actual": null
         }
       ]
     }
   ],
   "INV-03": [
+    {
+      "fixture": "dev-brk2-cancel-now-invoice-pending-no-prorate",
+      "diffs": [
+        {
+          "path": "canceled.invoice_count",
+          "expected": 2,
+          "actual": 1
+        },
+        {
+          "path": "canceled.latest_invoice.amount_due",
+          "expected": 400,
+          "actual": 1000
+        },
+        {
+          "path": "canceled.latest_invoice.amount_paid",
+          "expected": 0,
+          "actual": 1000
+        },
+        {
+          "path": "canceled.latest_invoice.amount_remaining",
+          "expected": 400,
+          "actual": 0
+        },
+        {
+          "path": "canceled.latest_invoice.attempt_count",
+          "expected": 0,
+          "actual": 1
+        }
+      ]
+    },
+    {
+      "fixture": "dev-brk2-invoiceitems-pending-false",
+      "diffs": [
+        {
+          "path": "invoiced.body.data[0].amount",
+          "expected": 400,
+          "actual": 200
+        },
+        {
+          "path": "invoiced.body.data[0].date",
+          "expected": 1791158400,
+          "actual": 1793840400
+        },
+        {
+          "path": "invoiced.body.data[0].id",
+          "expected": "ii#1",
+          "actual": "ii#2"
+        },
+        {
+          "path": "invoiced.body.data[0].invoice",
+          "expected": "in#1",
+          "actual": null
+        },
+        {
+          "path": "invoiced.body.data[0].period.end",
+          "expected": 1791158400,
+          "actual": 1793840400
+        }
+      ]
+    },
+    {
+      "fixture": "dev-brk2-oneoff-item-sub-coupon",
+      "diffs": [
+        {
+          "path": "invoices.body.data[0].amount_due",
+          "expected": 1120,
+          "actual": 1200
+        },
+        {
+          "path": "invoices.body.data[0].amount_paid",
+          "expected": 1120,
+          "actual": 1200
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[0].discount_amounts",
+          "actual": []
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[0].discount_amounts[0].amount",
+          "expected": 80
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[0].discount_amounts[0].discount",
+          "expected": "di#1"
+        }
+      ]
+    },
     {
       "fixture": "dev-v6-oneoff-other-subscription",
       "diffs": [
@@ -227,6 +1589,703 @@
         {
           "path": "preview.body.lines.data[0].parent.invoice_item_details.invoice_item",
           "actual": "ii#1"
+        }
+      ]
+    }
+  ],
+  "LIF-06": [
+    {
+      "fixture": "dev-brk2-cancel-stops-retries",
+      "diffs": [
+        {
+          "path": "after.latest_invoice.amount_paid",
+          "expected": 0,
+          "actual": 1000
+        },
+        {
+          "path": "after.latest_invoice.amount_remaining",
+          "expected": 1000,
+          "actual": 0
+        },
+        {
+          "path": "after.latest_invoice.attempt_count",
+          "expected": 1,
+          "actual": 2
+        },
+        {
+          "path": "after.latest_invoice.status",
+          "expected": "open",
+          "actual": "paid"
+        },
+        {
+          "path": "invoices.body.data[0].amount_paid",
+          "expected": 0,
+          "actual": 1000
+        }
+      ]
+    },
+    {
+      "fixture": "dev-brk2-error-if-incomplete",
+      "diffs": [
+        {
+          "path": "after.invoice_count",
+          "expected": 1,
+          "actual": 2
+        },
+        {
+          "path": "after.latest_invoice.amount_due",
+          "expected": 1000,
+          "actual": 1355
+        },
+        {
+          "path": "after.latest_invoice.amount_paid",
+          "expected": 1000,
+          "actual": 0
+        },
+        {
+          "path": "after.latest_invoice.amount_remaining",
+          "expected": 0,
+          "actual": 1355
+        },
+        {
+          "path": "after.latest_invoice.billing_reason",
+          "expected": "subscription_create",
+          "actual": "subscription_update"
+        }
+      ]
+    },
+    {
+      "fixture": "dev-brk2-retries-exhausted",
+      "diffs": [
+        {
+          "path": "next_cycle.invoice_count",
+          "expected": 2,
+          "actual": 3
+        },
+        {
+          "path": "next_cycle.latest_invoice.period_end",
+          "expected": 1793836800,
+          "actual": 1796428800
+        },
+        {
+          "path": "next_cycle.latest_invoice.period_start",
+          "expected": 1791158400,
+          "actual": 1793836800
+        },
+        {
+          "path": "next_cycle.period_end",
+          "expected": 1796428800,
+          "actual": 1799107200
+        },
+        {
+          "path": "next_cycle.period_start",
+          "expected": 1793836800,
+          "actual": 1796428800
+        }
+      ]
+    }
+  ],
+  "PRO-04": [
+    {
+      "fixture": "dev-brk2-classic-trunc12-a",
+      "diffs": [
+        {
+          "path": "preview.amount_due",
+          "expected": 200112136,
+          "actual": 200112135
+        },
+        {
+          "path": "preview.amount_remaining",
+          "expected": 200112136,
+          "actual": 200112135
+        },
+        {
+          "path": "preview.lines.data[1].amount",
+          "expected": 112157,
+          "actual": 112156
+        },
+        {
+          "path": "preview.lines.data[1].subtotal",
+          "expected": 112157,
+          "actual": 112156
+        },
+        {
+          "path": "preview.subtotal",
+          "expected": 200112136,
+          "actual": 200112135
+        }
+      ]
+    }
+  ],
+  "MOD-01": [
+    {
+      "fixture": "dev-brk2-classic-trunc12-a",
+      "diffs": [
+        {
+          "path": "preview.amount_due",
+          "expected": 200112136,
+          "actual": 200112135
+        },
+        {
+          "path": "preview.amount_remaining",
+          "expected": 200112136,
+          "actual": 200112135
+        },
+        {
+          "path": "preview.lines.data[1].amount",
+          "expected": 112157,
+          "actual": 112156
+        },
+        {
+          "path": "preview.lines.data[1].subtotal",
+          "expected": 112157,
+          "actual": 112156
+        },
+        {
+          "path": "preview.subtotal",
+          "expected": 200112136,
+          "actual": 200112135
+        }
+      ]
+    },
+    {
+      "fixture": "dev-brk2-flex-credit-after-none-change",
+      "diffs": [
+        {
+          "path": "preview.body.amount_due",
+          "expected": 9388,
+          "actual": 8033
+        },
+        {
+          "path": "preview.body.amount_remaining",
+          "expected": 9388,
+          "actual": 8033
+        },
+        {
+          "path": "preview.body.lines.data[0].amount",
+          "expected": -677,
+          "actual": -2032
+        },
+        {
+          "path": "preview.body.lines.data[0].description",
+          "expected": "Unused time on Basic after 15 Oct 2026",
+          "actual": "Unused time on Pro after 15 Oct 2026"
+        },
+        {
+          "path": "preview.body.lines.data[0].subtotal",
+          "expected": -677,
+          "actual": -2032
+        }
+      ]
+    }
+  ],
+  "PRO-08": [
+    {
+      "fixture": "dev-brk2-classic-trunc12-a",
+      "diffs": [
+        {
+          "path": "preview.amount_due",
+          "expected": 200112136,
+          "actual": 200112135
+        },
+        {
+          "path": "preview.amount_remaining",
+          "expected": 200112136,
+          "actual": 200112135
+        },
+        {
+          "path": "preview.lines.data[1].amount",
+          "expected": 112157,
+          "actual": 112156
+        },
+        {
+          "path": "preview.lines.data[1].subtotal",
+          "expected": 112157,
+          "actual": 112156
+        },
+        {
+          "path": "preview.subtotal",
+          "expected": 200112136,
+          "actual": 200112135
+        }
+      ]
+    },
+    {
+      "fixture": "dev-brk2-flex-credit-after-none-change",
+      "diffs": [
+        {
+          "path": "preview.body.amount_due",
+          "expected": 9388,
+          "actual": 8033
+        },
+        {
+          "path": "preview.body.amount_remaining",
+          "expected": 9388,
+          "actual": 8033
+        },
+        {
+          "path": "preview.body.lines.data[0].amount",
+          "expected": -677,
+          "actual": -2032
+        },
+        {
+          "path": "preview.body.lines.data[0].description",
+          "expected": "Unused time on Basic after 15 Oct 2026",
+          "actual": "Unused time on Pro after 15 Oct 2026"
+        },
+        {
+          "path": "preview.body.lines.data[0].subtotal",
+          "expected": -677,
+          "actual": -2032
+        }
+      ]
+    },
+    {
+      "fixture": "dev-brk2-fractional-quantity",
+      "diffs": [
+        {
+          "path": "preview.account_country",
+          "actual": "FR"
+        },
+        {
+          "path": "preview.account_name",
+          "actual": "environnement de test AcmeCo"
+        },
+        {
+          "path": "preview.account_tax_ids",
+          "actual": null
+        },
+        {
+          "path": "preview.amount_due",
+          "actual": 1161
+        },
+        {
+          "path": "preview.amount_overpaid",
+          "actual": 0
+        }
+      ]
+    },
+    {
+      "fixture": "dev-brk2-negative-quantity",
+      "diffs": [
+        {
+          "path": "preview.account_country",
+          "actual": "FR"
+        },
+        {
+          "path": "preview.account_name",
+          "actual": "environnement de test AcmeCo"
+        },
+        {
+          "path": "preview.account_tax_ids",
+          "actual": null
+        },
+        {
+          "path": "preview.amount_due",
+          "actual": 0
+        },
+        {
+          "path": "preview.amount_overpaid",
+          "actual": 0
+        }
+      ]
+    }
+  ],
+  "ERR-01": [
+    {
+      "fixture": "dev-brk2-fractional-proration-date",
+      "diffs": [
+        {
+          "path": "preview.account_country",
+          "actual": "FR"
+        },
+        {
+          "path": "preview.account_name",
+          "actual": "environnement de test AcmeCo"
+        },
+        {
+          "path": "preview.account_tax_ids",
+          "actual": null
+        },
+        {
+          "path": "preview.amount_due",
+          "actual": 4355
+        },
+        {
+          "path": "preview.amount_overpaid",
+          "actual": 0
+        }
+      ]
+    }
+  ],
+  "ITM-02": [
+    {
+      "fixture": "dev-brk2-invoiceitem-recurring-price",
+      "diffs": [
+        {
+          "path": "item.body.amount",
+          "actual": 0
+        },
+        {
+          "path": "item.body.currency",
+          "actual": "usd"
+        },
+        {
+          "path": "item.body.customer",
+          "actual": "cus#1"
+        },
+        {
+          "path": "item.body.customer_account",
+          "actual": null
+        },
+        {
+          "path": "item.body.date",
+          "actual": 1791158400
+        }
+      ]
+    },
+    {
+      "fixture": "dev-brk2-invoiceitem-unit-amount-quantity",
+      "diffs": [
+        {
+          "path": "item.body.amount",
+          "expected": 750,
+          "actual": 0
+        },
+        {
+          "path": "item.body.pricing.unit_amount_decimal",
+          "expected": "250",
+          "actual": "0"
+        },
+        {
+          "path": "item.body.quantity",
+          "expected": 3,
+          "actual": 1
+        },
+        {
+          "path": "item.body.quantity_decimal",
+          "expected": "3",
+          "actual": "1"
+        },
+        {
+          "path": "read.body.amount",
+          "expected": 750,
+          "actual": 0
+        }
+      ]
+    },
+    {
+      "fixture": "dev-brk2-invoiceitems-pending-false",
+      "diffs": [
+        {
+          "path": "invoiced.body.data[0].amount",
+          "expected": 400,
+          "actual": 200
+        },
+        {
+          "path": "invoiced.body.data[0].date",
+          "expected": 1791158400,
+          "actual": 1793840400
+        },
+        {
+          "path": "invoiced.body.data[0].id",
+          "expected": "ii#1",
+          "actual": "ii#2"
+        },
+        {
+          "path": "invoiced.body.data[0].invoice",
+          "expected": "in#1",
+          "actual": null
+        },
+        {
+          "path": "invoiced.body.data[0].period.end",
+          "expected": 1791158400,
+          "actual": 1793840400
+        }
+      ]
+    }
+  ],
+  "DSC-01": [
+    {
+      "fixture": "dev-brk2-oneoff-item-sub-coupon",
+      "diffs": [
+        {
+          "path": "invoices.body.data[0].amount_due",
+          "expected": 1120,
+          "actual": 1200
+        },
+        {
+          "path": "invoices.body.data[0].amount_paid",
+          "expected": 1120,
+          "actual": 1200
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[0].discount_amounts",
+          "actual": []
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[0].discount_amounts[0].amount",
+          "expected": 80
+        },
+        {
+          "path": "invoices.body.data[0].lines.data[0].discount_amounts[0].discount",
+          "expected": "di#1"
+        }
+      ]
+    }
+  ],
+  "LIF-03": [
+    {
+      "fixture": "dev-brk2-reactivate-after-end",
+      "diffs": [
+        {
+          "path": "after.cancel_at",
+          "expected": 1793836800,
+          "actual": null
+        },
+        {
+          "path": "after.cancel_at_period_end",
+          "expected": true,
+          "actual": false
+        },
+        {
+          "path": "after.canceled_at",
+          "expected": 1791158400,
+          "actual": null
+        },
+        {
+          "path": "reactivate.body.application",
+          "actual": null
+        },
+        {
+          "path": "reactivate.body.application_fee_percent",
+          "actual": null
+        }
+      ]
+    }
+  ],
+  "LIF-07": [
+    {
+      "fixture": "dev-brk2-second-sub-trial-end",
+      "diffs": [
+        {
+          "path": "list.body.data",
+          "actual": []
+        },
+        {
+          "path": "list.body.data[0].application",
+          "expected": null
+        },
+        {
+          "path": "list.body.data[0].application_fee_percent",
+          "expected": null
+        },
+        {
+          "path": "list.body.data[0].automatic_tax.disabled_reason",
+          "expected": null
+        },
+        {
+          "path": "list.body.data[0].automatic_tax.enabled",
+          "expected": false
+        }
+      ]
+    },
+    {
+      "fixture": "dev-brk2-trial-cancel-now-prorate",
+      "diffs": [
+        {
+          "path": "canceled.invoice_count",
+          "expected": 1,
+          "actual": 2
+        },
+        {
+          "path": "canceled.latest_invoice.billing_reason",
+          "expected": "subscription_create",
+          "actual": "subscription_cycle"
+        },
+        {
+          "path": "canceled.latest_invoice.lines[0].amount",
+          "expected": 0,
+          "actual": -786
+        },
+        {
+          "path": "canceled.latest_invoice.lines[0].description",
+          "expected": "Free trial for 1 × Basic",
+          "actual": "Unused time on Basic after 08 Oct 2026"
+        },
+        {
+          "path": "canceled.latest_invoice.period_end",
+          "expected": 1791158400,
+          "actual": 1791417600
+        }
+      ]
+    },
+    {
+      "fixture": "dev-brk2-trial-change-preview",
+      "diffs": [
+        {
+          "path": "preview.body.amount_due",
+          "expected": 0,
+          "actual": 4571
+        },
+        {
+          "path": "preview.body.amount_remaining",
+          "expected": 0,
+          "actual": 4571
+        },
+        {
+          "path": "preview.body.auto_advance",
+          "expected": false,
+          "actual": true
+        },
+        {
+          "path": "preview.body.created",
+          "expected": 1791417600,
+          "actual": 1792368000
+        },
+        {
+          "path": "preview.body.lines.data[0].amount",
+          "expected": 0,
+          "actual": -786
+        }
+      ]
+    },
+    {
+      "fixture": "dev-brk2-trial-days-zero",
+      "diffs": [
+        {
+          "path": "renewed.invoice_count",
+          "expected": 2,
+          "actual": 3
+        },
+        {
+          "path": "renewed.trial_end",
+          "expected": null,
+          "actual": 1791158400
+        },
+        {
+          "path": "start.latest_invoice.amount_due",
+          "expected": 1000,
+          "actual": 0
+        },
+        {
+          "path": "start.latest_invoice.amount_paid",
+          "expected": 1000,
+          "actual": 0
+        },
+        {
+          "path": "start.latest_invoice.attempt_count",
+          "expected": 1,
+          "actual": 0
+        }
+      ]
+    },
+    {
+      "fixture": "dev-brk2-trial-end-now",
+      "diffs": [
+        {
+          "path": "after.invoice_count",
+          "expected": 2,
+          "actual": 1
+        },
+        {
+          "path": "after.latest_invoice.amount_due",
+          "expected": 1000,
+          "actual": 0
+        },
+        {
+          "path": "after.latest_invoice.amount_paid",
+          "expected": 1000,
+          "actual": 0
+        },
+        {
+          "path": "after.latest_invoice.attempt_count",
+          "expected": 1,
+          "actual": 0
+        },
+        {
+          "path": "after.latest_invoice.billing_reason",
+          "expected": "subscription_update",
+          "actual": "subscription_create"
+        }
+      ]
+    }
+  ],
+  "LST-01": [
+    {
+      "fixture": "dev-brk2-second-sub-trial-end",
+      "diffs": [
+        {
+          "path": "list.body.data",
+          "actual": []
+        },
+        {
+          "path": "list.body.data[0].application",
+          "expected": null
+        },
+        {
+          "path": "list.body.data[0].application_fee_percent",
+          "expected": null
+        },
+        {
+          "path": "list.body.data[0].automatic_tax.disabled_reason",
+          "expected": null
+        },
+        {
+          "path": "list.body.data[0].automatic_tax.enabled",
+          "expected": false
+        }
+      ]
+    },
+    {
+      "fixture": "dev-v6-list-by-customer",
+      "diffs": [
+        {
+          "path": "other_sub.body.application",
+          "actual": null
+        },
+        {
+          "path": "other_sub.body.application_fee_percent",
+          "actual": null
+        },
+        {
+          "path": "other_sub.body.automatic_tax.disabled_reason",
+          "actual": null
+        },
+        {
+          "path": "other_sub.body.automatic_tax.enabled",
+          "actual": false
+        },
+        {
+          "path": "other_sub.body.automatic_tax.liability",
+          "actual": null
+        }
+      ]
+    }
+  ],
+  "INV-02": [
+    {
+      "fixture": "dev-v6-invoice-routing",
+      "diffs": [
+        {
+          "path": "finalize.body.account_country",
+          "expected": "FR"
+        },
+        {
+          "path": "finalize.body.account_name",
+          "expected": "environnement de test AcmeCo"
+        },
+        {
+          "path": "finalize.body.account_tax_ids",
+          "expected": null
+        },
+        {
+          "path": "finalize.body.amount_due",
+          "expected": 400
+        },
+        {
+          "path": "finalize.body.amount_overpaid",
+          "expected": 0
         }
       ]
     }
