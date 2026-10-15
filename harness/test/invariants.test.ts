@@ -354,6 +354,15 @@ describe("invariant 3: the guard hook keeps agents away from the evaluator", () 
       0,
     ],
     [
+      "analyst searches its spent batch",
+      {
+        agent_type: "analyst",
+        tool_name: "Grep",
+        tool_input: { path: "targets/t/spent/hold-b4/", pattern: "discount" },
+      },
+      0,
+    ],
+    [
       "builder reads public API documentation",
       {
         agent_type: "builder",

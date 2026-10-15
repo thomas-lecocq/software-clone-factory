@@ -17,10 +17,12 @@ Context to read: `targets/<t>/RECON.md`, `rules.json`, `adapter.ts` and the driv
 `probes.ts` (the generators and their stated distribution), the clone under `targets/<t>/clone/`
 with its `NOTES.md`, and the dev fixtures under `targets/<t>/fixtures/dev/`.
 
-To see a case's exact differences, start the clone with `startCloneProcess` from
-`harness/src/clone-process.ts` on a free port, run the adapter's `run(probe, { kind: "clone", url })`
-with the fixture's `input`, and diff against its `observed` with `diff` from `harness/src/policy.ts`
-under the target's `policy.json`.
+To see a case's exact differences, run
+`npx tsx harness/src/replay.ts <t> targets/<t>/spent/<batch>/<id>.json` (a directory replays every
+fixture in it): it starts the clone in its own process, runs each fixture's input and prints
+every blocking difference with the expected and the actual value, writing nothing. To test a
+hypothesis, copy the clone to `/tmp`, change the copy, and add `--clone /tmp/<copy>`; the real
+clone is never touched. Do not write your own replay script.
 
 Write `targets/<t>/analysis/<batch>-failures.md`, concise:
 

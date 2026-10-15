@@ -219,6 +219,7 @@ Stripe **test-mode** key; recording refuses any other kind of key.
 | `npx tsx audit/meta.ts`                                                  | measure the auditor: plant defects in copies, run it, report recall                                            |
 | `npx tsx audit/mutate.ts stripe-billing`                                 | plant one-line bugs in the clone and count how many the fixtures catch                                         |
 | `harness/run-analyst.sh stripe-billing hold`                             | analyse a spent batch's failures in the agent container; only that batch goes in                               |
+| `npx tsx harness/src/replay.ts stripe-billing <fixtures>`                | replay chosen fixtures and print every difference, writing nothing (`--clone <dir>` for a patched copy)        |
 | `npm run new-slice <name>`                                               | scaffold a new target                                                                                          |
 | `git config core.hooksPath .githooks`                                    | pre-commit check (check plus evaluator lock)                                                                   |
 

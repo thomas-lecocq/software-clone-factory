@@ -54,9 +54,9 @@ if [[ "$role" == "breaker" && "$tool" == "Bash" ]] && [[ "$target" =~ (\>|tee |d
   block "the breaker is read-only"
 fi
 # A search rooted at a target (or any recursive glob) reaches the holdout unless it is scoped to
-# the dev fixtures or the clone.
-if [[ "$tool" =~ ^(Grep|Glob)$ ]] && [[ "$target" == *targets* || "$target" == *"**"* ]] && [[ "$target" != *fixtures/dev* && "$target" != */clone* ]]; then
-  block "$role must scope searches to fixtures/dev/ or clone/"
+# the dev fixtures, the clone, or the one spent batch an analyst's sandbox holds.
+if [[ "$tool" =~ ^(Grep|Glob)$ ]] && [[ "$target" == *targets* || "$target" == *"**"* ]] && [[ "$target" != *fixtures/dev* && "$target" != */clone* && "$target" != */spent/* ]]; then
+  block "$role must scope searches to fixtures/dev/, clone/ or spent/"
 fi
 # Once the repository is public, its holdout fixtures are one request away: code hosts and package
 # registries' source views are out of bounds for implementers, by any tool.
