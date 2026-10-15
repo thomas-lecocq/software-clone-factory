@@ -1,0 +1,97 @@
+{
+  "id": "dev-v6-invalid-proration-behavior",
+  "rules": [
+    "ERR-03"
+  ],
+  "input": {
+    "kind": "lifecycle",
+    "start": 1791158400,
+    "amount": 1000,
+    "second_amount": 3000,
+    "trial_days": null,
+    "steps": [
+      {
+        "do": "raw",
+        "as": "update",
+        "method": "POST",
+        "path": "/v1/subscriptions/{subscription}",
+        "params": {
+          "items[0][id]": "{item}",
+          "items[0][price]": "{price2}",
+          "proration_behavior": "sometimes"
+        }
+      },
+      {
+        "do": "raw",
+        "as": "preview",
+        "method": "POST",
+        "path": "/v1/invoices/create_preview",
+        "params": {
+          "subscription": "{subscription}",
+          "subscription_details[items][0][id]": "{item}",
+          "subscription_details[items][0][price]": "{price2}",
+          "subscription_details[proration_behavior]": "sometimes"
+        }
+      },
+      {
+        "do": "snapshot",
+        "as": "unchanged"
+      }
+    ]
+  },
+  "observed": {
+    "update": {
+      "ok": false,
+      "error": {
+        "type": "StripeInvalidRequestError",
+        "code": null,
+        "param": "proration_behavior",
+        "message": "Invalid proration_behavior: must be one of create_prorations, none, or always_invoice"
+      }
+    },
+    "preview": {
+      "ok": false,
+      "error": {
+        "type": "StripeInvalidRequestError",
+        "code": null,
+        "param": "subscription_details[proration_behavior]",
+        "message": "Invalid subscription_details[proration_behavior]: must be one of create_prorations, none, or always_invoice"
+      }
+    },
+    "unchanged": {
+      "status": "active",
+      "cancel_at_period_end": false,
+      "cancel_at": null,
+      "canceled_at": null,
+      "ended_at": null,
+      "trial_end": null,
+      "period_start": 1791158400,
+      "period_end": 1793836800,
+      "latest_invoice": {
+        "status": "paid",
+        "billing_reason": "subscription_create",
+        "subtotal": 1000,
+        "total": 1000,
+        "amount_due": 1000,
+        "amount_paid": 1000,
+        "amount_remaining": 0,
+        "attempt_count": 1,
+        "period_start": 1791158400,
+        "period_end": 1791158400,
+        "lines": [
+          {
+            "amount": 1000,
+            "description": "1 × Basic (at $10.00 / month)"
+          }
+        ]
+      },
+      "invoice_count": 1
+    }
+  },
+  "noise": [],
+  "recorded_at": "2026-10-15T05:25:52.707Z",
+  "recorded_with": {
+    "stripe_api_version": "2026-08-26.dahlia",
+    "stripe_node": "22.6.2"
+  }
+}
