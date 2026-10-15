@@ -1,0 +1,1535 @@
+{
+  "source": "breaker agent, round 2 on clone v5, 2026-10-15 (logs/breaker-20261015T061640Z.jsonl)",
+  "probes": [
+    {
+      "id": "dev-brk2-flex-credit-after-none-change",
+      "rules": ["PRO-01", "MOD-01", "PRO-08"],
+      "input": {
+        "kind": "lifecycle",
+        "start": 1791158400,
+        "amount": 1000,
+        "trial_days": null,
+        "coupon": null,
+        "second_amount": 3000,
+        "spare_coupon": null,
+        "steps": [
+          {
+            "do": "advance",
+            "seconds": 432000
+          },
+          {
+            "do": "raw",
+            "as": "swap",
+            "method": "POST",
+            "path": "/v1/subscriptions/{subscription}",
+            "params": {
+              "items[0][id]": "{item}",
+              "items[0][price]": "{price2}",
+              "proration_behavior": "none"
+            }
+          },
+          {
+            "do": "advance",
+            "seconds": 432000
+          },
+          {
+            "do": "raw",
+            "as": "preview",
+            "method": "POST",
+            "path": "/v1/invoices/create_preview",
+            "params": {
+              "subscription": "{subscription}",
+              "subscription_details[items][0][id]": "{item}",
+              "subscription_details[items][0][quantity]": "2"
+            }
+          },
+          {
+            "do": "snapshot",
+            "as": "after"
+          }
+        ]
+      }
+    },
+    {
+      "id": "dev-brk2-second-change-carries-old-discount",
+      "rules": ["PRO-01", "DSC-02"],
+      "input": {
+        "kind": "lifecycle",
+        "start": 1791158400,
+        "amount": 1000,
+        "trial_days": null,
+        "coupon": {
+          "percent_off": 20,
+          "duration": "forever"
+        },
+        "second_amount": 3000,
+        "spare_coupon": null,
+        "steps": [
+          {
+            "do": "advance",
+            "seconds": 864000
+          },
+          {
+            "do": "raw",
+            "as": "up",
+            "method": "POST",
+            "path": "/v1/subscriptions/{subscription}",
+            "params": {
+              "items[0][id]": "{item}",
+              "items[0][price]": "{price2}",
+              "proration_behavior": "create_prorations"
+            }
+          },
+          {
+            "do": "advance",
+            "seconds": 432000
+          },
+          {
+            "do": "raw",
+            "as": "preview",
+            "method": "POST",
+            "path": "/v1/invoices/create_preview",
+            "params": {
+              "subscription": "{subscription}",
+              "subscription_details[items][0][id]": "{item}",
+              "subscription_details[items][0][price]": "{price}"
+            }
+          },
+          {
+            "do": "snapshot",
+            "as": "after"
+          }
+        ]
+      }
+    },
+    {
+      "id": "dev-brk2-trial-change-preview",
+      "rules": ["LIF-07", "PRO-01", "PRO-02"],
+      "input": {
+        "kind": "lifecycle",
+        "start": 1791158400,
+        "amount": 1000,
+        "trial_days": 14,
+        "coupon": null,
+        "second_amount": 3000,
+        "spare_coupon": null,
+        "steps": [
+          {
+            "do": "advance",
+            "seconds": 259200
+          },
+          {
+            "do": "raw",
+            "as": "preview",
+            "method": "POST",
+            "path": "/v1/invoices/create_preview",
+            "params": {
+              "subscription": "{subscription}",
+              "subscription_details[items][0][id]": "{item}",
+              "subscription_details[items][0][price]": "{price2}"
+            }
+          },
+          {
+            "do": "snapshot",
+            "as": "trialing"
+          }
+        ]
+      }
+    },
+    {
+      "id": "dev-brk2-trial-cancel-now-prorate",
+      "rules": ["LIF-05", "LIF-07"],
+      "input": {
+        "kind": "lifecycle",
+        "start": 1791158400,
+        "amount": 1000,
+        "trial_days": 14,
+        "coupon": null,
+        "second_amount": null,
+        "spare_coupon": null,
+        "steps": [
+          {
+            "do": "advance",
+            "seconds": 259200
+          },
+          {
+            "do": "cancel_now",
+            "prorate": true,
+            "invoice_now": true
+          },
+          {
+            "do": "snapshot",
+            "as": "canceled"
+          }
+        ]
+      }
+    },
+    {
+      "id": "dev-brk2-trial-days-zero",
+      "rules": ["LIF-07", "LIF-01"],
+      "input": {
+        "kind": "lifecycle",
+        "start": 1791158400,
+        "amount": 1000,
+        "trial_days": 0,
+        "coupon": null,
+        "second_amount": null,
+        "spare_coupon": null,
+        "steps": [
+          {
+            "do": "snapshot",
+            "as": "start"
+          },
+          {
+            "do": "advance",
+            "seconds": 2682000
+          },
+          {
+            "do": "snapshot",
+            "as": "renewed"
+          }
+        ]
+      }
+    },
+    {
+      "id": "dev-brk2-cancel-twice",
+      "rules": ["LIF-05", "ERR-03"],
+      "input": {
+        "kind": "lifecycle",
+        "start": 1791158400,
+        "amount": 1000,
+        "trial_days": null,
+        "coupon": null,
+        "second_amount": null,
+        "spare_coupon": null,
+        "steps": [
+          {
+            "do": "advance",
+            "seconds": 864000
+          },
+          {
+            "do": "raw",
+            "as": "first",
+            "method": "DELETE",
+            "path": "/v1/subscriptions/{subscription}",
+            "params": {}
+          },
+          {
+            "do": "advance",
+            "seconds": 86400
+          },
+          {
+            "do": "raw",
+            "as": "second",
+            "method": "DELETE",
+            "path": "/v1/subscriptions/{subscription}",
+            "params": {}
+          },
+          {
+            "do": "snapshot",
+            "as": "after"
+          }
+        ]
+      }
+    },
+    {
+      "id": "dev-brk2-update-items-on-canceled",
+      "rules": ["LIF-05", "PRO-01"],
+      "input": {
+        "kind": "lifecycle",
+        "start": 1791158400,
+        "amount": 1000,
+        "trial_days": null,
+        "coupon": null,
+        "second_amount": 3000,
+        "spare_coupon": null,
+        "steps": [
+          {
+            "do": "advance",
+            "seconds": 864000
+          },
+          {
+            "do": "cancel_now",
+            "prorate": false,
+            "invoice_now": false
+          },
+          {
+            "do": "raw",
+            "as": "change",
+            "method": "POST",
+            "path": "/v1/subscriptions/{subscription}",
+            "params": {
+              "items[0][id]": "{item}",
+              "items[0][price]": "{price2}"
+            }
+          },
+          {
+            "do": "raw",
+            "as": "pending",
+            "method": "GET",
+            "path": "/v1/invoiceitems",
+            "params": {
+              "customer": "{customer}",
+              "pending": "true"
+            }
+          },
+          {
+            "do": "snapshot",
+            "as": "after"
+          }
+        ]
+      }
+    },
+    {
+      "id": "dev-brk2-reactivate-after-end",
+      "rules": ["LIF-03", "LIF-04"],
+      "input": {
+        "kind": "lifecycle",
+        "start": 1791158400,
+        "amount": 1000,
+        "trial_days": null,
+        "coupon": null,
+        "second_amount": null,
+        "spare_coupon": null,
+        "steps": [
+          {
+            "do": "cancel_at_period_end"
+          },
+          {
+            "do": "advance",
+            "seconds": 2682000
+          },
+          {
+            "do": "raw",
+            "as": "reactivate",
+            "method": "POST",
+            "path": "/v1/subscriptions/{subscription}",
+            "params": {
+              "cancel_at_period_end": "false"
+            }
+          },
+          {
+            "do": "snapshot",
+            "as": "after"
+          }
+        ]
+      }
+    },
+    {
+      "id": "dev-brk2-add-second-item",
+      "rules": ["ITM-01", "PRO-02"],
+      "input": {
+        "kind": "lifecycle",
+        "start": 1791158400,
+        "amount": 1000,
+        "trial_days": null,
+        "coupon": null,
+        "second_amount": 3000,
+        "spare_coupon": null,
+        "steps": [
+          {
+            "do": "advance",
+            "seconds": 864000
+          },
+          {
+            "do": "raw",
+            "as": "add",
+            "method": "POST",
+            "path": "/v1/subscriptions/{subscription}",
+            "params": {
+              "items[0][id]": "{item}",
+              "items[1][price]": "{price2}"
+            }
+          },
+          {
+            "do": "raw",
+            "as": "pending",
+            "method": "GET",
+            "path": "/v1/invoiceitems",
+            "params": {
+              "customer": "{customer}",
+              "pending": "true"
+            }
+          },
+          {
+            "do": "snapshot",
+            "as": "after"
+          }
+        ]
+      }
+    },
+    {
+      "id": "dev-brk2-swap-item-deleted",
+      "rules": ["ITM-01", "PRO-01"],
+      "input": {
+        "kind": "lifecycle",
+        "start": 1791158400,
+        "amount": 1000,
+        "trial_days": null,
+        "coupon": null,
+        "second_amount": 3000,
+        "spare_coupon": null,
+        "steps": [
+          {
+            "do": "advance",
+            "seconds": 864000
+          },
+          {
+            "do": "raw",
+            "as": "swap",
+            "method": "POST",
+            "path": "/v1/subscriptions/{subscription}",
+            "params": {
+              "items[0][id]": "{item}",
+              "items[0][deleted]": "true",
+              "items[1][price]": "{price2}"
+            }
+          },
+          {
+            "do": "raw",
+            "as": "pending",
+            "method": "GET",
+            "path": "/v1/invoiceitems",
+            "params": {
+              "customer": "{customer}",
+              "pending": "true"
+            }
+          },
+          {
+            "do": "snapshot",
+            "as": "after"
+          }
+        ]
+      }
+    },
+    {
+      "id": "dev-brk2-delete-only-item",
+      "rules": ["ITM-01", "ERR-03"],
+      "input": {
+        "kind": "lifecycle",
+        "start": 1791158400,
+        "amount": 1000,
+        "trial_days": null,
+        "coupon": null,
+        "second_amount": null,
+        "spare_coupon": null,
+        "steps": [
+          {
+            "do": "raw",
+            "as": "delete",
+            "method": "DELETE",
+            "path": "/v1/subscription_items/{item}",
+            "params": {}
+          },
+          {
+            "do": "snapshot",
+            "as": "after"
+          }
+        ]
+      }
+    },
+    {
+      "id": "dev-brk2-billing-cycle-anchor-now",
+      "rules": ["PER-01", "PRO-01", "PRO-07"],
+      "input": {
+        "kind": "lifecycle",
+        "start": 1791158400,
+        "amount": 1000,
+        "trial_days": null,
+        "coupon": null,
+        "second_amount": null,
+        "spare_coupon": null,
+        "steps": [
+          {
+            "do": "advance",
+            "seconds": 864000
+          },
+          {
+            "do": "raw",
+            "as": "reset",
+            "method": "POST",
+            "path": "/v1/subscriptions/{subscription}",
+            "params": {
+              "billing_cycle_anchor": "now",
+              "proration_behavior": "create_prorations"
+            }
+          },
+          {
+            "do": "snapshot",
+            "as": "after"
+          }
+        ]
+      }
+    },
+    {
+      "id": "dev-brk2-trial-end-now",
+      "rules": ["LIF-07"],
+      "input": {
+        "kind": "lifecycle",
+        "start": 1791158400,
+        "amount": 1000,
+        "trial_days": 14,
+        "coupon": null,
+        "second_amount": null,
+        "spare_coupon": null,
+        "steps": [
+          {
+            "do": "advance",
+            "seconds": 259200
+          },
+          {
+            "do": "raw",
+            "as": "end",
+            "method": "POST",
+            "path": "/v1/subscriptions/{subscription}",
+            "params": {
+              "trial_end": "now"
+            }
+          },
+          {
+            "do": "snapshot",
+            "as": "after"
+          }
+        ]
+      }
+    },
+    {
+      "id": "dev-brk2-pause-collection-void",
+      "rules": ["LIF-01"],
+      "input": {
+        "kind": "lifecycle",
+        "start": 1791158400,
+        "amount": 1000,
+        "trial_days": null,
+        "coupon": null,
+        "second_amount": null,
+        "spare_coupon": null,
+        "steps": [
+          {
+            "do": "raw",
+            "as": "pause",
+            "method": "POST",
+            "path": "/v1/subscriptions/{subscription}",
+            "params": {
+              "pause_collection[behavior]": "void"
+            }
+          },
+          {
+            "do": "advance",
+            "seconds": 2682000
+          },
+          {
+            "do": "snapshot",
+            "as": "renewed"
+          },
+          {
+            "do": "raw",
+            "as": "invoices",
+            "method": "GET",
+            "path": "/v1/invoices",
+            "params": {
+              "customer": "{customer}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "dev-brk2-cancel-at-next-period",
+      "rules": ["LIF-09", "LIF-01"],
+      "input": {
+        "kind": "lifecycle",
+        "start": 1791158400,
+        "amount": 1000,
+        "trial_days": null,
+        "coupon": null,
+        "second_amount": null,
+        "spare_coupon": null,
+        "steps": [
+          {
+            "do": "raw",
+            "as": "set",
+            "method": "POST",
+            "path": "/v1/subscriptions/{subscription}",
+            "params": {
+              "cancel_at": "1795132800"
+            }
+          },
+          {
+            "do": "snapshot",
+            "as": "set"
+          },
+          {
+            "do": "advance",
+            "seconds": 2682000
+          },
+          {
+            "do": "snapshot",
+            "as": "renewed"
+          },
+          {
+            "do": "advance",
+            "seconds": 1382400
+          },
+          {
+            "do": "snapshot",
+            "as": "ended"
+          }
+        ]
+      }
+    },
+    {
+      "id": "dev-brk2-cancel-at-and-flag",
+      "rules": ["LIF-02", "LIF-08", "ERR-03"],
+      "input": {
+        "kind": "lifecycle",
+        "start": 1791158400,
+        "amount": 1000,
+        "trial_days": null,
+        "coupon": null,
+        "second_amount": null,
+        "spare_coupon": null,
+        "steps": [
+          {
+            "do": "raw",
+            "as": "both",
+            "method": "POST",
+            "path": "/v1/subscriptions/{subscription}",
+            "params": {
+              "cancel_at": "{period_end}",
+              "cancel_at_period_end": "true"
+            }
+          },
+          {
+            "do": "snapshot",
+            "as": "after"
+          }
+        ]
+      }
+    },
+    {
+      "id": "dev-brk2-cancel-at-mid-then-flag-false",
+      "rules": ["LIF-09", "LIF-04"],
+      "input": {
+        "kind": "lifecycle",
+        "start": 1791158400,
+        "amount": 1000,
+        "trial_days": null,
+        "coupon": null,
+        "second_amount": null,
+        "spare_coupon": null,
+        "steps": [
+          {
+            "do": "raw",
+            "as": "set",
+            "method": "POST",
+            "path": "/v1/subscriptions/{subscription}",
+            "params": {
+              "cancel_at": "1792454400",
+              "proration_behavior": "create_prorations"
+            }
+          },
+          {
+            "do": "raw",
+            "as": "unflag",
+            "method": "POST",
+            "path": "/v1/subscriptions/{subscription}",
+            "params": {
+              "cancel_at_period_end": "false"
+            }
+          },
+          {
+            "do": "snapshot",
+            "as": "unflagged"
+          },
+          {
+            "do": "advance",
+            "seconds": 1382400
+          },
+          {
+            "do": "snapshot",
+            "as": "later"
+          }
+        ]
+      }
+    },
+    {
+      "id": "dev-brk2-cancel-at-mid-always-invoice",
+      "rules": ["LIF-09", "PRO-07"],
+      "input": {
+        "kind": "lifecycle",
+        "start": 1791158400,
+        "amount": 1000,
+        "trial_days": null,
+        "coupon": null,
+        "second_amount": null,
+        "spare_coupon": null,
+        "steps": [
+          {
+            "do": "raw",
+            "as": "set",
+            "method": "POST",
+            "path": "/v1/subscriptions/{subscription}",
+            "params": {
+              "cancel_at": "1792454400",
+              "proration_behavior": "always_invoice"
+            }
+          },
+          {
+            "do": "raw",
+            "as": "invoices",
+            "method": "GET",
+            "path": "/v1/invoices",
+            "params": {
+              "customer": "{customer}"
+            }
+          },
+          {
+            "do": "raw",
+            "as": "pending",
+            "method": "GET",
+            "path": "/v1/invoiceitems",
+            "params": {
+              "customer": "{customer}",
+              "pending": "true"
+            }
+          },
+          {
+            "do": "snapshot",
+            "as": "set"
+          }
+        ]
+      }
+    },
+    {
+      "id": "dev-brk2-retries-exhausted",
+      "rules": ["LIF-06", "LIF-01"],
+      "input": {
+        "kind": "lifecycle",
+        "start": 1791158400,
+        "amount": 1000,
+        "trial_days": null,
+        "coupon": null,
+        "second_amount": null,
+        "spare_coupon": null,
+        "steps": [
+          {
+            "do": "failing_card"
+          },
+          {
+            "do": "advance",
+            "seconds": 2682000
+          },
+          {
+            "do": "advance",
+            "seconds": 864000
+          },
+          {
+            "do": "snapshot",
+            "as": "after_retries"
+          },
+          {
+            "do": "advance",
+            "seconds": 1814400
+          },
+          {
+            "do": "snapshot",
+            "as": "next_cycle"
+          }
+        ]
+      }
+    },
+    {
+      "id": "dev-brk2-cancel-stops-retries",
+      "rules": ["LIF-06", "LIF-05"],
+      "input": {
+        "kind": "lifecycle",
+        "start": 1791158400,
+        "amount": 1000,
+        "trial_days": null,
+        "coupon": null,
+        "second_amount": null,
+        "spare_coupon": null,
+        "steps": [
+          {
+            "do": "failing_card"
+          },
+          {
+            "do": "advance",
+            "seconds": 2682000
+          },
+          {
+            "do": "cancel_now",
+            "prorate": false,
+            "invoice_now": false
+          },
+          {
+            "do": "good_card"
+          },
+          {
+            "do": "advance",
+            "seconds": 432000
+          },
+          {
+            "do": "snapshot",
+            "as": "after"
+          },
+          {
+            "do": "raw",
+            "as": "invoices",
+            "method": "GET",
+            "path": "/v1/invoices",
+            "params": {
+              "customer": "{customer}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "dev-brk2-oneoff-item-sub-coupon",
+      "rules": ["INV-03", "DSC-01"],
+      "input": {
+        "kind": "lifecycle",
+        "start": 1791158400,
+        "amount": 1000,
+        "trial_days": null,
+        "coupon": {
+          "percent_off": 20,
+          "duration": "forever"
+        },
+        "second_amount": null,
+        "spare_coupon": null,
+        "steps": [
+          {
+            "do": "raw",
+            "as": "item",
+            "method": "POST",
+            "path": "/v1/invoiceitems",
+            "params": {
+              "customer": "{customer}",
+              "subscription": "{subscription}",
+              "amount": "400",
+              "currency": "usd"
+            }
+          },
+          {
+            "do": "advance",
+            "seconds": 2682000
+          },
+          {
+            "do": "snapshot",
+            "as": "renewed"
+          },
+          {
+            "do": "raw",
+            "as": "invoices",
+            "method": "GET",
+            "path": "/v1/invoices",
+            "params": {
+              "customer": "{customer}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "dev-brk2-invoiceitem-unit-amount-quantity",
+      "rules": ["ITM-02"],
+      "input": {
+        "kind": "lifecycle",
+        "start": 1791158400,
+        "amount": 1000,
+        "trial_days": null,
+        "coupon": null,
+        "second_amount": null,
+        "spare_coupon": null,
+        "steps": [
+          {
+            "do": "raw",
+            "as": "item",
+            "method": "POST",
+            "path": "/v1/invoiceitems",
+            "params": {
+              "customer": "{customer}",
+              "unit_amount_decimal": "250",
+              "quantity": "3",
+              "currency": "usd"
+            }
+          },
+          {
+            "do": "raw",
+            "as": "read",
+            "method": "GET",
+            "path": "/v1/invoiceitems/{item.id}",
+            "params": {}
+          }
+        ]
+      }
+    },
+    {
+      "id": "dev-brk2-invoiceitem-recurring-price",
+      "rules": ["ITM-02", "ERR-03"],
+      "input": {
+        "kind": "lifecycle",
+        "start": 1791158400,
+        "amount": 1000,
+        "trial_days": null,
+        "coupon": null,
+        "second_amount": null,
+        "spare_coupon": null,
+        "steps": [
+          {
+            "do": "raw",
+            "as": "item",
+            "method": "POST",
+            "path": "/v1/invoiceitems",
+            "params": {
+              "customer": "{customer}",
+              "price": "{price}"
+            }
+          },
+          {
+            "do": "raw",
+            "as": "pending",
+            "method": "GET",
+            "path": "/v1/invoiceitems",
+            "params": {
+              "customer": "{customer}",
+              "pending": "true"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "dev-brk2-invoiceitems-pending-false",
+      "rules": ["ITM-02", "INV-03"],
+      "input": {
+        "kind": "lifecycle",
+        "start": 1791158400,
+        "amount": 1000,
+        "trial_days": null,
+        "coupon": null,
+        "second_amount": null,
+        "spare_coupon": null,
+        "steps": [
+          {
+            "do": "raw",
+            "as": "first",
+            "method": "POST",
+            "path": "/v1/invoiceitems",
+            "params": {
+              "customer": "{customer}",
+              "amount": "400",
+              "currency": "usd"
+            }
+          },
+          {
+            "do": "advance",
+            "seconds": 2682000
+          },
+          {
+            "do": "raw",
+            "as": "second",
+            "method": "POST",
+            "path": "/v1/invoiceitems",
+            "params": {
+              "customer": "{customer}",
+              "amount": "200",
+              "currency": "usd"
+            }
+          },
+          {
+            "do": "raw",
+            "as": "invoiced",
+            "method": "GET",
+            "path": "/v1/invoiceitems",
+            "params": {
+              "customer": "{customer}",
+              "pending": "false"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "dev-brk2-preview-canceled",
+      "rules": ["LIF-05", "ERR-03"],
+      "input": {
+        "kind": "lifecycle",
+        "start": 1791158400,
+        "amount": 1000,
+        "trial_days": null,
+        "coupon": null,
+        "second_amount": null,
+        "spare_coupon": null,
+        "steps": [
+          {
+            "do": "advance",
+            "seconds": 864000
+          },
+          {
+            "do": "cancel_now",
+            "prorate": false,
+            "invoice_now": false
+          },
+          {
+            "do": "raw",
+            "as": "preview",
+            "method": "POST",
+            "path": "/v1/invoices/create_preview",
+            "params": {
+              "subscription": "{subscription}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "dev-brk2-preview-cancel-now",
+      "rules": ["LIF-05", "PRO-01"],
+      "input": {
+        "kind": "lifecycle",
+        "start": 1791158400,
+        "amount": 1000,
+        "trial_days": null,
+        "coupon": null,
+        "second_amount": null,
+        "spare_coupon": null,
+        "steps": [
+          {
+            "do": "advance",
+            "seconds": 864000
+          },
+          {
+            "do": "raw",
+            "as": "preview",
+            "method": "POST",
+            "path": "/v1/invoices/create_preview",
+            "params": {
+              "subscription": "{subscription}",
+              "subscription_details[cancel_now]": "true",
+              "subscription_details[proration_behavior]": "create_prorations"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "dev-brk2-always-invoice-real-with-coupon",
+      "rules": ["PRO-07", "DSC-07", "DSC-02"],
+      "input": {
+        "kind": "lifecycle",
+        "start": 1791158400,
+        "amount": 1000,
+        "trial_days": null,
+        "coupon": {
+          "percent_off": 20,
+          "duration": "forever"
+        },
+        "second_amount": 3000,
+        "spare_coupon": null,
+        "steps": [
+          {
+            "do": "advance",
+            "seconds": 864000
+          },
+          {
+            "do": "raw",
+            "as": "up",
+            "method": "POST",
+            "path": "/v1/subscriptions/{subscription}",
+            "params": {
+              "items[0][id]": "{item}",
+              "items[0][price]": "{price2}",
+              "proration_behavior": "always_invoice"
+            }
+          },
+          {
+            "do": "raw",
+            "as": "invoices",
+            "method": "GET",
+            "path": "/v1/invoices",
+            "params": {
+              "customer": "{customer}"
+            }
+          },
+          {
+            "do": "snapshot",
+            "as": "after"
+          }
+        ]
+      }
+    },
+    {
+      "id": "dev-brk2-second-sub-trial-end",
+      "rules": ["LIF-07", "LST-01"],
+      "input": {
+        "kind": "lifecycle",
+        "start": 1791158400,
+        "amount": 1000,
+        "trial_days": null,
+        "coupon": null,
+        "second_amount": 3000,
+        "spare_coupon": null,
+        "steps": [
+          {
+            "do": "raw",
+            "as": "second",
+            "method": "POST",
+            "path": "/v1/subscriptions",
+            "params": {
+              "customer": "{customer}",
+              "items[0][price]": "{price2}",
+              "trial_end": "1791417600"
+            }
+          },
+          {
+            "do": "raw",
+            "as": "list",
+            "method": "GET",
+            "path": "/v1/subscriptions",
+            "params": {
+              "customer": "{customer}",
+              "status": "trialing"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "dev-brk2-error-if-incomplete",
+      "rules": ["LIF-06", "PRO-07"],
+      "input": {
+        "kind": "lifecycle",
+        "start": 1791158400,
+        "amount": 1000,
+        "trial_days": null,
+        "coupon": null,
+        "second_amount": 3000,
+        "spare_coupon": null,
+        "steps": [
+          {
+            "do": "failing_card"
+          },
+          {
+            "do": "advance",
+            "seconds": 864000
+          },
+          {
+            "do": "raw",
+            "as": "up",
+            "method": "POST",
+            "path": "/v1/subscriptions/{subscription}",
+            "params": {
+              "items[0][id]": "{item}",
+              "items[0][price]": "{price2}",
+              "proration_behavior": "always_invoice",
+              "payment_behavior": "error_if_incomplete"
+            }
+          },
+          {
+            "do": "snapshot",
+            "as": "after"
+          }
+        ]
+      }
+    },
+    {
+      "id": "dev-brk2-cancel-now-invoice-pending-no-prorate",
+      "rules": ["LIF-05", "INV-03"],
+      "input": {
+        "kind": "lifecycle",
+        "start": 1791158400,
+        "amount": 1000,
+        "trial_days": null,
+        "coupon": null,
+        "second_amount": null,
+        "spare_coupon": null,
+        "steps": [
+          {
+            "do": "advance",
+            "seconds": 864000
+          },
+          {
+            "do": "raw",
+            "as": "item",
+            "method": "POST",
+            "path": "/v1/invoiceitems",
+            "params": {
+              "customer": "{customer}",
+              "subscription": "{subscription}",
+              "amount": "400",
+              "currency": "usd"
+            }
+          },
+          {
+            "do": "cancel_now",
+            "prorate": false,
+            "invoice_now": true
+          },
+          {
+            "do": "snapshot",
+            "as": "canceled"
+          },
+          {
+            "do": "raw",
+            "as": "pending",
+            "method": "GET",
+            "path": "/v1/invoiceitems",
+            "params": {
+              "customer": "{customer}",
+              "pending": "true"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "dev-brk2-classic-trunc12-a",
+      "rules": ["PRO-04", "MOD-01", "PRO-02", "PRO-08"],
+      "input": {
+        "kind": "wide",
+        "start": 1791158400,
+        "billing_mode": "classic",
+        "interval": "month",
+        "items": [
+          {
+            "amount": 1000,
+            "quantity": 1
+          }
+        ],
+        "coupons": [],
+        "change": {
+          "item": 0,
+          "amount": 9999999,
+          "interval": null,
+          "quantity": 20,
+          "offset": 2676898,
+          "proration_behavior": null,
+          "discount": null
+        }
+      }
+    },
+    {
+      "id": "dev-brk2-first-invoice-over-charge-limit",
+      "rules": ["INV-01", "PRO-08"],
+      "input": {
+        "kind": "wide",
+        "start": 1791158400,
+        "billing_mode": "flexible",
+        "interval": "month",
+        "items": [
+          {
+            "amount": 10000000,
+            "quantity": 10
+          }
+        ],
+        "coupons": [],
+        "change": {
+          "item": 0,
+          "amount": null,
+          "interval": null,
+          "quantity": 9,
+          "offset": 864000,
+          "proration_behavior": null,
+          "discount": null
+        }
+      }
+    },
+    {
+      "id": "dev-brk2-negative-quantity",
+      "rules": ["ERR-03", "PRO-08"],
+      "input": {
+        "kind": "wide",
+        "start": 1791158400,
+        "billing_mode": "flexible",
+        "interval": "month",
+        "items": [
+          {
+            "amount": 1000,
+            "quantity": 2
+          }
+        ],
+        "coupons": [],
+        "change": {
+          "item": 0,
+          "amount": null,
+          "interval": null,
+          "quantity": -1,
+          "offset": 864000,
+          "proration_behavior": null,
+          "discount": null
+        }
+      }
+    },
+    {
+      "id": "dev-brk2-fractional-quantity",
+      "rules": ["ERR-03", "PRO-08"],
+      "input": {
+        "kind": "wide",
+        "start": 1791158400,
+        "billing_mode": "classic",
+        "interval": "month",
+        "items": [
+          {
+            "amount": 1000,
+            "quantity": 2
+          }
+        ],
+        "coupons": [],
+        "change": {
+          "item": 0,
+          "amount": null,
+          "interval": null,
+          "quantity": 1.5,
+          "offset": 864000,
+          "proration_behavior": null,
+          "discount": null
+        }
+      }
+    },
+    {
+      "id": "dev-brk2-fractional-proration-date",
+      "rules": ["ERR-01", "ERR-03"],
+      "input": {
+        "kind": "wide",
+        "start": 1791158400,
+        "billing_mode": "flexible",
+        "interval": "month",
+        "items": [
+          {
+            "amount": 1000,
+            "quantity": 1
+          }
+        ],
+        "coupons": [],
+        "change": {
+          "item": 0,
+          "amount": 3000,
+          "interval": null,
+          "quantity": null,
+          "offset": 864000.5,
+          "proration_behavior": null,
+          "discount": null
+        }
+      }
+    },
+    {
+      "id": "dev-brk2-classic-pct50-half-charge",
+      "rules": ["DSC-04", "PRO-04", "MOD-01"],
+      "input": {
+        "kind": "wide",
+        "start": 1791158400,
+        "billing_mode": "classic",
+        "interval": "month",
+        "items": [
+          {
+            "amount": 1000,
+            "quantity": 1
+          }
+        ],
+        "coupons": [
+          {
+            "percent_off": 50,
+            "duration": "forever"
+          }
+        ],
+        "change": {
+          "item": 0,
+          "amount": 2001,
+          "interval": null,
+          "quantity": null,
+          "offset": 0,
+          "proration_behavior": null,
+          "discount": null
+        }
+      }
+    },
+    {
+      "id": "dev-brk2-classic-off1-midpoint",
+      "rules": ["DSC-04", "DSC-03", "PRO-04", "MOD-01"],
+      "input": {
+        "kind": "wide",
+        "start": 1791158400,
+        "billing_mode": "classic",
+        "interval": "month",
+        "items": [
+          {
+            "amount": 1000,
+            "quantity": 1
+          }
+        ],
+        "coupons": [
+          {
+            "amount_off": 1,
+            "duration": "forever"
+          }
+        ],
+        "change": {
+          "item": 0,
+          "amount": 3000,
+          "interval": null,
+          "quantity": null,
+          "offset": 1339200,
+          "proration_behavior": null,
+          "discount": null
+        }
+      }
+    },
+    {
+      "id": "dev-brk2-mixed-interval-preview-amount-coupon",
+      "rules": ["INT-01", "DSC-03", "ITM-01"],
+      "input": {
+        "kind": "wide",
+        "start": 1791158400,
+        "billing_mode": "flexible",
+        "interval": "month",
+        "items": [
+          {
+            "amount": 1000,
+            "quantity": 1
+          },
+          {
+            "amount": 2000,
+            "quantity": 1
+          }
+        ],
+        "coupons": [
+          {
+            "percent_off": 10,
+            "duration": "forever"
+          }
+        ],
+        "change": {
+          "item": 0,
+          "amount": 10000,
+          "interval": "year",
+          "quantity": null,
+          "offset": 864000,
+          "proration_behavior": null,
+          "discount": {
+            "amount_off": 300,
+            "duration": "forever"
+          }
+        }
+      }
+    },
+    {
+      "id": "dev-brk2-mixed-interval-sub-amount-coupon-replaced",
+      "rules": ["INT-01", "DSC-03", "ITM-01"],
+      "input": {
+        "kind": "wide",
+        "start": 1791158400,
+        "billing_mode": "flexible",
+        "interval": "month",
+        "items": [
+          {
+            "amount": 1000,
+            "quantity": 1
+          },
+          {
+            "amount": 2000,
+            "quantity": 1
+          }
+        ],
+        "coupons": [
+          {
+            "amount_off": 300,
+            "duration": "forever"
+          }
+        ],
+        "change": {
+          "item": 0,
+          "amount": 10000,
+          "interval": "year",
+          "quantity": null,
+          "offset": 864000,
+          "proration_behavior": null,
+          "discount": {
+            "percent_off": 10,
+            "duration": "forever"
+          }
+        }
+      }
+    },
+    {
+      "id": "dev-brk2-interval-change-to-qty0-always",
+      "rules": ["INT-01", "PRO-08", "PRO-07", "DSC-07", "ITM-01"],
+      "input": {
+        "kind": "wide",
+        "start": 1791158400,
+        "billing_mode": "flexible",
+        "interval": "month",
+        "items": [
+          {
+            "amount": 1000,
+            "quantity": 1
+          },
+          {
+            "amount": 2000,
+            "quantity": 3
+          }
+        ],
+        "coupons": [
+          {
+            "percent_off": 20,
+            "duration": "forever"
+          }
+        ],
+        "change": {
+          "item": 1,
+          "amount": 50000,
+          "interval": "year",
+          "quantity": 0,
+          "offset": 864000,
+          "proration_behavior": "always_invoice",
+          "discount": null
+        }
+      }
+    },
+    {
+      "id": "dev-brk2-dsc07-two-survivors-replaced",
+      "rules": ["DSC-07", "DSC-08", "DSC-05", "DSC-06", "ITM-01"],
+      "input": {
+        "kind": "wide",
+        "start": 1791158400,
+        "billing_mode": "flexible",
+        "interval": "month",
+        "items": [
+          {
+            "amount": 1000000,
+            "quantity": 1
+          },
+          {
+            "amount": 100,
+            "quantity": 1
+          }
+        ],
+        "coupons": [
+          {
+            "amount_off": 500,
+            "duration": "forever"
+          },
+          {
+            "percent_off": 50,
+            "duration": "once"
+          }
+        ],
+        "change": {
+          "item": 1,
+          "amount": 300,
+          "interval": null,
+          "quantity": null,
+          "offset": 669600,
+          "proration_behavior": "always_invoice",
+          "discount": {
+            "percent_off": 10,
+            "duration": "forever"
+          }
+        }
+      }
+    }
+  ]
+}

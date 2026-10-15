@@ -2571,5 +2571,6 @@ export function probes(): Probe[] {
     ...uiFull,
     ...wide,
     ...breakerProbes("breaker-round1.json"),
+    ...breakerProbes("breaker-round2.json"),
   ];
 }

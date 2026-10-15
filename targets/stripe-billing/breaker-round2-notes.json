@@ -1,0 +1,1614 @@
+[
+  {
+    "id": "dev-brk2-flex-credit-after-none-change",
+    "rules": ["PRO-01", "MOD-01", "PRO-08"],
+    "input": {
+      "kind": "lifecycle",
+      "start": 1791158400,
+      "amount": 1000,
+      "trial_days": null,
+      "coupon": null,
+      "second_amount": 3000,
+      "spare_coupon": null,
+      "steps": [
+        {
+          "do": "advance",
+          "seconds": 432000
+        },
+        {
+          "do": "raw",
+          "as": "swap",
+          "method": "POST",
+          "path": "/v1/subscriptions/{subscription}",
+          "params": {
+            "items[0][id]": "{item}",
+            "items[0][price]": "{price2}",
+            "proration_behavior": "none"
+          }
+        },
+        {
+          "do": "advance",
+          "seconds": 432000
+        },
+        {
+          "do": "raw",
+          "as": "preview",
+          "method": "POST",
+          "path": "/v1/invoices/create_preview",
+          "params": {
+            "subscription": "{subscription}",
+            "subscription_details[items][0][id]": "{item}",
+            "subscription_details[items][0][quantity]": "2"
+          }
+        },
+        {
+          "do": "snapshot",
+          "as": "after"
+        }
+      ]
+    },
+    "expect": "Flexible billing mode bases credit prorations on what was last billed: the 1000 first invoice, not the 3000 price set with proration_behavior=none. Credit about -677 (1000 x 21/31), charge 2 x 3000 x 21/31, renewal 6000.",
+    "clone_today": "creditLine uses the item's current price (3000), so the credit is about -2032."
+  },
+  {
+    "id": "dev-brk2-second-change-carries-old-discount",
+    "rules": ["PRO-01", "DSC-02"],
+    "input": {
+      "kind": "lifecycle",
+      "start": 1791158400,
+      "amount": 1000,
+      "trial_days": null,
+      "coupon": {
+        "percent_off": 20,
+        "duration": "forever"
+      },
+      "second_amount": 3000,
+      "spare_coupon": null,
+      "steps": [
+        {
+          "do": "advance",
+          "seconds": 864000
+        },
+        {
+          "do": "raw",
+          "as": "up",
+          "method": "POST",
+          "path": "/v1/subscriptions/{subscription}",
+          "params": {
+            "items[0][id]": "{item}",
+            "items[0][price]": "{price2}",
+            "proration_behavior": "create_prorations"
+          }
+        },
+        {
+          "do": "advance",
+          "seconds": 432000
+        },
+        {
+          "do": "raw",
+          "as": "preview",
+          "method": "POST",
+          "path": "/v1/invoices/create_preview",
+          "params": {
+            "subscription": "{subscription}",
+            "subscription_details[items][0][id]": "{item}",
+            "subscription_details[items][0][price]": "{price}"
+          }
+        },
+        {
+          "do": "snapshot",
+          "as": "after"
+        }
+      ]
+    },
+    "expect": "The second change credits the 3000 price's unused 16 days with the 20 % that applied to it: about -(2400 x 16/31) = -1239, labelled with 20.0% off.",
+    "clone_today": "Credit = -(round(3000 x r/P) - round(200 x r/P)). The 200 is the old 1000 line's discount, so the credit is about -1445."
+  },
+  {
+    "id": "dev-brk2-trial-change-preview",
+    "rules": ["LIF-07", "PRO-01", "PRO-02"],
+    "input": {
+      "kind": "lifecycle",
+      "start": 1791158400,
+      "amount": 1000,
+      "trial_days": 14,
+      "coupon": null,
+      "second_amount": 3000,
+      "spare_coupon": null,
+      "steps": [
+        {
+          "do": "advance",
+          "seconds": 259200
+        },
+        {
+          "do": "raw",
+          "as": "preview",
+          "method": "POST",
+          "path": "/v1/invoices/create_preview",
+          "params": {
+            "subscription": "{subscription}",
+            "subscription_details[items][0][id]": "{item}",
+            "subscription_details[items][0][price]": "{price2}"
+          }
+        },
+        {
+          "do": "snapshot",
+          "as": "trialing"
+        }
+      ]
+    },
+    "expect": "Nothing was paid during the trial, so a change prorates nothing (or only 0 lines). The preview is the trial-end invoice at 3000.",
+    "clone_today": "Credits 1000 x 11/14 = -786 and charges 3000 x 11/14 = 2357 over the trial period, then the 3000 renewal."
+  },
+  {
+    "id": "dev-brk2-trial-cancel-now-prorate",
+    "rules": ["LIF-05", "LIF-07"],
+    "input": {
+      "kind": "lifecycle",
+      "start": 1791158400,
+      "amount": 1000,
+      "trial_days": 14,
+      "coupon": null,
+      "second_amount": null,
+      "spare_coupon": null,
+      "steps": [
+        {
+          "do": "advance",
+          "seconds": 259200
+        },
+        {
+          "do": "cancel_now",
+          "prorate": true,
+          "invoice_now": true
+        },
+        {
+          "do": "snapshot",
+          "as": "canceled"
+        }
+      ]
+    },
+    "expect": "No credit for an unpaid trial: the latest invoice stays the 0 trial invoice, or a final invoice holds no negative line.",
+    "clone_today": "A draft subscription_cycle invoice with a -786 'Unused time' credit line."
+  },
+  {
+    "id": "dev-brk2-trial-days-zero",
+    "rules": ["LIF-07", "LIF-01"],
+    "input": {
+      "kind": "lifecycle",
+      "start": 1791158400,
+      "amount": 1000,
+      "trial_days": 0,
+      "coupon": null,
+      "second_amount": null,
+      "spare_coupon": null,
+      "steps": [
+        {
+          "do": "snapshot",
+          "as": "start"
+        },
+        {
+          "do": "advance",
+          "seconds": 2682000
+        },
+        {
+          "do": "snapshot",
+          "as": "renewed"
+        }
+      ]
+    },
+    "expect": "trial_period_days=0 means no trial: status active, trial_end null, first invoice 1000 paid, period Oct 5 to Nov 5. (If Stripe refuses 0, the subscription create call errors, and the probe should be recorded on its own first.)",
+    "clone_today": "Status trialing with trial_end = period_end = start and a 0 'Free trial' invoice. It renews at once on the next advance, so the dates differ."
+  },
+  {
+    "id": "dev-brk2-cancel-twice",
+    "rules": ["LIF-05", "ERR-03"],
+    "input": {
+      "kind": "lifecycle",
+      "start": 1791158400,
+      "amount": 1000,
+      "trial_days": null,
+      "coupon": null,
+      "second_amount": null,
+      "spare_coupon": null,
+      "steps": [
+        {
+          "do": "advance",
+          "seconds": 864000
+        },
+        {
+          "do": "raw",
+          "as": "first",
+          "method": "DELETE",
+          "path": "/v1/subscriptions/{subscription}",
+          "params": {}
+        },
+        {
+          "do": "advance",
+          "seconds": 86400
+        },
+        {
+          "do": "raw",
+          "as": "second",
+          "method": "DELETE",
+          "path": "/v1/subscriptions/{subscription}",
+          "params": {}
+        },
+        {
+          "do": "snapshot",
+          "as": "after"
+        }
+      ]
+    },
+    "expect": "The second cancel is rejected with an invalid_request_error (already canceled). ended_at stays at day 10.",
+    "clone_today": "200. cancelNow runs again and moves ended_at to day 11."
+  },
+  {
+    "id": "dev-brk2-update-items-on-canceled",
+    "rules": ["LIF-05", "PRO-01"],
+    "input": {
+      "kind": "lifecycle",
+      "start": 1791158400,
+      "amount": 1000,
+      "trial_days": null,
+      "coupon": null,
+      "second_amount": 3000,
+      "spare_coupon": null,
+      "steps": [
+        {
+          "do": "advance",
+          "seconds": 864000
+        },
+        {
+          "do": "cancel_now",
+          "prorate": false,
+          "invoice_now": false
+        },
+        {
+          "do": "raw",
+          "as": "change",
+          "method": "POST",
+          "path": "/v1/subscriptions/{subscription}",
+          "params": {
+            "items[0][id]": "{item}",
+            "items[0][price]": "{price2}"
+          }
+        },
+        {
+          "do": "raw",
+          "as": "pending",
+          "method": "GET",
+          "path": "/v1/invoiceitems",
+          "params": {
+            "customer": "{customer}",
+            "pending": "true"
+          }
+        },
+        {
+          "do": "snapshot",
+          "as": "after"
+        }
+      ]
+    },
+    "expect": "Rejected: a canceled subscription can only update metadata or cancellation details. No pending items.",
+    "clone_today": "200: the item moves to Pro and a credit and a charge become pending invoice items."
+  },
+  {
+    "id": "dev-brk2-reactivate-after-end",
+    "rules": ["LIF-03", "LIF-04"],
+    "input": {
+      "kind": "lifecycle",
+      "start": 1791158400,
+      "amount": 1000,
+      "trial_days": null,
+      "coupon": null,
+      "second_amount": null,
+      "spare_coupon": null,
+      "steps": [
+        {
+          "do": "cancel_at_period_end"
+        },
+        {
+          "do": "advance",
+          "seconds": 2682000
+        },
+        {
+          "do": "raw",
+          "as": "reactivate",
+          "method": "POST",
+          "path": "/v1/subscriptions/{subscription}",
+          "params": {
+            "cancel_at_period_end": "false"
+          }
+        },
+        {
+          "do": "snapshot",
+          "as": "after"
+        }
+      ]
+    },
+    "expect": "invalid_request_error: a canceled subscription cannot be reactivated. canceled_at and cancel_at stay as they were.",
+    "clone_today": "200. canceled_at and cancel_at are cleared on a subscription that stays canceled."
+  },
+  {
+    "id": "dev-brk2-add-second-item",
+    "rules": ["ITM-01", "PRO-02"],
+    "input": {
+      "kind": "lifecycle",
+      "start": 1791158400,
+      "amount": 1000,
+      "trial_days": null,
+      "coupon": null,
+      "second_amount": 3000,
+      "spare_coupon": null,
+      "steps": [
+        {
+          "do": "advance",
+          "seconds": 864000
+        },
+        {
+          "do": "raw",
+          "as": "add",
+          "method": "POST",
+          "path": "/v1/subscriptions/{subscription}",
+          "params": {
+            "items[0][id]": "{item}",
+            "items[1][price]": "{price2}"
+          }
+        },
+        {
+          "do": "raw",
+          "as": "pending",
+          "method": "GET",
+          "path": "/v1/invoiceitems",
+          "params": {
+            "customer": "{customer}",
+            "pending": "true"
+          }
+        },
+        {
+          "do": "snapshot",
+          "as": "after"
+        }
+      ]
+    },
+    "expect": "A second item (Pro, quantity 1) is added with one pending charge of about 3000 x 21/31. The first item is untouched (no credit).",
+    "clone_today": "404 resource_missing 'No such subscription_item: '''. Every change needs an existing id."
+  },
+  {
+    "id": "dev-brk2-swap-item-deleted",
+    "rules": ["ITM-01", "PRO-01"],
+    "input": {
+      "kind": "lifecycle",
+      "start": 1791158400,
+      "amount": 1000,
+      "trial_days": null,
+      "coupon": null,
+      "second_amount": 3000,
+      "spare_coupon": null,
+      "steps": [
+        {
+          "do": "advance",
+          "seconds": 864000
+        },
+        {
+          "do": "raw",
+          "as": "swap",
+          "method": "POST",
+          "path": "/v1/subscriptions/{subscription}",
+          "params": {
+            "items[0][id]": "{item}",
+            "items[0][deleted]": "true",
+            "items[1][price]": "{price2}"
+          }
+        },
+        {
+          "do": "raw",
+          "as": "pending",
+          "method": "GET",
+          "path": "/v1/invoiceitems",
+          "params": {
+            "customer": "{customer}",
+            "pending": "true"
+          }
+        },
+        {
+          "do": "snapshot",
+          "as": "after"
+        }
+      ]
+    },
+    "expect": "The old item is removed (credit about -677) and a new Pro item is added (charge about 2032).",
+    "clone_today": "404 resource_missing for the item with no id. 'deleted' is ignored in any case."
+  },
+  {
+    "id": "dev-brk2-delete-only-item",
+    "rules": ["ITM-01", "ERR-03"],
+    "input": {
+      "kind": "lifecycle",
+      "start": 1791158400,
+      "amount": 1000,
+      "trial_days": null,
+      "coupon": null,
+      "second_amount": null,
+      "spare_coupon": null,
+      "steps": [
+        {
+          "do": "raw",
+          "as": "delete",
+          "method": "DELETE",
+          "path": "/v1/subscription_items/{item}",
+          "params": {}
+        },
+        {
+          "do": "snapshot",
+          "as": "after"
+        }
+      ]
+    },
+    "expect": "invalid_request_error: a subscription must keep at least one item (use cancel instead).",
+    "clone_today": "200 with the item JSON. DELETE falls through to the read path."
+  },
+  {
+    "id": "dev-brk2-billing-cycle-anchor-now",
+    "rules": ["PER-01", "PRO-01", "PRO-07"],
+    "input": {
+      "kind": "lifecycle",
+      "start": 1791158400,
+      "amount": 1000,
+      "trial_days": null,
+      "coupon": null,
+      "second_amount": null,
+      "spare_coupon": null,
+      "steps": [
+        {
+          "do": "advance",
+          "seconds": 864000
+        },
+        {
+          "do": "raw",
+          "as": "reset",
+          "method": "POST",
+          "path": "/v1/subscriptions/{subscription}",
+          "params": {
+            "billing_cycle_anchor": "now",
+            "proration_behavior": "create_prorations"
+          }
+        },
+        {
+          "do": "snapshot",
+          "as": "after"
+        }
+      ]
+    },
+    "expect": "The cycle restarts at day 10: period Oct 15 to Nov 15, and an immediate invoice with the unused-time credit and a full new period.",
+    "clone_today": "billing_cycle_anchor is ignored: the period stays Oct 5 to Nov 5 and there is no new invoice."
+  },
+  {
+    "id": "dev-brk2-trial-end-now",
+    "rules": ["LIF-07"],
+    "input": {
+      "kind": "lifecycle",
+      "start": 1791158400,
+      "amount": 1000,
+      "trial_days": 14,
+      "coupon": null,
+      "second_amount": null,
+      "spare_coupon": null,
+      "steps": [
+        {
+          "do": "advance",
+          "seconds": 259200
+        },
+        {
+          "do": "raw",
+          "as": "end",
+          "method": "POST",
+          "path": "/v1/subscriptions/{subscription}",
+          "params": {
+            "trial_end": "now"
+          }
+        },
+        {
+          "do": "snapshot",
+          "as": "after"
+        }
+      ]
+    },
+    "expect": "The trial ends at once: status active, trial_end = day 3, a new period from day 3, and a 1000 subscription_update invoice, paid.",
+    "clone_today": "trial_end is ignored on update: still trialing until day 14."
+  },
+  {
+    "id": "dev-brk2-pause-collection-void",
+    "rules": ["LIF-01"],
+    "input": {
+      "kind": "lifecycle",
+      "start": 1791158400,
+      "amount": 1000,
+      "trial_days": null,
+      "coupon": null,
+      "second_amount": null,
+      "spare_coupon": null,
+      "steps": [
+        {
+          "do": "raw",
+          "as": "pause",
+          "method": "POST",
+          "path": "/v1/subscriptions/{subscription}",
+          "params": {
+            "pause_collection[behavior]": "void"
+          }
+        },
+        {
+          "do": "advance",
+          "seconds": 2682000
+        },
+        {
+          "do": "snapshot",
+          "as": "renewed"
+        },
+        {
+          "do": "raw",
+          "as": "invoices",
+          "method": "GET",
+          "path": "/v1/invoices",
+          "params": {
+            "customer": "{customer}"
+          }
+        }
+      ]
+    },
+    "expect": "pause_collection is set on the subscription and the renewal invoice is voided (status void, amount_paid 0).",
+    "clone_today": "Ignored: pause_collection stays null and the renewal is paid."
+  },
+  {
+    "id": "dev-brk2-cancel-at-next-period",
+    "rules": ["LIF-09", "LIF-01"],
+    "input": {
+      "kind": "lifecycle",
+      "start": 1791158400,
+      "amount": 1000,
+      "trial_days": null,
+      "coupon": null,
+      "second_amount": null,
+      "spare_coupon": null,
+      "steps": [
+        {
+          "do": "raw",
+          "as": "set",
+          "method": "POST",
+          "path": "/v1/subscriptions/{subscription}",
+          "params": {
+            "cancel_at": "1795132800"
+          }
+        },
+        {
+          "do": "snapshot",
+          "as": "set"
+        },
+        {
+          "do": "advance",
+          "seconds": 2682000
+        },
+        {
+          "do": "snapshot",
+          "as": "renewed"
+        },
+        {
+          "do": "advance",
+          "seconds": 1382400
+        },
+        {
+          "do": "snapshot",
+          "as": "ended"
+        }
+      ]
+    },
+    "expect": "The last period is shortened to cancel_at (Nov 20). The renewal bills Nov 5 to Nov 20 prorated (about 500) and the item's period_end is Nov 20. The subscription ends Nov 20.",
+    "clone_today": "Full 1000 renewal with period end Dec 5, then cancels on Nov 20 with no credit."
+  },
+  {
+    "id": "dev-brk2-cancel-at-and-flag",
+    "rules": ["LIF-02", "LIF-08", "ERR-03"],
+    "input": {
+      "kind": "lifecycle",
+      "start": 1791158400,
+      "amount": 1000,
+      "trial_days": null,
+      "coupon": null,
+      "second_amount": null,
+      "spare_coupon": null,
+      "steps": [
+        {
+          "do": "raw",
+          "as": "both",
+          "method": "POST",
+          "path": "/v1/subscriptions/{subscription}",
+          "params": {
+            "cancel_at": "{period_end}",
+            "cancel_at_period_end": "true"
+          }
+        },
+        {
+          "do": "snapshot",
+          "as": "after"
+        }
+      ]
+    },
+    "expect": "Rejected: cancel_at and cancel_at_period_end are mutually exclusive.",
+    "clone_today": "200. The cancel_at branch runs second and resets cancel_at_period_end to false."
+  },
+  {
+    "id": "dev-brk2-cancel-at-mid-then-flag-false",
+    "rules": ["LIF-09", "LIF-04"],
+    "input": {
+      "kind": "lifecycle",
+      "start": 1791158400,
+      "amount": 1000,
+      "trial_days": null,
+      "coupon": null,
+      "second_amount": null,
+      "spare_coupon": null,
+      "steps": [
+        {
+          "do": "raw",
+          "as": "set",
+          "method": "POST",
+          "path": "/v1/subscriptions/{subscription}",
+          "params": {
+            "cancel_at": "1792454400",
+            "proration_behavior": "create_prorations"
+          }
+        },
+        {
+          "do": "raw",
+          "as": "unflag",
+          "method": "POST",
+          "path": "/v1/subscriptions/{subscription}",
+          "params": {
+            "cancel_at_period_end": "false"
+          }
+        },
+        {
+          "do": "snapshot",
+          "as": "unflagged"
+        },
+        {
+          "do": "advance",
+          "seconds": 1382400
+        },
+        {
+          "do": "snapshot",
+          "as": "later"
+        }
+      ]
+    },
+    "expect": "Either cancel_at is kept (the subscription ends Oct 20) or it is cleared with the period end restored to Nov 5. In neither case is there a renewal on Oct 20.",
+    "clone_today": "Clears cancel_at but leaves period_end at Oct 20 (natural_end not restored). The clock then renews early on Oct 20, with invoice_count 2."
+  },
+  {
+    "id": "dev-brk2-cancel-at-mid-always-invoice",
+    "rules": ["LIF-09", "PRO-07"],
+    "input": {
+      "kind": "lifecycle",
+      "start": 1791158400,
+      "amount": 1000,
+      "trial_days": null,
+      "coupon": null,
+      "second_amount": null,
+      "spare_coupon": null,
+      "steps": [
+        {
+          "do": "raw",
+          "as": "set",
+          "method": "POST",
+          "path": "/v1/subscriptions/{subscription}",
+          "params": {
+            "cancel_at": "1792454400",
+            "proration_behavior": "always_invoice"
+          }
+        },
+        {
+          "do": "raw",
+          "as": "invoices",
+          "method": "GET",
+          "path": "/v1/invoices",
+          "params": {
+            "customer": "{customer}"
+          }
+        },
+        {
+          "do": "raw",
+          "as": "pending",
+          "method": "GET",
+          "path": "/v1/invoiceitems",
+          "params": {
+            "customer": "{customer}",
+            "pending": "true"
+          }
+        },
+        {
+          "do": "snapshot",
+          "as": "set"
+        }
+      ]
+    },
+    "expect": "always_invoice invoices the unused-time credit at once: a second invoice (credit about -516, amount_due 0, credit to the balance), and no pending item.",
+    "clone_today": "Treated like create_prorations: one pending credit item and no new invoice."
+  },
+  {
+    "id": "dev-brk2-retries-exhausted",
+    "rules": ["LIF-06", "LIF-01"],
+    "input": {
+      "kind": "lifecycle",
+      "start": 1791158400,
+      "amount": 1000,
+      "trial_days": null,
+      "coupon": null,
+      "second_amount": null,
+      "spare_coupon": null,
+      "steps": [
+        {
+          "do": "failing_card"
+        },
+        {
+          "do": "advance",
+          "seconds": 2682000
+        },
+        {
+          "do": "advance",
+          "seconds": 864000
+        },
+        {
+          "do": "snapshot",
+          "as": "after_retries"
+        },
+        {
+          "do": "advance",
+          "seconds": 1814400
+        },
+        {
+          "do": "snapshot",
+          "as": "next_cycle"
+        }
+      ]
+    },
+    "expect": "After the account's last retry, the subscription moves to its configured end state (canceled or unpaid; the invoice may become uncollectible), or retries continue past day 5. The next cycle is not billed as a normal past_due renewal.",
+    "clone_today": "Two retries at +1 and +4 days, then nothing: past_due for ever, and the Dec 5 renewal creates another open invoice."
+  },
+  {
+    "id": "dev-brk2-cancel-stops-retries",
+    "rules": ["LIF-06", "LIF-05"],
+    "input": {
+      "kind": "lifecycle",
+      "start": 1791158400,
+      "amount": 1000,
+      "trial_days": null,
+      "coupon": null,
+      "second_amount": null,
+      "spare_coupon": null,
+      "steps": [
+        {
+          "do": "failing_card"
+        },
+        {
+          "do": "advance",
+          "seconds": 2682000
+        },
+        {
+          "do": "cancel_now",
+          "prorate": false,
+          "invoice_now": false
+        },
+        {
+          "do": "good_card"
+        },
+        {
+          "do": "advance",
+          "seconds": 432000
+        },
+        {
+          "do": "snapshot",
+          "as": "after"
+        },
+        {
+          "do": "raw",
+          "as": "invoices",
+          "method": "GET",
+          "path": "/v1/invoices",
+          "params": {
+            "customer": "{customer}"
+          }
+        }
+      ]
+    },
+    "expect": "Canceling stops automatic collection: the failed renewal invoice stays open with attempt_count 1 (or is voided or closed), and is not paid by the new card.",
+    "clone_today": "The open invoice keeps its retry schedule: retried at +1 day with the good card, paid, attempt_count 2."
+  },
+  {
+    "id": "dev-brk2-oneoff-item-sub-coupon",
+    "rules": ["INV-03", "DSC-01"],
+    "input": {
+      "kind": "lifecycle",
+      "start": 1791158400,
+      "amount": 1000,
+      "trial_days": null,
+      "coupon": {
+        "percent_off": 20,
+        "duration": "forever"
+      },
+      "second_amount": null,
+      "spare_coupon": null,
+      "steps": [
+        {
+          "do": "raw",
+          "as": "item",
+          "method": "POST",
+          "path": "/v1/invoiceitems",
+          "params": {
+            "customer": "{customer}",
+            "subscription": "{subscription}",
+            "amount": "400",
+            "currency": "usd"
+          }
+        },
+        {
+          "do": "advance",
+          "seconds": 2682000
+        },
+        {
+          "do": "snapshot",
+          "as": "renewed"
+        },
+        {
+          "do": "raw",
+          "as": "invoices",
+          "method": "GET",
+          "path": "/v1/invoices",
+          "params": {
+            "customer": "{customer}"
+          }
+        }
+      ]
+    },
+    "expect": "The 20 % subscription coupon also discounts the discountable one-off item on the subscription's invoice: total 1120 (1400 - 280).",
+    "clone_today": "renew() allocates discounts over the recurring lines only: total 1200."
+  },
+  {
+    "id": "dev-brk2-invoiceitem-unit-amount-quantity",
+    "rules": ["ITM-02"],
+    "input": {
+      "kind": "lifecycle",
+      "start": 1791158400,
+      "amount": 1000,
+      "trial_days": null,
+      "coupon": null,
+      "second_amount": null,
+      "spare_coupon": null,
+      "steps": [
+        {
+          "do": "raw",
+          "as": "item",
+          "method": "POST",
+          "path": "/v1/invoiceitems",
+          "params": {
+            "customer": "{customer}",
+            "unit_amount_decimal": "250",
+            "quantity": "3",
+            "currency": "usd"
+          }
+        },
+        {
+          "do": "raw",
+          "as": "read",
+          "method": "GET",
+          "path": "/v1/invoiceitems/{item.id}",
+          "params": {}
+        }
+      ]
+    },
+    "expect": "amount 750, quantity 3, unit_amount_decimal '250'.",
+    "clone_today": "Reads only 'amount', so amount 0 and quantity 1."
+  },
+  {
+    "id": "dev-brk2-invoiceitem-recurring-price",
+    "rules": ["ITM-02", "ERR-03"],
+    "input": {
+      "kind": "lifecycle",
+      "start": 1791158400,
+      "amount": 1000,
+      "trial_days": null,
+      "coupon": null,
+      "second_amount": null,
+      "spare_coupon": null,
+      "steps": [
+        {
+          "do": "raw",
+          "as": "item",
+          "method": "POST",
+          "path": "/v1/invoiceitems",
+          "params": {
+            "customer": "{customer}",
+            "price": "{price}"
+          }
+        },
+        {
+          "do": "raw",
+          "as": "pending",
+          "method": "GET",
+          "path": "/v1/invoiceitems",
+          "params": {
+            "customer": "{customer}",
+            "pending": "true"
+          }
+        }
+      ]
+    },
+    "expect": "invalid_request_error on 'price': only one_time prices are accepted, and recurring ones are refused. No pending item.",
+    "clone_today": "Creates a 0-amount pending item and ignores price."
+  },
+  {
+    "id": "dev-brk2-invoiceitems-pending-false",
+    "rules": ["ITM-02", "INV-03"],
+    "input": {
+      "kind": "lifecycle",
+      "start": 1791158400,
+      "amount": 1000,
+      "trial_days": null,
+      "coupon": null,
+      "second_amount": null,
+      "spare_coupon": null,
+      "steps": [
+        {
+          "do": "raw",
+          "as": "first",
+          "method": "POST",
+          "path": "/v1/invoiceitems",
+          "params": {
+            "customer": "{customer}",
+            "amount": "400",
+            "currency": "usd"
+          }
+        },
+        {
+          "do": "advance",
+          "seconds": 2682000
+        },
+        {
+          "do": "raw",
+          "as": "second",
+          "method": "POST",
+          "path": "/v1/invoiceitems",
+          "params": {
+            "customer": "{customer}",
+            "amount": "200",
+            "currency": "usd"
+          }
+        },
+        {
+          "do": "raw",
+          "as": "invoiced",
+          "method": "GET",
+          "path": "/v1/invoiceitems",
+          "params": {
+            "customer": "{customer}",
+            "pending": "false"
+          }
+        }
+      ]
+    },
+    "expect": "pending=false lists only the invoiced 400 item.",
+    "clone_today": "pending=false means no filter: both items are listed."
+  },
+  {
+    "id": "dev-brk2-preview-canceled",
+    "rules": ["LIF-05", "ERR-03"],
+    "input": {
+      "kind": "lifecycle",
+      "start": 1791158400,
+      "amount": 1000,
+      "trial_days": null,
+      "coupon": null,
+      "second_amount": null,
+      "spare_coupon": null,
+      "steps": [
+        {
+          "do": "advance",
+          "seconds": 864000
+        },
+        {
+          "do": "cancel_now",
+          "prorate": false,
+          "invoice_now": false
+        },
+        {
+          "do": "raw",
+          "as": "preview",
+          "method": "POST",
+          "path": "/v1/invoices/create_preview",
+          "params": {
+            "subscription": "{subscription}"
+          }
+        }
+      ]
+    },
+    "expect": "invalid_request_error: a canceled subscription has no upcoming invoice to preview.",
+    "clone_today": "Returns a 1000 renewal preview for Nov 5."
+  },
+  {
+    "id": "dev-brk2-preview-cancel-now",
+    "rules": ["LIF-05", "PRO-01"],
+    "input": {
+      "kind": "lifecycle",
+      "start": 1791158400,
+      "amount": 1000,
+      "trial_days": null,
+      "coupon": null,
+      "second_amount": null,
+      "spare_coupon": null,
+      "steps": [
+        {
+          "do": "advance",
+          "seconds": 864000
+        },
+        {
+          "do": "raw",
+          "as": "preview",
+          "method": "POST",
+          "path": "/v1/invoices/create_preview",
+          "params": {
+            "subscription": "{subscription}",
+            "subscription_details[cancel_now]": "true",
+            "subscription_details[proration_behavior]": "create_prorations"
+          }
+        }
+      ]
+    },
+    "expect": "The preview simulates canceling now: an unused-time credit of about -677 and no renewal line.",
+    "clone_today": "cancel_now is ignored: a plain 1000 renewal preview."
+  },
+  {
+    "id": "dev-brk2-always-invoice-real-with-coupon",
+    "rules": ["PRO-07", "DSC-07", "DSC-02"],
+    "input": {
+      "kind": "lifecycle",
+      "start": 1791158400,
+      "amount": 1000,
+      "trial_days": null,
+      "coupon": {
+        "percent_off": 20,
+        "duration": "forever"
+      },
+      "second_amount": 3000,
+      "spare_coupon": null,
+      "steps": [
+        {
+          "do": "advance",
+          "seconds": 864000
+        },
+        {
+          "do": "raw",
+          "as": "up",
+          "method": "POST",
+          "path": "/v1/subscriptions/{subscription}",
+          "params": {
+            "items[0][id]": "{item}",
+            "items[0][price]": "{price2}",
+            "proration_behavior": "always_invoice"
+          }
+        },
+        {
+          "do": "raw",
+          "as": "invoices",
+          "method": "GET",
+          "path": "/v1/invoices",
+          "params": {
+            "customer": "{customer}"
+          }
+        },
+        {
+          "do": "snapshot",
+          "as": "after"
+        }
+      ]
+    },
+    "expect": "The immediate invoice lists the subscription's discount (invoice.discounts, and the lines' discount_amounts at 0, as in the always_invoice preview of DSC-07).",
+    "clone_today": "invoiceNow() builds the invoice with discounts [] and empty line discount lists."
+  },
+  {
+    "id": "dev-brk2-second-sub-trial-end",
+    "rules": ["LIF-07", "LST-01"],
+    "input": {
+      "kind": "lifecycle",
+      "start": 1791158400,
+      "amount": 1000,
+      "trial_days": null,
+      "coupon": null,
+      "second_amount": 3000,
+      "spare_coupon": null,
+      "steps": [
+        {
+          "do": "raw",
+          "as": "second",
+          "method": "POST",
+          "path": "/v1/subscriptions",
+          "params": {
+            "customer": "{customer}",
+            "items[0][price]": "{price2}",
+            "trial_end": "1791417600"
+          }
+        },
+        {
+          "do": "raw",
+          "as": "list",
+          "method": "GET",
+          "path": "/v1/subscriptions",
+          "params": {
+            "customer": "{customer}",
+            "status": "trialing"
+          }
+        }
+      ]
+    },
+    "expect": "The second subscription is trialing until Oct 8 with a 0 first invoice. Listing with status=trialing returns it.",
+    "clone_today": "createSubscription ignores trial_end: active, charged 3000; the trialing list is empty."
+  },
+  {
+    "id": "dev-brk2-error-if-incomplete",
+    "rules": ["LIF-06", "PRO-07"],
+    "input": {
+      "kind": "lifecycle",
+      "start": 1791158400,
+      "amount": 1000,
+      "trial_days": null,
+      "coupon": null,
+      "second_amount": 3000,
+      "spare_coupon": null,
+      "steps": [
+        {
+          "do": "failing_card"
+        },
+        {
+          "do": "advance",
+          "seconds": 864000
+        },
+        {
+          "do": "raw",
+          "as": "up",
+          "method": "POST",
+          "path": "/v1/subscriptions/{subscription}",
+          "params": {
+            "items[0][id]": "{item}",
+            "items[0][price]": "{price2}",
+            "proration_behavior": "always_invoice",
+            "payment_behavior": "error_if_incomplete"
+          }
+        },
+        {
+          "do": "snapshot",
+          "as": "after"
+        }
+      ]
+    },
+    "expect": "A card error (402, card_declined) and the update is not applied: still active on Basic, latest invoice the first one.",
+    "clone_today": "payment_behavior is ignored: the change is applied, the invoice is left open and the subscription becomes past_due."
+  },
+  {
+    "id": "dev-brk2-cancel-now-invoice-pending-no-prorate",
+    "rules": ["LIF-05", "INV-03"],
+    "input": {
+      "kind": "lifecycle",
+      "start": 1791158400,
+      "amount": 1000,
+      "trial_days": null,
+      "coupon": null,
+      "second_amount": null,
+      "spare_coupon": null,
+      "steps": [
+        {
+          "do": "advance",
+          "seconds": 864000
+        },
+        {
+          "do": "raw",
+          "as": "item",
+          "method": "POST",
+          "path": "/v1/invoiceitems",
+          "params": {
+            "customer": "{customer}",
+            "subscription": "{subscription}",
+            "amount": "400",
+            "currency": "usd"
+          }
+        },
+        {
+          "do": "cancel_now",
+          "prorate": false,
+          "invoice_now": true
+        },
+        {
+          "do": "snapshot",
+          "as": "canceled"
+        },
+        {
+          "do": "raw",
+          "as": "pending",
+          "method": "GET",
+          "path": "/v1/invoiceitems",
+          "params": {
+            "customer": "{customer}",
+            "pending": "true"
+          }
+        }
+      ]
+    },
+    "expect": "invoice_now puts the pending items on a final invoice even without proration: a 400 invoice. No pending item is left.",
+    "clone_today": "Without prorate, no invoice is made: the latest invoice stays the first one and the 400 item stays pending."
+  },
+  {
+    "id": "dev-brk2-classic-trunc12-a",
+    "rules": ["PRO-04", "MOD-01", "PRO-02", "PRO-08"],
+    "input": {
+      "kind": "wide",
+      "start": 1791158400,
+      "billing_mode": "classic",
+      "interval": "month",
+      "items": [
+        {
+          "amount": 1000,
+          "quantity": 1
+        }
+      ],
+      "coupons": [],
+      "change": {
+        "item": 0,
+        "amount": 9999999,
+        "interval": null,
+        "quantity": 20,
+        "offset": 2676898,
+        "proration_behavior": null,
+        "discount": null
+      }
+    },
+    "expect": "Exact half-up (and float) give 112157 for 199999980 x 1502/2678400. Any truncation of r/P to 13 or more decimals gives 112157 too.",
+    "clone_today": "CLASSIC_DIGITS = 12 (a guess in the notes) gives a remaining-time line of 112156."
+  },
+  {
+    "id": "dev-brk2-first-invoice-over-charge-limit",
+    "rules": ["INV-01", "PRO-08"],
+    "input": {
+      "kind": "wide",
+      "start": 1791158400,
+      "billing_mode": "flexible",
+      "interval": "month",
+      "items": [
+        {
+          "amount": 10000000,
+          "quantity": 10
+        }
+      ],
+      "coupons": [],
+      "change": {
+        "item": 0,
+        "amount": null,
+        "interval": null,
+        "quantity": 9,
+        "offset": 864000,
+        "proration_behavior": null,
+        "discount": null
+      }
+    },
+    "expect": "100,000,000 cents is above the $999,999.99 maximum charge. The first payment fails (amount_too_large), the subscription is incomplete with its invoice open, and the preview reflects or refuses an incomplete subscription.",
+    "clone_today": "First invoice status paid, and a normal proration preview."
+  },
+  {
+    "id": "dev-brk2-negative-quantity",
+    "rules": ["ERR-03", "PRO-08"],
+    "input": {
+      "kind": "wide",
+      "start": 1791158400,
+      "billing_mode": "flexible",
+      "interval": "month",
+      "items": [
+        {
+          "amount": 1000,
+          "quantity": 2
+        }
+      ],
+      "coupons": [],
+      "change": {
+        "item": 0,
+        "amount": null,
+        "interval": null,
+        "quantity": -1,
+        "offset": 864000,
+        "proration_behavior": null,
+        "discount": null
+      }
+    },
+    "expect": "invalid_request_error on subscription_details[items][0][quantity] (it must be at least 0).",
+    "clone_today": "Accepts -1: credit -1355, charge -677 and a -1000 renewal line."
+  },
+  {
+    "id": "dev-brk2-fractional-quantity",
+    "rules": ["ERR-03", "PRO-08"],
+    "input": {
+      "kind": "wide",
+      "start": 1791158400,
+      "billing_mode": "classic",
+      "interval": "month",
+      "items": [
+        {
+          "amount": 1000,
+          "quantity": 2
+        }
+      ],
+      "coupons": [],
+      "change": {
+        "item": 0,
+        "amount": null,
+        "interval": null,
+        "quantity": 1.5,
+        "offset": 864000,
+        "proration_behavior": null,
+        "discount": null
+      }
+    },
+    "expect": "invalid_request_error 'Invalid integer: 1.5' on the quantity parameter.",
+    "clone_today": "Computes with quantity 1.5. classicProrate calls BigInt(1500) here, but other amounts produce non-integer n and throw (a 500)."
+  },
+  {
+    "id": "dev-brk2-fractional-proration-date",
+    "rules": ["ERR-01", "ERR-03"],
+    "input": {
+      "kind": "wide",
+      "start": 1791158400,
+      "billing_mode": "flexible",
+      "interval": "month",
+      "items": [
+        {
+          "amount": 1000,
+          "quantity": 1
+        }
+      ],
+      "coupons": [],
+      "change": {
+        "item": 0,
+        "amount": 3000,
+        "interval": null,
+        "quantity": null,
+        "offset": 864000.5,
+        "proration_behavior": null,
+        "discount": null
+      }
+    },
+    "expect": "invalid_request_error 'Invalid integer: 1792022400.5' on subscription_details[proration_date].",
+    "clone_today": "Accepts it and prorates over a fractional r (credit -677, charge 2032)."
+  },
+  {
+    "id": "dev-brk2-classic-pct50-half-charge",
+    "rules": ["DSC-04", "PRO-04", "MOD-01"],
+    "input": {
+      "kind": "wide",
+      "start": 1791158400,
+      "billing_mode": "classic",
+      "interval": "month",
+      "items": [
+        {
+          "amount": 1000,
+          "quantity": 1
+        }
+      ],
+      "coupons": [
+        {
+          "percent_off": 50,
+          "duration": "forever"
+        }
+      ],
+      "change": {
+        "item": 0,
+        "amount": 2001,
+        "interval": null,
+        "quantity": null,
+        "offset": 0,
+        "proration_behavior": null,
+        "discount": null
+      }
+    },
+    "expect": "A classic percent-off on the prorated charge lands exactly on .5 (2001 x 50 % = 1000.5). It pins the tie rule for this path (no fixture does); half-even or truncation would give a 1001 line.",
+    "clone_today": "roundRatio rounds half away from zero: discount 1001, remaining-time line 1000."
+  },
+  {
+    "id": "dev-brk2-classic-off1-midpoint",
+    "rules": ["DSC-04", "DSC-03", "PRO-04", "MOD-01"],
+    "input": {
+      "kind": "wide",
+      "start": 1791158400,
+      "billing_mode": "classic",
+      "interval": "month",
+      "items": [
+        {
+          "amount": 1000,
+          "quantity": 1
+        }
+      ],
+      "coupons": [
+        {
+          "amount_off": 1,
+          "duration": "forever"
+        }
+      ],
+      "change": {
+        "item": 0,
+        "amount": 3000,
+        "interval": null,
+        "quantity": null,
+        "offset": 1339200,
+        "proration_behavior": null,
+        "discount": null
+      }
+    },
+    "expect": "Two exact ties in classic: credit 999 x 1/2 = 499.5 and the prorated 1-cent discount 0.5. These pin classic tie-breaking with an amount-off coupon (only the flexible twin is recorded).",
+    "clone_today": "Credit -500 (away from zero); charge 1500 - 1 = 1499."
+  },
+  {
+    "id": "dev-brk2-mixed-interval-preview-amount-coupon",
+    "rules": ["INT-01", "DSC-03", "ITM-01"],
+    "input": {
+      "kind": "wide",
+      "start": 1791158400,
+      "billing_mode": "flexible",
+      "interval": "month",
+      "items": [
+        {
+          "amount": 1000,
+          "quantity": 1
+        },
+        {
+          "amount": 2000,
+          "quantity": 1
+        }
+      ],
+      "coupons": [
+        {
+          "percent_off": 10,
+          "duration": "forever"
+        }
+      ],
+      "change": {
+        "item": 0,
+        "amount": 10000,
+        "interval": "year",
+        "quantity": null,
+        "offset": 864000,
+        "proration_behavior": null,
+        "discount": {
+          "amount_off": 300,
+          "duration": "forever"
+        }
+      }
+    },
+    "expect": "Unknown which coupons Stripe's mixed-interval check reads. If it checks the subscription's own coupons, the preview succeeds; if it checks the passed one, it errors.",
+    "clone_today": "Checks the new state's discounts (the passed forever amount-off) and returns the 'multiple intervals only support percent_off coupons...' error."
+  },
+  {
+    "id": "dev-brk2-mixed-interval-sub-amount-coupon-replaced",
+    "rules": ["INT-01", "DSC-03", "ITM-01"],
+    "input": {
+      "kind": "wide",
+      "start": 1791158400,
+      "billing_mode": "flexible",
+      "interval": "month",
+      "items": [
+        {
+          "amount": 1000,
+          "quantity": 1
+        },
+        {
+          "amount": 2000,
+          "quantity": 1
+        }
+      ],
+      "coupons": [
+        {
+          "amount_off": 300,
+          "duration": "forever"
+        }
+      ],
+      "change": {
+        "item": 0,
+        "amount": 10000,
+        "interval": "year",
+        "quantity": null,
+        "offset": 864000,
+        "proration_behavior": null,
+        "discount": {
+          "percent_off": 10,
+          "duration": "forever"
+        }
+      }
+    },
+    "expect": "The mirror case: the subscription holds a forever amount-off and a percent coupon is passed to the preview. Stripe may still refuse because of the subscription's coupon.",
+    "clone_today": "No error: the passed coupon replaces the discounts before the check."
+  },
+  {
+    "id": "dev-brk2-interval-change-to-qty0-always",
+    "rules": ["INT-01", "PRO-08", "PRO-07", "DSC-07", "ITM-01"],
+    "input": {
+      "kind": "wide",
+      "start": 1791158400,
+      "billing_mode": "flexible",
+      "interval": "month",
+      "items": [
+        {
+          "amount": 1000,
+          "quantity": 1
+        },
+        {
+          "amount": 2000,
+          "quantity": 3
+        }
+      ],
+      "coupons": [
+        {
+          "percent_off": 20,
+          "duration": "forever"
+        }
+      ],
+      "change": {
+        "item": 1,
+        "amount": 50000,
+        "interval": "year",
+        "quantity": 0,
+        "offset": 864000,
+        "proration_behavior": "always_invoice",
+        "discount": null
+      }
+    },
+    "expect": "Moving an item to a yearly price at quantity 0: credit for the monthly item, and a 0 (or omitted) yearly remaining-time line. It pins how Stripe treats a 0-amount item that creates a mixed-interval subscription.",
+    "clone_today": "Credit about -3252 (6000 less 20 %, prorated) and a 0 remaining-time line over Oct 5 2026 to Oct 5 2027 in an immediate invoice. The credit's discount list follows the DSC-07 table."
+  },
+  {
+    "id": "dev-brk2-dsc07-two-survivors-replaced",
+    "rules": ["DSC-07", "DSC-08", "DSC-05", "DSC-06", "ITM-01"],
+    "input": {
+      "kind": "wide",
+      "start": 1791158400,
+      "billing_mode": "flexible",
+      "interval": "month",
+      "items": [
+        {
+          "amount": 1000000,
+          "quantity": 1
+        },
+        {
+          "amount": 100,
+          "quantity": 1
+        }
+      ],
+      "coupons": [
+        {
+          "amount_off": 500,
+          "duration": "forever"
+        },
+        {
+          "percent_off": 50,
+          "duration": "once"
+        }
+      ],
+      "change": {
+        "item": 1,
+        "amount": 300,
+        "interval": null,
+        "quantity": null,
+        "offset": 669600,
+        "proration_behavior": "always_invoice",
+        "discount": {
+          "percent_off": 10,
+          "duration": "forever"
+        }
+      }
+    },
+    "expect": "No fixture covers this DSC-07 case: two carried discounts, both survive DSC-08 (r/P = 0.75), neither is still on the invoice (both replaced by the passed coupon), and one is a spent once coupon. It shows which of the three coupons Stripe lists on the credit line.",
+    "clone_today": "immediateCreditList returns the invoice's discounts (the passed 10 % coupon), because the line carried two discounts."
+  }
+]
